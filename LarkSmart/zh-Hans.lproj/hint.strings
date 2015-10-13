@@ -1,0 +1,325 @@
+/* 
+  Localizable.strings
+  CloudBox
+
+  Created by TTS on 15/7/2.
+  Copyright (c) 2015年 宇音天下. All rights reserved.
+*/
+
+/* audio Play */
+"playlistIsEmpty" = "播放列表为空";
+"urlIsEmpty" = "播放地址为空";
+"playingProgramFailed" = "推送失败";
+
+"start" = "开始";
+"ok" = "确定";
+"delete" = "删除";
+"deleting" = "正在删除...";
+"edit" = "编辑";
+"done" = "完成";
+"cancel" = "取消";
+"modify" = "修改";
+"save" = "保存";
+"saving" = "正在保存...";
+"savingFailed" = "保存失败";
+"pleaseWaiting" = "请稍后...";
+"networkTimeout" = "请求服务器超时，网络不给力哦~";
+"label" = "标签";
+"time" = "时间";
+"repeat" = "重复";
+"date" = "日期";
+"show" = "显示";
+"hide" = "隐藏";
+"back" = "返回";
+"help" = "帮助";
+"closed" = "已关闭";
+"open" = "打开";
+"close" = "关闭";
+"refresh" = "刷新";
+"returnToMainMenu" = "主菜单";
+"hintForTransferFailed" = "您可以：\n1.检查手机和终端的网络连接是否正常\n2.再获取一次";
+"hintForDeviceDisconnect" = "您可以：\n1.检查手机和终端的网络连接是否正常\n2.检查手机和终端连接的是否为同一个WIFI网络";
+"operationIsTooFrequenct" = "操作太频繁，请稍后再试~";
+"ServerAbnormal" = "服务器异常，手机端与百灵端未用同一个服务器：";
+"deleteSuccessful" = "删除成功";
+"deleteFailed" = "删除失败";
+
+
+/* 扫描设备 */
+"rescanningDevice" = "重新扫描设备";
+
+/* 设备列表 */
+"addDevice" = "添加设备";
+"pullDownTorefresh" = "下拉刷新设备列表";
+"gettingDeviceList" = "正在获取设备列表...";
+"noDeviceFound" = "没有扫描到设备哦，赶快去添加吧~";
+"deviceCount" = "我的设备(%lu)";
+"changeNickname" = "更改昵称";
+"maxNicknameLenth%d" = "昵称的长度不可超过%d";
+"changeNickNameFailed" = "更改昵称失败";
+"refreshingDeviceList" = "正在刷新设备列表...";
+"connectingTo" = "正在连接到“%@”";
+"connectionFailed" = "连接失败";
+
+/* 闹铃 */
+"insertAlarm" = "添加闹铃";
+"gettingAlarmList" = "正在获取闹铃列表...";
+"noAlarmFound" = "还没有闹铃哦，赶快去添加吧~";
+"alarmCount" = "我的闹铃(%lu)";
+"whoBirthday" = "%@的生日";
+"getup" = "起床";
+"insertGetupAlarm" = "新增起床闹铃";
+"insertCustomAlarm" = "新增自定义闹铃";
+"custom" = "自定义";
+"insertRemindAlarm" = "新增备忘闹铃";
+"insertBirthdayAlarm" = "新增生日闹铃";
+"gettingAlarmFailed" = "获取闹铃失败";
+"hintForGettingAlarmFailed" = "您可以：\n1.点击右上方的“刷新”按钮，重新获取\n2.检查手机和终端的网络连接是否正常，并且连接的为同一网络";
+"deletingAlarmFailed" = "删除闹铃失败";
+"savingAlarmFailed" = "保存闹铃失败";
+"addingAlarmFailed" = "添加闹铃失败";
+"getupAlarm" = "起床闹铃";
+"customAlarm" = "自定义闹铃";
+"fireDate" = "响铃日期";
+"alarmGeneralSet" = "起床闹铃设置";
+"howManySeconds" = "%lu秒";
+"gettingGetupGeneralSet" = "正在获取起床闹铃通用设置...";
+"gettingGetupGeneralSetFailed" = "获取起床闹铃通用设置失败";
+"pleaseWait" = "请稍等...";
+"%@seconds" = "%@秒";
+"remidAlarm" = "备忘闹铃";
+"remindPlaceholder" = "输入您想要提醒的事件吧~";
+"remindIsTooLong" = "备忘信息超出了字数限制";
+"kindlyReminder" = "温馨提示";
+"remindHint" = "1、备忘信息默认会在起床闹铃中播放哦\n2、试着对终端说“播报备忘备忘”，您就能知道设置的备忘信息了~";
+"birthdayAlarm" = "生日闹铃";
+"birthdayHint" = "1、生日信息(当前只支持阳历)默认会在起床闹铃中播放哦\n2、试着对终端说“播报生日信息”，您就能知道设置的生日信息了~";
+"ring" = "铃声设置";
+"broadcast" = "播报设置";
+"longevity" = "寿星";
+"set" = "设置";
+"pleaseInputAlarmTitle" = "请输入闹铃名称";
+"alarmTitleIsTooLong" = "您输入的闹铃名称超出了字数限制";
+"pleaseInputLongevity" = "请输入寿星的名字";
+"longevityNameIsTooLong" = "您输入的寿星名字超出了字数限制";
+"deleteThisAlarm?" = "您确定要删除该闹铃吗？";
+"deleteThisRemind?" = "您确定要删除该备忘吗？";
+"deleteThisBirthday?" = "您确定要删除该生日提醒吗?";
+"openThisAlarm?" = "您确定要开启该闹铃吗?";
+"closeThisAlarm?" = "您确定要关闭该闹铃吗?";
+"openThisRemind?" = "您确定要开启该备忘提醒吗?";
+"closeThisRemind?" = "您确定要关闭该备忘提醒吗?";
+"openGetupAlarmSuccessful" = "开启闹铃成功，已为您开启了%@:%@分的起床闹铃";
+"openGetupAlarmFailed" = "开启闹铃失败";
+"openCustomAlarmSuccessful" = "开启闹铃成功，已为您开启了%@:%@分的自定义闹铃";
+"openCustomAlarmFailed" = "开启闹铃失败";
+"openRemindSuccessful" = "开启备忘闹铃成功";
+"openRemindFailed" = "开启备忘闹铃失败";
+
+"closeGetupAlarmSuccessful" = "关闭闹铃成功，已为您关闭了%@:%@分的起床闹铃";
+"closeGetupAlarmFailed" = "关闭闹铃失败";
+"closeCustomAlarmSuccessful" = "关闭闹铃成功，已为您关闭了%@:%@分的自定义闹铃";
+"closeCustomAlarmFailed" = "关闭闹铃失败";
+"closeRemindSuccessful" = "关闭备忘闹铃成功";
+"closeRemindFailed" = "关闭备忘闹铃失败";
+
+"modifyGetupAlarmSuccessful" = "修改成功，已为您设置了%@:%@分的起床闹铃";
+"modifyOneOffGetupAlarmSuccessful" = "修改成功，已为您设置了%@年%@月%@日%@:%@分的起床闹铃";
+"modifyGetupAlarmFailed" = "修改失败";
+"modifyCustomAlarmSuccessful" = "修改成功，已为您设置了%@:%@分的自定义闹铃";
+"modifyOneOffCustomAlarmSuccessful" = "修改成功，已为您设置了%@年%@月%@日%@:%@分的自定义闹铃";
+"modifyCustomAlarmFailed" = "修改失败";
+"modifyRemindSuccessful" = "修改备忘闹铃成功";
+"modifyRemindFailed" = "修改备忘闹铃失败";
+"modifyBirthdaySuccessful" = "修改成功，已为您设置了%@的生日闹铃";
+"modifyBirthdayFailed" = "修改失败";
+"modifyGetupSetSuccessful" = "修改起床通用设置成功";
+"modifyGetupSetFailed" = "修改起床通用设置失败";
+
+"monday" = "周一";
+"tuesday" = "周二";
+"wednesday" = "周三";
+"thursday" = "周四";
+"friday" = "周五";
+"saturday" = "周六";
+"sunday" = "周日";
+"oneOff" = "只响一次";
+"everyday" = "每天";
+"alarmCycle" = "响铃周期";
+"alarmTime" = "响铃时间";
+"broadcastTimes" = "播报次数";
+
+"insertGetupAlarmSuccessful" = "添加成功，已为您添加了%@:%@分的起床闹铃";
+"insertOneOffGetupAlarmSuccessful" = "添加成功，已为您添加了%@年%@月%@日%@:%@分的起床闹铃";
+"insertGetupAlarmFailed" = "添加失败";
+"insertCustomAlarmSuccessful" = "添加成功，已为您添加了%@:%@分的自定义闹铃";
+"insertOneOffCustomAlarmSuccessful" = "添加成功，已为您添加了%@年%@月%@日%@:%@分的自定义闹铃";
+"insertCustomAlarmFailed" = "添加失败";
+"insertRemindAlarmSuccessful" = "添加备忘闹铃成功";
+"insertRemindAlarmFailed" = "添加备忘闹铃失败";
+"insertBirthdayAlarmSuccessful" = "添加成功，已为您添加了%@的生日闹铃";
+"insertBirthdayAlarmFailed" = "添加失败";
+"ringSelection" = "铃声选择";
+
+"invalidAlarmTime" = "闹铃时间无效，响铃的时间必须设置为当前时间以后";
+"theDateOfRemindIsInvalid" = "备忘信息必须设置为今天或今天以后的日期才能播放哦~";
+"theAlarmTitleInvalid" = "闹铃名称无效，请重新输入";
+"theAlarmTitleIsEmpty" = "您还没给闹铃取名勒~";
+"theLongevityInvalid" = "寿星的名字无效，请重新输入";
+"theLongevityNameIsEmpty" = "您还没输入寿星的名字勒~";
+"theRemindInvalid" = "备忘信息无效，请重新输入";
+"theRemindIsEmpty" = "您还没输入需要提醒的事件勒~";
+
+"invalidCharacterOrFormatForAlarmTitle" = "闹铃标题不能以空格开始和结束并且不能包含回车符";
+"invalidCharacterOrFormatForRemindInfo" = "备忘信息不能以空格开始和结束并且不能包含回车符";
+"invalidCharacterOrFormatForLongevityName" = "寿星名字不能以空格开始和结束并且不能包含回车符";
+
+/* 唤醒控制 */
+"wakeupSet" = "唤醒设置";
+"wakeupName" = "唤醒名称";
+"wakeupHint" = "试着对终端说“你的唤醒名是什么”";//，“打开提示音”，“关闭提示音”";
+"wakeupTimeHint" = "夜间模式开启后，以上时间段将会关闭“滴”、“啊噢”的提示音和WIFI指示灯";
+"gettingWakeup" = "正在获取唤醒设置...";
+"getWakeupFailed" = "获取唤醒设置失败";
+"modifyWakeupNameSuccessful" = "唤醒参数修改成功";
+"modifyWakeupNameFailed" = "唤醒参数修改失败";
+
+
+/* 睡前音乐 */
+"sleepMusicSet" = "睡前音乐设置";
+"sleepMusicHint" = "试着对终端说“我要睡觉了”，睡前音乐播放完毕后会自动关灯哦~";
+"gettingMusicList" = "正在获取音乐列表...";
+"gettingSleepMusic" = "正在获取睡前音乐...";
+"getSleepMusicSetFailed" = "获取睡前音乐设置失败";
+"getMusicListFailed" = "获取音乐列表失败";
+//"saveSleepMusicSetFailed" = "保存睡前音乐设置失败";
+
+/* 喜马拉雅 */
+"himalaya" = "喜马拉雅";
+"gettingProgramList" = "正在获取节目列表...";
+"pullupToGetMore" = "上拉加载更多节目";
+"gettingProgramList" = "正在加载节目...";
+"noProgramFound" = "暂无节目列表，去看看其他的吧~";
+"noMoreProgram" = "已加载完所有的节目！";
+"getProgramListFailed" = "获取节目列表失败";
+"addProgramToPlayListFinish" = "已添加到播放列表";
+"himalayaHelp" = "喜马拉雅帮助";
+"enterHimalaya" = "进入喜马拉雅";
+"automaticPopHelper" = "自动弹出帮助";
+
+/* 本地城市 */
+"localCitySet" = "本地城市设置";
+"theWayToGetLocalCity" = "获取本地城市的方式";
+"localCityHint" = "1.本地城市的天气信息默认会在起床闹铃中播放哦~\n2.试着对终端说“今天天气”，您就能知道本地城市最新的天气情况了哦~";
+"selectYourPosition" = "请选择你所在的城市";
+"gettingLocalCity" = "正在获取本地城市设置...";
+"city" = "当前城市";
+"getLocalCitySetFailed" = "获取本地城市设置失败";
+//"saveLocalCitySetFailed" = "保存本地城市设置失败";
+
+"connectedToWireless:%@" = "已连接到无线网络：%@";
+"wifiIsNotEnable" = "手机WIFI未打开或手机未连接到无线网络, 请检查网络后重新扫描设备";
+"iphoneDisconnectedTo %@" = "手机无法连接到“%@”";
+"iphoneConnectedTo %@" = "手机已连接到“%@”";
+"connectionsTo %@ isUnstable" = "与“%@”的通讯不畅";
+"failedToGetSSID" = "获取网络名失败，请检查网络连接";
+
+/* 设备信息 */
+"deviceInfo" = "设备详情";
+"gettingDeviceInfo" = "正在获取设备信息...";
+"gettingDeviceInfoFailed" = "获取设备信息失败";
+
+/* 免扰控制 */
+"undisturbedControl" = "免扰控制";
+"getNightControlFailed" = "获取免扰控制失败";
+"nightStart" = "夜间开始";
+"nightEnd" = "夜间结束";
+"nightControlHint" = "夜间模式开启后以上时间段还会：\n1.关闭“嘀”、“啊呃”的提示音\n2.关闭WIFI指示灯\n3.关闭整点和半点报时";
+"promptControlHint" = "此开关用于控制“嘀”、“啊呃”的提示音";
+"nightVolume" = "夜间音量";
+
+/* 其他设置 */
+"otherSet" = "其他设置";
+"getOtherSetFailed" = "获取失败";
+"broadcastSet" = "播报设置";
+"loopPlayHint" = "设置的连续播放时长将会在播放新闻、笑话、音乐、故事的时候生效哦~";
+
+/* 百灵帮助 */
+"larkerHelper" = "百灵帮助";
+
+/* FSK配置 */
+"noHint" = "未听到提示";
+"resend" = "重新发送";
+"adjustVolume" = "音量调节";
+"currentVolume" = "当前音量";
+"adjustVolumeHint" = "请根据终端的提示调节音量";
+"nextStep" = "下一步";
+"WIFINameAndPassword" = "配置终端设备的网络参数";
+"send" = "发送";
+"configurationConsiderations" = "配置注意事项";
+"configuration" = "根据终端提示按下对应按键";
+"SSIDisEmpty" = "网络名为空";
+"phoneIsMute" = "手机音量未打开";
+"pleaseInputWIFIName" = "请输入WIFI名";
+"pleaseGiveNothingIfThereIsNoPassword" = "没有密码可不填";
+"NoDeviceFound" = "没有扫描到设备！";
+
+/* 本地音乐 */
+"unknownArtist" = "演唱者未知";
+"localMusic" = "手机音乐";
+"unknownAlbum" = "专辑名未知";
+"noMusicOnYourIOSDevice" = "抱歉，没有发现MP3格式的音乐哦，您可以:\n1.点击右上方的刷新按钮再获取一次\n2.通过iTunes下载您喜欢的音乐";
+"localMusic%d" = "手机音乐(%d)";
+"addSongs" = "添加MP3到“手机音乐”";
+"unsurpportMusicFormat" = "格式不支持";
+"addingFailed" = "添加失败，点击删除";
+"addSongsToPlayListFinish" = "已添加到播放列表";
+"selectAll" = "全选";
+"pushToPlayList" = "添加到播放列表";
+"deleteFinish" = "删除完成";
+"cancelAll" = "取消全选";
+"areYouSureYouWantToDeleteThisSong" = "您确定要删除歌曲“%@”吗？";
+"noSongFound" = "在手机上没有发现MP3格式的音乐";
+
+/* 播放控制 */
+"songsList" = "列表";
+"modeOnDemand" = "点播模式";
+"modeSingleCycle" = "单曲循环";
+"modeRandomPlay" = "随机播放";
+"modeLoopPlay" = "循环播放";
+"mySongs" = "播放列表";
+"playTheSameProgram" = "已经在播放...";
+"nonRecognitionReply" = "非识别回复";
+"recognitionServerAbnormal" = "识别服务器维护中，请稍候再用";
+"analysisServerAbnormal" = "解析服务器维护中，请稍候再用";
+"audioPlayControl" = "播放控制";
+"playListEmpty" = "播放列表为空";
+"playerStopped" = "播放已停止";
+"getDeviceOpenIdFailed" = "获取终端设备的OpenId失败。请重启终端设备并确保设备能正常连接到互联网";
+
+/* 主功能界面 */
+"mainMenu" = "主菜单";
+"highSet" = "高级设置";
+
+/* 意见反馈 */
+"suggestionFeedback" = "意见反馈";
+"pleaseInputYourSuggestion" = "请输入您的意见或建议";
+"pleaseLeftYourContactInformation" = "请留下您的联系方式";
+"submit" = "提交";
+"submiting" = "提交中...";
+"suggestionIsEmpty" = "您输入的建议为空，请重新输入";
+"suggestionIsTooLong" = "您输入的意见或建议超出了字数限制";
+"contactsIsTooLong" = "您输入的联系方式超出了字数限制";
+"submitSuccessful" = "提交成功，谢谢您的参与";
+"unknownError" = "未知错误";
+"questionYouWantToFeedbackBelongTo" = "您要反馈的问题属于";
+"typeYouWantToFeedbackBelongTo" = "您要反馈的类型是";
+"feedBackInvalid" = "输入的反馈内容无效，请重新输入";
+"contactInfoInvalid" = "输入的联系方式无效，请重新输入";
+"feedbackInputIsInvalid" = "输入无效，不能以空格或回车符开始或结束";
+
+/* 微信公众号 */
+"weiChatAccount" = "百灵公众号";
+
+/* 关于百灵 */
+"aboutLark" = "关于百灵";

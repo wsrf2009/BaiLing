@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="8191" systemVersion="14F27" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8154"/>
+    </dependencies>
+    <scenes>
+        <!--Local Music View Controller-->
+        <scene sceneID="D2W-WI-aBa">
+            <objects>
+                <tableViewController storyboardIdentifier="LocalMusicViewController" id="v33-tj-Z4n" customClass="LocalMusicViewController" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="60" sectionHeaderHeight="22" sectionFooterHeight="22" id="rdb-We-fxL">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <searchBar key="tableHeaderView" contentMode="redraw" placeholder="请输入歌曲名" id="EyX-D0-H9y">
+                            <rect key="frame" x="0.0" y="0.0" width="600" height="44"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                            <textInputTraits key="textInputTraits"/>
+                            <connections>
+                                <outlet property="delegate" destination="v33-tj-Z4n" id="lhA-9H-HhT"/>
+                            </connections>
+                        </searchBar>
+                        <prototypes>
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" indentationWidth="10" reuseIdentifier="LocalMusicTableViewCell" id="5j0-E7-x0U" customClass="LocalMusicTableViewCell">
+                                <rect key="frame" x="0.0" y="66" width="600" height="60"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="5j0-E7-x0U" id="ejZ-Dq-X5k">
+                                    <rect key="frame" x="0.0" y="0.0" width="600" height="59"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="T0n-Wh-K18">
+                                            <rect key="frame" x="15" y="10" width="42" height="21"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xr1-Wa-Twr">
+                                            <rect key="frame" x="585" y="30" width="0.0" height="0.0"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                            <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="So5-hf-L2N">
+                                            <rect key="frame" x="15" y="33" width="38" height="18"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                            <color key="textColor" red="0.49803921568627452" green="0.49803921568627452" blue="0.49803921568627452" alpha="1" colorSpace="calibratedRGB"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="So5-hf-L2N" firstAttribute="leading" secondItem="ejZ-Dq-X5k" secondAttribute="leading" constant="15" id="LPm-Xo-qpm"/>
+                                        <constraint firstAttribute="centerY" secondItem="xr1-Wa-Twr" secondAttribute="centerY" id="MJg-3A-utD"/>
+                                        <constraint firstItem="T0n-Wh-K18" firstAttribute="leading" secondItem="ejZ-Dq-X5k" secondAttribute="leading" constant="15" id="VxR-PO-fww"/>
+                                        <constraint firstAttribute="centerY" secondItem="T0n-Wh-K18" secondAttribute="centerY" id="aMz-89-F5I"/>
+                                        <constraint firstItem="T0n-Wh-K18" firstAttribute="top" secondItem="ejZ-Dq-X5k" secondAttribute="top" constant="8" id="e0g-2o-gas"/>
+                                        <constraint firstAttribute="trailing" secondItem="xr1-Wa-Twr" secondAttribute="trailing" constant="15" id="enJ-1L-InA"/>
+                                        <constraint firstItem="xr1-Wa-Twr" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="T0n-Wh-K18" secondAttribute="trailing" constant="10" id="jTQ-KP-hdy"/>
+                                        <constraint firstItem="So5-hf-L2N" firstAttribute="leading" secondItem="T0n-Wh-K18" secondAttribute="leading" id="lSs-Ak-FTk"/>
+                                        <constraint firstItem="T0n-Wh-K18" firstAttribute="top" secondItem="ejZ-Dq-X5k" secondAttribute="top" constant="10" id="r2n-E9-rj5"/>
+                                        <constraint firstAttribute="bottom" secondItem="So5-hf-L2N" secondAttribute="bottom" constant="8" id="wv2-zM-tp2"/>
+                                    </constraints>
+                                    <variation key="default">
+                                        <mask key="constraints">
+                                            <exclude reference="aMz-89-F5I"/>
+                                            <exclude reference="e0g-2o-gas"/>
+                                        </mask>
+                                    </variation>
+                                </tableViewCellContentView>
+                                <inset key="separatorInset" minX="15" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                <connections>
+                                    <outlet property="labelAddingFailed" destination="xr1-Wa-Twr" id="fY8-jn-JnP"/>
+                                    <outlet property="time" destination="So5-hf-L2N" id="1Lf-he-wNO"/>
+                                    <outlet property="title" destination="T0n-Wh-K18" id="ZvE-kE-DxV"/>
+                                </connections>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="v33-tj-Z4n" id="als-oL-THI"/>
+                            <outlet property="delegate" destination="v33-tj-Z4n" id="pZE-c5-jPR"/>
+                        </connections>
+                    </tableView>
+                    <connections>
+                        <outlet property="searchBarSong" destination="EyX-D0-H9y" id="98k-rw-ET2"/>
+                        <outlet property="searchDisplayController" destination="BPZ-bj-Tvh" id="v6S-7F-4d7"/>
+                    </connections>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="iKR-Hl-97t" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <searchDisplayController id="tMk-eh-RsD">
+                    <connections>
+                        <outlet property="delegate" destination="v33-tj-Z4n" id="Foh-iD-fBq"/>
+                        <outlet property="searchContentsController" destination="v33-tj-Z4n" id="iqY-On-pxP"/>
+                        <outlet property="searchResultsDataSource" destination="v33-tj-Z4n" id="iN5-Zm-Uc7"/>
+                        <outlet property="searchResultsDelegate" destination="v33-tj-Z4n" id="bdX-Dr-kVW"/>
+                    </connections>
+                </searchDisplayController>
+                <searchDisplayController id="BPZ-bj-Tvh">
+                    <connections>
+                        <outlet property="delegate" destination="v33-tj-Z4n" id="rtx-fO-hcE"/>
+                        <outlet property="searchContentsController" destination="v33-tj-Z4n" id="1Zz-J8-SCF"/>
+                        <outlet property="searchResultsDataSource" destination="v33-tj-Z4n" id="RZ7-iB-cvT"/>
+                        <outlet property="searchResultsDelegate" destination="v33-tj-Z4n" id="l7r-4K-bRJ"/>
+                    </connections>
+                </searchDisplayController>
+            </objects>
+            <point key="canvasLocation" x="556" y="385"/>
+        </scene>
+    </scenes>
+</document>
