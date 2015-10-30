@@ -316,12 +316,16 @@
 #pragma UITextViewDelegate
 
 - (void)textViewDidChange:(UITextView *)textView {
-    
-    
-    
     if (textView.text.length >= 1) {
-        /* 检查是否以空格开始 */
+        /* 检查是否以包含空格 */
         NSRange range1 = [textView.text rangeOfString:@" "];
+        if (NSNotFound != range1.location) {
+            [self showMessage:NSLocalizedStringFromTable(@"invalidCharacterOrFormatForRemindInfo", @"hint", nil) messageType:0];
+            textView.text = [textView.text stringByReplacingOccurrencesOfString:@" " withString:@""];
+            [self contentLengthCheck];
+            return;
+        }
+#if 0
         if (0 == range1.location) {
             [self showMessage:NSLocalizedStringFromTable(@"invalidCharacterOrFormatForRemindInfo", @"hint", nil) messageType:0];
             textView.text = [textView.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
@@ -337,7 +341,7 @@
             [self contentLengthCheck];
             return;
         }
-        
+#endif
         /* 检查是否包含回车符 */
         NSRange range2 = [textView.text rangeOfString:@"\n"];
         if (NSNotFound != range2.location) {

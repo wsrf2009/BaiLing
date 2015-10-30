@@ -234,7 +234,7 @@
                 [self removeEffectView];
             } else {
                 [self removeEffectView];
-                [Toast showWithText:NSLocalizedStringFromTable(@"savingFailed", @"hint", nil)];
+                [QXToast showMessage:NSLocalizedStringFromTable(@"savingFailed", @"hint", nil)];
             }
         });
     }];

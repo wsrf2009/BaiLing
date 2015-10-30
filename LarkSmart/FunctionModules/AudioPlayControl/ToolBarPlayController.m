@@ -728,7 +728,7 @@ NSString const *MusicRelativeDir = @"songs";
     NSLog(@"%s", __func__);
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        [Toast showWithText:[NSString stringWithFormat:NSLocalizedStringFromTable(@"iphoneDisconnectedTo %@", @"hint", nil), _deviceManager.device.userData.generalData.nickName]];
+        [QXToast showMessage:[NSString stringWithFormat:NSLocalizedStringFromTable(@"iphoneDisconnectedTo %@", @"hint", nil), _deviceManager.device.userData.generalData.nickName]];
     });
 }
 
@@ -737,7 +737,7 @@ NSString const *MusicRelativeDir = @"songs";
     NSLog(@"%s", __func__);
 
     dispatch_async(dispatch_get_main_queue(), ^{
-        [Toast showWithText:NSLocalizedStringFromTable(@"playingProgramFailed", @"hint", nil)];
+        [QXToast showMessage:NSLocalizedStringFromTable(@"playingProgramFailed", @"hint", nil)];
     });
 }
 
@@ -746,7 +746,7 @@ NSString const *MusicRelativeDir = @"songs";
     NSLog(@"%s", __func__);
 
     dispatch_async(dispatch_get_main_queue(), ^{
-        [Toast showWithText:NSLocalizedStringFromTable(@"urlIsEmpty", @"hint", nil)];
+        [QXToast showMessage:NSLocalizedStringFromTable(@"urlIsEmpty", @"hint", nil)];
     });
 }
 

@@ -7,9 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "SWTableViewCell.h"
+//#import "SWTableViewCell.h"
 
-@interface AlarmTableViewCell : SWTableViewCell
+@interface AlarmTableViewCell : UITableViewCell
 
 @property (nonatomic, retain) IBOutlet UIImageView *imageViewType;
 @property (nonatomic, retain) IBOutlet UILabel *lableTime;

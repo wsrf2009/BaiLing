@@ -9,7 +9,7 @@
 #import "AlarmRingViewController.h"
 #import "AlarmRingClass.h"
 #import "AlarmRingCell.h"
-#import "Toast.h"
+#import "QXToast.h"
 
 @interface AlarmRingViewController () <YYTXDeviceManagerDelegate>
 {

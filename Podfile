@@ -1,0 +1,13 @@
+platform:ios, '7.0'
+
+pod 'IQKeyboardManager'
+pod 'MBProgressHUD'
+pod 'SDWebImage'
+pod 'Reachability'
+pod 'FMDB'
+pod 'FPPopover'
+pod 'JGActionSheet'
+pod 'MJRefresh'
+pod 'TSLibraryImport'
+pod 'QXToast', :git => 'https://github.com/wsrf2009/QXToast.git'
+pod 'GCDWebServer'

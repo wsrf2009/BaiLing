@@ -11,7 +11,7 @@
 #import "ServerServiceManager.h"
 #import "BoxDatabase.h"
 #import "NetworkMonitor.h"
-#import "Toast.h"
+#import "QXToast.h"
 #import "SystemToolClass.h"
 #import "UICustomAlertView.h"
 #import "LocalMusicTask.h"

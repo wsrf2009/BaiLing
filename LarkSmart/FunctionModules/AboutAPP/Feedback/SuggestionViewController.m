@@ -289,10 +289,10 @@
         [self removeEffectView];
         
         if (nil == message) {
-            [Toast showWithText:NSLocalizedStringFromTable(@"submitSuccessful", @"hint", nil)];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"submitSuccessful", @"hint", nil)];
             [self.navigationController popViewControllerAnimated:YES];
         } else {
-            [Toast showWithText:message];
+            [QXToast showMessage:message];
         }
     }];
 }

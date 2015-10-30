@@ -7,9 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "SWTableViewCell.h"
+//#import "SWTableViewCell.h"
 
-@interface RemindTableViewCell : SWTableViewCell
+@interface RemindTableViewCell : UITableViewCell
 @property (nonatomic, retain) IBOutlet UIImageView *imageViewType;
 @property (nonatomic, retain) IBOutlet UILabel *labelDate;
 @property (nonatomic, retain) IBOutlet UILabel *remind;

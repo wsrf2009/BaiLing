@@ -396,7 +396,7 @@
 //                [Toast showWithText:NSLocalizedStringFromTable(@"operationIsTooFrequenct", @"hint", nil)];
             } else {
                 [self removeEffectView];
-                [Toast showWithText:NSLocalizedStringFromTable(@"gettingGetupGeneralSetFailed", @"hint", nil)];
+                [QXToast showMessage:NSLocalizedStringFromTable(@"gettingGetupGeneralSetFailed", @"hint", nil)];
             }
         });
     }];
@@ -431,7 +431,7 @@
 //                [Toast showWithText:NSLocalizedStringFromTable(@"operationIsTooFrequenct", @"hint", nil)];
             } else {
                 [self removeEffectView];
-                [Toast showWithText:NSLocalizedStringFromTable(@"savingFailed", @"hint", nil)];
+                [QXToast showMessage:NSLocalizedStringFromTable(@"savingFailed", @"hint", nil)];
             }
         });
     }];

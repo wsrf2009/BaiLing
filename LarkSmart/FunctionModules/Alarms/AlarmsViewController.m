@@ -12,7 +12,7 @@
 #import "RemindViewController.h"
 #import "BirthdayViewController.h"
 #import "MJRefresh.h"
-#import "Toast.h"
+#import "QXToast.h"
 #import "BirthdayTableViewCell.h"
 #import "RemindTableViewCell.h"
 #import "AddingAlarmViewController.h"
@@ -29,7 +29,7 @@ enum {
 NSString *const AlertViewType = @"AlertViewType";
 NSString *const NSIndexPathValue = @"NSIndexPathValue";
 
-@interface AlarmsViewController () <SWTableViewCellDelegate>
+@interface AlarmsViewController ()
 {
     AlarmClass *selectAlarm;
     
@@ -951,7 +951,7 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
                                     [self removeEffectView];
                                 } else {
                                     [self removeEffectView];
-                                    [Toast showWithText:NSLocalizedStringFromTable(@"gettingAlarmFailed", @"hint", nil)];
+                                    [QXToast showMessage:NSLocalizedStringFromTable(@"gettingAlarmFailed", @"hint", nil)];
                                 }
                                 
                                 [_getupAlarmArray removeAllObjects];
@@ -977,7 +977,7 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
                             [self showTitle:[NSString stringWithFormat:NSLocalizedStringFromTable(@"iphoneDisconnectedTo %@", @"hint", nil), self.deviceManager.device.userData.generalData.nickName] hint:NSLocalizedStringFromTable(@"hintForDeviceDisconnect", @"hint", nil)];
                         } else {
                             [self removeEffectView];
-                            [Toast showWithText:NSLocalizedStringFromTable(@"gettingAlarmFailed", @"hint", nil)];
+                            [QXToast showMessage:NSLocalizedStringFromTable(@"gettingAlarmFailed", @"hint", nil)];
                         }
 
                         [_getupAlarmArray removeAllObjects];
@@ -1004,7 +1004,7 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
                     [self showTitle:[NSString stringWithFormat:NSLocalizedStringFromTable(@"iphoneDisconnectedTo %@", @"hint", nil), self.deviceManager.device.userData.generalData.nickName] hint:NSLocalizedStringFromTable(@"hintForDeviceDisconnect", @"hint", nil)];
                 } else {
                     [self removeEffectView];
-                    [Toast showWithText:NSLocalizedStringFromTable(@"gettingAlarmFailed", @"hint", nil)];
+                    [QXToast showMessage:NSLocalizedStringFromTable(@"gettingAlarmFailed", @"hint", nil)];
                 }
 
                 [_getupAlarmArray removeAllObjects];

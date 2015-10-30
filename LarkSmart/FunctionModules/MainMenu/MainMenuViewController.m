@@ -15,7 +15,7 @@
 #import "XMLYHelpViewController.h"
 #import "HighSetViewController.h"
 
-@interface MainMenuViewController () <UISplitViewControllerDelegate>
+@interface MainMenuViewController ()
 
 @property (nonatomic, retain) UIBarButtonItem *barButtonFindDevice;
 @property (nonatomic, retain) UIScrollView *scrollView;

@@ -261,8 +261,15 @@
 - (IBAction)textFieldNameChange:(UITextField *)textField {
     
     if (textField.text.length >= 1) {
-        /* 检查是否以空格开始 */
+        /* 检查是否以包含空格 */
         NSRange range1 = [textField.text rangeOfString:@" "];
+        if (NSNotFound != range1.location) {
+            [self showMessage:NSLocalizedStringFromTable(@"invalidCharacterOrFormatForLongevityName", @"hint", nil) messageType:0];
+            textField.text = [textField.text stringByReplacingOccurrencesOfString:@" " withString:@""];
+            [self nameLengthCheck];
+            return;
+        }
+#if 0
         if (0 == range1.location) {
             [self showMessage:NSLocalizedStringFromTable(@"invalidCharacterOrFormatForLongevityName", @"hint", nil) messageType:0];
             textField.text = [textField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
@@ -278,7 +285,7 @@
             [self nameLengthCheck];
             return;
         }
-        
+#endif
         /* 检查是否包含回车符 */
         NSRange range2 = [textField.text rangeOfString:@"\n"];
         if (NSNotFound != range2.location) {
@@ -489,6 +496,10 @@
 }
 
 - (void)modifyBirthday {
+    
+    if (![self inputParametersIsValid]) {
+        return;
+    }
     
     // 保存生日修改
     _birthday.who = [_textFeildName text];

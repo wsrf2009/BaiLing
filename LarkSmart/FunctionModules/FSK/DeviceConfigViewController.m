@@ -110,7 +110,7 @@
     }
     
     if ([_textfieldSSID.text isEqualToString:@""]) {
-        [Toast showWithText:NSLocalizedStringFromTable(@"pleaseInputWIFIName", @"hint", nil) topOffset:66.0f duration:2.0];
+        [QXToast showMessage:NSLocalizedStringFromTable(@"pleaseInputWIFIName", @"hint", nil)];
         [_textfieldSSID becomeFirstResponder];
         
         return;

@@ -170,9 +170,9 @@
 "theRemindInvalid" = "备忘信息无效，请重新输入";
 "theRemindIsEmpty" = "您还没输入需要提醒的事件勒~";
 
-"invalidCharacterOrFormatForAlarmTitle" = "闹铃标题不能以空格开始和结束并且不能包含回车符";
-"invalidCharacterOrFormatForRemindInfo" = "备忘信息不能以空格开始和结束并且不能包含回车符";
-"invalidCharacterOrFormatForLongevityName" = "寿星名字不能以空格开始和结束并且不能包含回车符";
+"invalidCharacterOrFormatForAlarmTitle" = "闹铃标题不能有空格或回车符";
+"invalidCharacterOrFormatForRemindInfo" = "备忘信息不能有空格或回车符";
+"invalidCharacterOrFormatForLongevityName" = "寿星名字不能有空格或回车符";
 
 /* 唤醒控制 */
 "wakeupSet" = "唤醒设置";

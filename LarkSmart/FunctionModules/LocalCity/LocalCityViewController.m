@@ -11,7 +11,7 @@
 #import <MapKit/MapKit.h>
 #import "ChinaCityViewController.h"
 //#import "M2DHudView.h"
-#import "Toast.h"
+#import "QXToast.h"
 #import "CityListViewController.h"
 #import "ProvinceListViewController.h"
 #import "ChinaCityClass.h"
@@ -294,7 +294,7 @@
             } else {
                 
                 [self removeEffectView];
-                [Toast showWithText:NSLocalizedStringFromTable(@"savingFailed", @"hint", nil)];
+                [QXToast showMessage:NSLocalizedStringFromTable(@"savingFailed", @"hint", nil)];
             }
         });
     }];

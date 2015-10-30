@@ -463,9 +463,9 @@ NSString *const YYTXNewWIFISSID = @"YYTXNewWIFISSID";
     dispatch_async(dispatch_get_main_queue(), ^{
 
         if (nil != ssid) {
-            [Toast showWithText:[NSString stringWithFormat:NSLocalizedStringFromTable(@"connectedToWireless:%@", @"hint", nil), ssid]];
+            [QXToast showMessage:[NSString stringWithFormat:NSLocalizedStringFromTable(@"connectedToWireless:%@", @"hint", nil), ssid]];
         } else {
-            [Toast showWithText:NSLocalizedStringFromTable(@"failedToGetSSID", @"hint", nil)];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"failedToGetSSID", @"hint", nil)];
         }
     });
     

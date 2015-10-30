@@ -352,16 +352,52 @@ char pinyinFirstLetter(unsigned short hanzi)
         [source replaceCharactersInRange:NSMakeRange(0, 4)withString:@"shen"];
     }
     
-    if ([[(NSString *)chineseString substringToIndex:1] compare:@"厦"] ==NSOrderedSame) {
+    if ([[(NSString *)chineseString substringToIndex:1] compare:@"厦"] == NSOrderedSame) {
         [source replaceCharactersInRange:NSMakeRange(0, 3)withString:@"xia"];
     }
     
-    if ([[(NSString *)chineseString substringToIndex:1] compare:@"地"] ==NSOrderedSame) {
+    if ([[(NSString *)chineseString substringToIndex:1] compare:@"地"] == NSOrderedSame) {
         [source replaceCharactersInRange:NSMakeRange(0, 3)withString:@"di"];
     }
     
-    if ([[(NSString *)chineseString substringToIndex:1] compare:@"重"] ==NSOrderedSame) {
+    if ([[(NSString *)chineseString substringToIndex:1] compare:@"重"] == NSOrderedSame) {
         [source replaceCharactersInRange:NSMakeRange(0, 5) withString:@"chong"];
+    }
+    
+    if ([chineseString compare:@"枞阳"] == NSOrderedSame) {
+        source = [NSMutableString stringWithString:@"zong yang"];
+    }
+    
+    if ([chineseString compare:@"宕昌"] == NSOrderedSame) {
+        source = [NSMutableString stringWithString:@"tan chang"];
+    }
+    
+    if ([chineseString compare:@"番禺"] == NSOrderedSame) {
+        source = [NSMutableString stringWithString:@"pan yu"];
+    }
+    
+    if ([chineseString compare:@"泊头"] == NSOrderedSame) {
+        source = [NSMutableString stringWithString:@"bo tou"];
+    }
+    
+    if ([chineseString compare:@"乾安"] == NSOrderedSame) {
+        source = [NSMutableString stringWithString:@"qian an"];
+    }
+    
+    if ([chineseString compare:@"略阳"] == NSOrderedSame) {
+        source = [NSMutableString stringWithString:@"lve yang"];
+    }
+    
+    if ([chineseString compare:@"乾县"] == NSOrderedSame) {
+        source = [NSMutableString stringWithString:@"qian xian"];
+    }
+    
+    if ([chineseString compare:@"犍为"] == NSOrderedSame) {
+        source = [NSMutableString stringWithString:@"qian wei"];
+    }
+    
+    if ([chineseString compare:@"筠连"] == NSOrderedSame) {
+        source = [NSMutableString stringWithString:@"jun lian"];
     }
     
     NSLog(@"%s chineseString:%@ source:%@", __func__, chineseString, source);

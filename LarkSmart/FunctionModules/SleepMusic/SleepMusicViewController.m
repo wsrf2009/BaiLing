@@ -10,7 +10,7 @@
 #import "PlayTimeViewController.h"
 #import "SubCategoryListViewController.h"
 #import "MusicListViewController.h"
-#import "Toast.h"
+#import "QXToast.h"
 
 #define LeadingSpaceToSuperView         15.0f
 #define TrailingSpaceToSuperView         15.0f
@@ -432,7 +432,7 @@
 //                [Toast showWithText:NSLocalizedStringFromTable(@"operationIsTooFrequenct", @"hint", nil)];
             } else {
                 [self removeEffectView];
-                [Toast showWithText:NSLocalizedStringFromTable(@"savingFailed", @"hint", nil)];
+                [QXToast showMessage:NSLocalizedStringFromTable(@"savingFailed", @"hint", nil)];
             }
         });
     }];
