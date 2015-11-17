@@ -21,7 +21,10 @@ extern NSString *const jsonItemKeyYunBaoOpenId;
 
 @interface UserFeedback : NSObject
 
+/** 创建意见反馈数据包 */
 + (NSMutableDictionary *)createWithFeedback:(NSDictionary *)feedback;
+
+/** 从root中解析出提交意见反馈后服务器的响应 */
 + (NSString *)getResponseMessage:(NSDictionary *)root;
 
 @end

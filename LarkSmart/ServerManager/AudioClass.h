@@ -17,6 +17,7 @@
 @property (nonatomic, retain) NSString *url;
 @property (nonatomic, assign) NSUInteger duration;
 
+/** 解析AudioClass */
 + (AudioClass *)parseAudio:(NSDictionary *)audioItem;
 
 @end

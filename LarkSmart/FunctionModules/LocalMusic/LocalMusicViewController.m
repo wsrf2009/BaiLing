@@ -56,9 +56,9 @@
     
     HightLightColor = [UIColor colorWithRed:58.0f/255.0f green:171.0f/255.0f blue:250.0f/255.0f alpha:1.0f];
     
-    _mediaTask = self.deviceManager.mediaTask;
+    _mediaTask = self.deviceManager.mediaTask; //
     _mediaTask.delegate = self;
-    _mediaList = self.deviceManager.mediaTask.musicItems;
+    _mediaList = self.deviceManager.mediaTask.musicItems; // 本地音乐列表
     
     if (_mediaList.count <= 0) {
         [self refreshSongsList];
@@ -74,6 +74,7 @@
     [super didReceiveMemoryWarning];
 }
 
+/** 刷新歌曲列表 */
 - (void)refreshSongsList {
     
     NSLog(@"%s +++++++++++++++++++++++++++++++++++", __func__);
@@ -83,12 +84,12 @@
     [self removeEffectView];
     
     [_itemRefresh setEnabled:NO];
-    [self showBusying:NSLocalizedStringFromTable(@"pleaseWaiting", @"hint", nil)];
+    [self showBusying:NSLocalizedStringFromTable(@"pleaseWaiting", @"hint", nil)]; // 显示状态
     
-    [_mediaTask clearMediaList];
+    [_mediaTask clearMediaList]; // 清空
     [self.tableView reloadData];
     
-    [_mediaTask regainMedias];
+    [_mediaTask regainMedias]; // 重新获取
     [self.tableView reloadData];
     
     [_itemRefresh setEnabled:YES];
@@ -114,7 +115,7 @@
     if (_showSearchResults) {
         return 1;
     } else {
-
+        /* 根据首字母分组显示，有多少组 */
         NSInteger count = 0;
         for (NSArray *sArr in _mediaList) {
             count += sArr.count-1;
@@ -130,7 +131,7 @@
     if (_showSearchResults) {
         return _searchResults.count;
     } else {
-
+        /* 分组显示，每组有多少曲目 */
         NSArray *sArr = [_mediaList objectAtIndex:section];
     
         return sArr.count-1;
@@ -165,6 +166,7 @@
     if (_showSearchResults) {
         return nil;
     } else {
+        /* 返回每组的标题，歌曲的首字母 */
         NSMutableArray *arr = [NSMutableArray array];
         
         for (NSArray *group in _mediaList) {
@@ -183,21 +185,21 @@
         item = [_searchResults objectAtIndex:indexPath.row];
     } else {
         NSArray *arr = [_mediaList objectAtIndex:indexPath.section];
-        item = [arr objectAtIndex:indexPath.row+1];
+        item = [arr objectAtIndex:indexPath.row+1]; // 找到对应的歌曲
     }
     
-    [cell.title setText:item.audio.title];
-    cell.time.text = [NSString stringWithFormat:@"%02d:%02d", item.audio.duration/60, item.audio.duration%60];
+    [cell.title setText:item.audio.title]; // 歌曲名
+    cell.time.text = [NSString stringWithFormat:@"%02u:%02u", item.audio.duration/60, item.audio.duration%60]; // 播放时长
 
     if ((YYTXMediaExportingStateUnknown == item.state) || (YYTXMediaExportingStateWaiting == item.state)) {
-                
+        /* 等待转换 */
         cell.userInteractionEnabled = NO;
         [cell.labelAddingFailed setHidden:YES];
         [cell setBackgroundColor:[UIColor colorWithRed:236.0f/255.0f green:236.0f/255.0f blue:236.0f/255.0f alpha:1.0f]];
         [cell setAccessoryType:UITableViewCellAccessoryNone];
         
     } else if (YYTXMediaExportingStateExporting == item.state) {
-        
+        /* 正在转换，从ipod－library导出歌曲 */
         cell.userInteractionEnabled = NO;
         [cell.labelAddingFailed setHidden:YES];
         [cell setBackgroundColor:[UIColor colorWithRed:236.0f/255.0f green:236.0f/255.0f blue:236.0f/255.0f alpha:1.0f]];
@@ -206,14 +208,14 @@
         [cell setAccessoryView:activity];
         
     } else if (YYTXMediaExportingStateCompleted == item.state) {
-
+        /* 已经转换完成 */
         cell.userInteractionEnabled = YES;
         [cell.labelAddingFailed setHidden:YES];
         [cell setBackgroundColor:[UIColor whiteColor]];
         [cell setAccessoryType:UITableViewCellAccessoryNone];
 
     } else if (YYTXMediaExportingStateFailed == item.state || YYTXMediaExportingStateCancelled == item.state) {
-
+        /* 导出失败 */
         cell.userInteractionEnabled = YES;
         [cell.labelAddingFailed setHidden:NO];
         [cell.labelAddingFailed setText:NSLocalizedStringFromTable(@"addingFailed", @"hint", nil)];
@@ -221,6 +223,7 @@
         [cell setAccessoryType:UITableViewCellAccessoryNone];
     }
     
+    /* 标记当前选中的歌曲 */
     if ([_selectedProgramTitle isEqualToString:item.audio.title]) {
         [cell.title setTextColor:HightLightColor];
         [cell.time setTextColor:HightLightColor];
@@ -238,7 +241,7 @@
 
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
-    [self showBusying:NSLocalizedStringFromTable(@"pleaseWaiting", @"hint", nil)];
+    [self showBusying:NSLocalizedStringFromTable(@"pleaseWaiting", @"hint", nil)]; // 显示状态，忙
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1*NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         
@@ -252,18 +255,19 @@
         item = [_searchResults objectAtIndex:indexPath.row];
     } else {
         NSArray *arr = [_mediaList objectAtIndex:indexPath.section];
-        item = [arr objectAtIndex:indexPath.row+1];
+        item = [arr objectAtIndex:indexPath.row+1]; // 找到对应item
     }
     
     NSLog(@"%s item:%@", __func__, item);
 
     if (YYTXMediaExportingStateFailed == item.state || YYTXMediaExportingStateCancelled == item.state) {
-
+        /* 导出失败的歌曲，则删除 */
         [self deleteSongItem:item indexPath:indexPath];
         
         return;
     }
 
+    /* 更新播放控制器中播放列表 */
     [_toolBarPlayer.playList removeAllObjects];
     if (_showSearchResults) {
         for (YYTXMediaItem *item in _searchResults) {
@@ -284,6 +288,7 @@
     }
     _toolBarPlayer.delegate = self;
 
+    /* 根据当前点击的indexPath定位播放列表中偏移量index */
     NSInteger index = 0;
     for (NSInteger i=0; i<indexPath.section; i++) {
         NSArray *arr = _mediaList[i];
@@ -294,25 +299,27 @@
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
-    
+    /* 左划出现删除按钮 */
     return NSLocalizedStringFromTable(@"delete", @"hint", nil);
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
 
     if (editingStyle == UITableViewCellEditingStyleDelete) {
+        /* 点击每一行的删除按钮 */
         NSMutableArray *arr = [_mediaList objectAtIndex:indexPath.section];
         YYTXMediaItem *item = [arr objectAtIndex:indexPath.row+1];
         
         NSString *message = [NSString stringWithFormat:NSLocalizedStringFromTable(@"areYouSureYouWantToDeleteThisSong", @"hint", nil), item.audio.title];
         NSString *buttonCancelTitle = NSLocalizedStringFromTable(@"cancel", @"hint", nil);
         NSString *buttonDeleteTitle = NSLocalizedStringFromTable(@"delete", @"hint", nil);
-                             
+        
+        /* 给出弹窗提示是否要删除歌曲 */
         if ([SystemToolClass systemVersionIsNotLessThan:@"8.0"]) {
             UIAlertController *alertController = [UIAlertController alertControllerWithTitle:[SystemToolClass appName] message:message preferredStyle:UIAlertControllerStyleAlert];
             [alertController addAction:[UIAlertAction actionWithTitle:buttonCancelTitle style:UIAlertActionStyleCancel handler:nil]];
             [alertController addAction:[UIAlertAction actionWithTitle:buttonDeleteTitle style:UIAlertActionStyleDestructive handler:^(UIAlertAction *action) {
-                
+                /* 删除 */
                 [self deleteSongItem:item indexPath:indexPath];
             }]];
             
@@ -325,6 +332,7 @@
                 
                 NSString *buttonTitle = [alertView buttonTitleAtIndex:buttonIndex];
                 if ([buttonTitle isEqualToString:buttonDeleteTitle]) {
+                    /* 删除 */
                     [self deleteSongItem:item indexPath:indexPath];
                 }
             }];
@@ -333,10 +341,12 @@
     }
 }
 
+/** 删除indexPath处的歌曲 */
 - (void)deleteSongItem:(YYTXMediaItem *)item indexPath:(NSIndexPath *)indexPath {
     
     [[NSFileManager defaultManager] removeItemAtPath:item.file error:nil]; // 删除最终文件
 
+    /* 从_mediaList中删除对应的曲目 */
     for (NSInteger i=0; i<_mediaList.count; i++) {
         NSArray *arr = [_mediaList objectAtIndex:i];
         for (NSInteger j=0; j<arr.count; j++) {
@@ -359,6 +369,7 @@
         }
     }
     
+    /* 删除播放控制器的播放列表中对应的曲目 */
     NSArray *pArr = [NSArray arrayWithArray:_toolBarPlayer.playList];
     for (AudioClass *audio in pArr) {
         if ([audio.title isEqualToString:item.audio.title]) {
@@ -366,6 +377,7 @@
         }
     }
     
+    /* 如果改组已为空 */
     NSMutableArray *arr = [_mediaList objectAtIndex:indexPath.section];
     
     if (arr.count <= 2) {
@@ -399,7 +411,7 @@
             return;
         }
     } else {
-
+        /* 根据播放曲目的title定位出section和row */
         BOOL isEnd = NO;
         for (section=0; section<_mediaList.count; section++) {
             NSArray *arr = _mediaList[section];
@@ -417,10 +429,11 @@
         }
     }
     
-    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row-1 inSection:section];
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row-1 inSection:section]; // 根据section和row得出indexPath
     
     dispatch_async(dispatch_get_main_queue(), ^{
         if (nil != _selectedPath) {
+            /* 取消之前已选择的曲目标记 */
             LocalMusicTableViewCell *cell = (LocalMusicTableViewCell *)[self.tableView cellForRowAtIndexPath:_selectedPath];
             [cell.title setTextColor:[UIColor blackColor]];
             [cell.time setTextColor:[UIColor grayColor]];
@@ -428,6 +441,7 @@
 
         _selectedPath = indexPath;
 
+        /* 标记新的曲目 */
         LocalMusicTableViewCell *cell = (LocalMusicTableViewCell *)[self.tableView cellForRowAtIndexPath:indexPath];
         [cell.title setTextColor:HightLightColor];
         [cell.time setTextColor:HightLightColor];

@@ -16,17 +16,14 @@
 // 是否有子目录 JSONITEM_AUDIOCATEGORY_HASSUB
 #define CATEGORY_HAS_SUB        @"true"
 #define CATEGORY_NO_SUB         @"false"
-
+ 
 @implementation CategoryClass
 
 + (NSDictionary *)getCategoryWithCategoryId:(NSString *)cId {
-    NSDictionary *categoryIdItem = [NSDictionary dictionaryWithObject:cId forKey:JSONITEM_AUDIOCATEGORY_CATEGORYID];
-    
-    return categoryIdItem;
+    return @{JSONITEM_AUDIOCATEGORY_CATEGORYID:cId};
 }
 
 + (CategoryClass *)parseCategory:(NSDictionary *)categoryItem {
-    
     if (nil == categoryItem) {
         return nil;
     }
@@ -57,7 +54,6 @@
 }
 
 + (CategoryClass *)getSubCategoryFromRootCategoryArray:(NSMutableArray *)rootArray withSubCategoryId:(NSString *)Id {
-    
     for (CategoryClass *category in rootArray) {
         if ([category.categoryId isEqualToString:Id]) {
             return category;

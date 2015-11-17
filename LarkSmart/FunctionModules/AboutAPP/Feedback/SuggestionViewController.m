@@ -82,33 +82,32 @@
     
     if (0 == indexPath.section) {
         if (0 == indexPath.row) {
-            
+            /* 反馈的问题：百灵APP软件、百灵硬件终端 */
             NSString *title = NSLocalizedStringFromTable(@"questionYouWantToFeedbackBelongTo", @"hint", nil);
             
-            JGActionSheetSection *s0 = [JGActionSheetSection sectionWithTitle:title message:nil buttonTitles:_softHard buttonStyle:JGActionSheetButtonStyleBlue];
+            JGActionSheetSection *s0 = [JGActionSheetSection sectionWithTitle:title message:nil buttonTitles:_softHard buttonStyle:JGActionSheetButtonStyleBlue]; // 初始化section
             
-            JGActionSheet *sheet = [JGActionSheet actionSheetWithSections:@[s0]];
+            JGActionSheet *sheet = [JGActionSheet actionSheetWithSections:@[s0]]; // 初始化sheet
             sheet.delegate = self;
             sheet.insets = UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f);
             
             if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-                
+                /* ipad中指定显示的位置 */
                 CGPoint p = (CGPoint){-5.0f, CGRectGetMidY(_labelSoftOrHard.bounds)};
-                
                 p = [self.navigationController.view convertPoint:p fromView:_labelSoftOrHard];
-                
                 [sheet showFromPoint:p inView:self.navigationController.view arrowDirection:JGActionSheetArrowDirectionRight animated:YES];
-            }
-            else {
+            } else {
+                /* iphone */
                 [sheet showInView:self.navigationController.view animated:YES];
             }
             
             [sheet setOutsidePressBlock:^(JGActionSheet *sheet) {
+                /* 在sheet之外点击 */
                 [sheet dismissAnimated:YES];
             }];
             
             [sheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
-                
+                /* 点中了某一个section */
                 [sheet dismissAnimated:YES];
                 
                 if (0 == indexPath.section) {
@@ -116,31 +115,32 @@
                 }
             }];
         } else if (1 == indexPath.row) {
+            /* 反馈的类型：错误或异常、新想法、体验差 */
             NSString *title = NSLocalizedStringFromTable(@"typeYouWantToFeedbackBelongTo", @"hint", nil);
-            JGActionSheetSection *s0 = [JGActionSheetSection sectionWithTitle:title message:nil buttonTitles:_feedbackType buttonStyle:JGActionSheetButtonStyleBlue];
+            JGActionSheetSection *s0 = [JGActionSheetSection sectionWithTitle:title message:nil buttonTitles:_feedbackType buttonStyle:JGActionSheetButtonStyleBlue]; // 初始化section
             
-            JGActionSheet *sheet = [JGActionSheet actionSheetWithSections:@[s0]];
+            JGActionSheet *sheet = [JGActionSheet actionSheetWithSections:@[s0]]; // 初始化sheet
             sheet.delegate = self;
             sheet.insets = UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f);
             
             if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-                
+                /* 指定在ipad中显示的位置 */
                 CGPoint p = (CGPoint){-5.0f, CGRectGetMidY(_labelFeedbackType.bounds)};
-                
                 p = [self.navigationController.view convertPoint:p fromView:_labelFeedbackType];
-                
                 [sheet showFromPoint:p inView:self.navigationController.view arrowDirection:JGActionSheetArrowDirectionRight animated:YES];
             }
             else {
+                /* iphone */
                 [sheet showInView:self.navigationController.view animated:YES];
             }
             
             [sheet setOutsidePressBlock:^(JGActionSheet *sheet) {
+                /* sheet之外点击 */
                 [sheet dismissAnimated:YES];
             }];
             
             [sheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
-                
+                /* sheet之内的某个section */
                 [sheet dismissAnimated:YES];
                 
                 if (0 == indexPath.section) {
@@ -162,7 +162,7 @@
         NSRange range1 = [textView.text rangeOfString:@" "];
         NSRange range2 = [textView.text rangeOfString:@"\n"];
         if (0 == range1.location || 0 == range2.location) {
-            [self showMessage:NSLocalizedStringFromTable(@"feedbackInputIsInvalid", @"hint", nil) messageType:0];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"feedbackInputIsInvalid", @"hint", nil)];
             textView.text = [textView.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             return;
         }
@@ -185,6 +185,7 @@
     
 }
 
+/** 检查反馈内容的长度 */
 - (BOOL)contentLengthCheck {
     NSInteger length = _textViewSuggestion.text.length;
     
@@ -202,6 +203,7 @@
     }
 }
 
+/** 检查联系信息的长度 */
 - (BOOL)contactLengthCheck {
     NSInteger length = _textViewContact.text.length;
     
@@ -225,9 +227,9 @@
     if (![self contentLengthCheck]) {
         
         if (_textViewSuggestion.text.length <= 0) {
-            [self showMessage:NSLocalizedStringFromTable(@"pleaseInputYourSuggestion", @"hint", nil) messageType:0];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"pleaseInputYourSuggestion", @"hint", nil)];
         } else {
-            [self showMessage:NSLocalizedStringFromTable(@"suggestionIsTooLong", @"hint", nil) messageType:0];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"suggestionIsTooLong", @"hint", nil)];
         }
         
         [_textViewSuggestion becomeFirstResponder];
@@ -239,7 +241,7 @@
         str = [str stringByReplacingOccurrencesOfString:@"\n" withString:@""];
         if (str.length <= 0) {
             
-            [self showMessage:NSLocalizedStringFromTable(@"feedBackInvalid", @"hint", nil) messageType:0];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"feedBackInvalid", @"hint", nil)];
             
             _textViewSuggestion.text = NSLocalizedStringFromTable(@"pleaseInputYourSuggestion", @"hint", nil);
             [_textViewSuggestion becomeFirstResponder];
@@ -255,9 +257,9 @@
     if (![self contactLengthCheck]) {
         
         if (_textViewContact.text.length <= 0) {
-            [self showMessage:NSLocalizedStringFromTable(@"pleaseLeftYourContactInformation", @"hint", nil) messageType:0];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"pleaseLeftYourContactInformation", @"hint", nil)];
         } else {
-            [self showMessage:NSLocalizedStringFromTable(@"contactsIsTooLong", @"hint", nil) messageType:0];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"contactsIsTooLong", @"hint", nil)];
         }
         
         [_textViewContact becomeFirstResponder];
@@ -269,7 +271,7 @@
         str = [str stringByReplacingOccurrencesOfString:@"\n" withString:@""];
         if (str.length <= 0) {
             
-            [self showMessage:NSLocalizedStringFromTable(@"contactInfoInvalid", @"hint", nil) messageType:0];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"contactInfoInvalid", @"hint", nil)];
             
             _textViewContact.text = NSLocalizedStringFromTable(@"pleaseLeftYourContactInformation", @"hint", nil);
             [_textViewContact becomeFirstResponder];

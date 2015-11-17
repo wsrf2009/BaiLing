@@ -33,7 +33,10 @@
 @property (nonatomic, retain) NSString *help;
 @property (nonatomic, retain) NSString *status;
 
+/** 解析event类 */
 + (EventIndClass *)parseEventIndJsonItem:(NSDictionary *)eventItem;
+
+/** 创建媒体播放信息，方便设备发出EventInd通知 */
 + (NSDictionary *)createMediaInfo:(NSString *)queryValue reply:(NSString *)replyValue;
 
 @end

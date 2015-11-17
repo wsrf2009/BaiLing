@@ -91,6 +91,7 @@ NSString const *MusicRelativeDir = @"songs";
 
 @implementation ToolBarPlayController
 
+/** 初始化的是播放控制界面的视图 */
 - (void)viewDidLoad {
 
     [super viewDidLoad];
@@ -111,6 +112,7 @@ NSString const *MusicRelativeDir = @"songs";
     [backgroundImage setImage:[UIImage imageNamed:@"menubackground.png"]];
     [backgroundImage setTranslatesAutoresizingMaskIntoConstraints:NO];
     
+    /* 滚动视图初始化－－－背景视图 */
     _scrollView = [[UIScrollView alloc] init];
     [_scrollView setBackgroundColor:[UIColor whiteColor]];
     _scrollView.alwaysBounceVertical = YES;
@@ -124,6 +126,7 @@ NSString const *MusicRelativeDir = @"songs";
     [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_scrollView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_scrollView)]];
     [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_scrollView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_scrollView)]];
 
+    /* 图片视图 */
     _imageViewIcon = [[UIImageView alloc] init];
     [_imageViewIcon setBackgroundColor:[UIColor clearColor]];
     [_imageViewIcon setImage:[UIImage imageNamed:@"playerdefault.png"]];
@@ -135,27 +138,32 @@ NSString const *MusicRelativeDir = @"songs";
     [_labelInImage setTextAlignment:NSTextAlignmentCenter];
     _labelInImage.translatesAutoresizingMaskIntoConstraints = NO;
     
+    /* 显示正在播放曲目 */
     _labelTitle = [[UILabel alloc] init];
     [_labelTitle setFont:[UIFont systemFontOfSize:17.0f]];
     [_labelTitle setNumberOfLines:2];
     [_labelTitle setTextAlignment:NSTextAlignmentLeft];
     _labelTitle.translatesAutoresizingMaskIntoConstraints = NO;
     
+    /* 前一首 */
     _buttonPrevious = [[UIButton alloc] init];
     [_buttonPrevious setBackgroundImage:[UIImage imageNamed:@"playerPrevious.png"] forState:UIControlStateNormal];
     [_buttonPrevious addTarget:self action:@selector(buttonPreviousClick) forControlEvents:UIControlEventTouchUpInside];
     _buttonPrevious.translatesAutoresizingMaskIntoConstraints = NO;
     
+    /* 播放/暂停 */
     _buttonPlayPause = [[UIButton alloc] init];
     [_buttonPlayPause addTarget:self action:@selector(button3Click) forControlEvents:UIControlEventTouchUpInside];
     [_buttonPlayPause setBackgroundImage:[UIImage imageNamed:@"playerPlay.png"] forState:UIControlStateNormal];
     _buttonPlayPause.translatesAutoresizingMaskIntoConstraints = NO;
     
+    /* 下一首 */
     _buttonNext = [[UIButton alloc] init];
     [_buttonNext setBackgroundImage:[UIImage imageNamed:@"playerNext.png"] forState:UIControlStateNormal];
     [_buttonNext addTarget:self action:@selector(button4Click) forControlEvents:UIControlEventTouchUpInside];
     _buttonNext.translatesAutoresizingMaskIntoConstraints = NO;
     
+    /* 音量减 */
     _buttonVolumeDown = [[UIButton alloc] init];
     [_buttonVolumeDown setTitleColor:[UIColor colorWithRed:0.0f green:122.0f/255.0f blue:1.0f alpha:1.0f] forState:UIControlStateNormal];
     [_buttonVolumeDown setTitleColor:[UIColor colorWithRed:0.0f green:122.0f/255.0f blue:1.0f alpha:1.0f] forState:UIControlStateNormal];
@@ -163,11 +171,13 @@ NSString const *MusicRelativeDir = @"songs";
     [_buttonVolumeDown addTarget:self action:@selector(buttonVolumeDownClick) forControlEvents:UIControlEventTouchUpInside];
     _buttonVolumeDown.translatesAutoresizingMaskIntoConstraints = NO;
     
+    /* 语音识别按钮 */
     _buttonVoiceSearch = [[UIButton alloc] init];
     [_buttonVoiceSearch setBackgroundImage:[UIImage imageNamed:@"voiceSearch.png"] forState:UIControlStateNormal];
     [_buttonVoiceSearch addTarget:self action:@selector(button1Click) forControlEvents:UIControlEventTouchUpInside];
     _buttonVoiceSearch.translatesAutoresizingMaskIntoConstraints = NO;
     
+    /* 音量加 */
     _buttonVolumeUp = [[UIButton alloc] init];
     [_buttonVolumeUp setTitleColor:[UIColor colorWithRed:0.0f green:122.0f/255.0f blue:1.0f alpha:1.0f] forState:UIControlStateNormal];
     [_buttonVolumeUp setTitleColor:[UIColor colorWithRed:0.0f green:122.0f/255.0f blue:1.0f alpha:1.0f] forState:UIControlStateNormal];
@@ -190,6 +200,7 @@ NSString const *MusicRelativeDir = @"songs";
 
     [_scrollView setFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
 
+    /* 页面布局 */
     CGFloat verticalSpace = CGRectGetHeight(_scrollView.frame)-HeightImageViewIcon-VerticalSpaceLabelTitleTopToImageViewIconBottom-HeightLabelTitle-HeightButtonPlayPause-VerticalSpaceButtonVoiceSearchTopToButtonPlayPauseBottom-HeightButtonVoiceSearch-VerticalSpaceSuperViewBottomToButtonVoiceSearchBottom;
     CGFloat distanceImageToSuperTop = 3*verticalSpace/5;
     CGFloat distanceButtonPlayPauseToLabelTitle = 2*verticalSpace/5;
@@ -229,6 +240,7 @@ NSString const *MusicRelativeDir = @"songs";
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
+/** 初始化界面底端显示的播放控制视图 */
 - (instancetype)initWithManager:(YYTXDeviceManager *)manager {
     
     NSLog(@"%s isMainThread:%@", __func__, [NSThread isMainThread]?@"YES":@"NO");
@@ -240,16 +252,19 @@ NSString const *MusicRelativeDir = @"songs";
         _playList = [[NSMutableArray alloc] init];
         playIndex = -1;
         NSLog(@"%s DeviceEventPlayerStart:%@", __func__, DeviceEventPlayerStart);
+        /* 接收来自Device的通知：开始播放、停止播放、暂停播放、恢复播放 */
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(notificationForDeviceStartToPlay:) name:DeviceEventPlayerStart object:_deviceManager.device];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(notificationForDeviceStopToPlay:) name:DeviceEventPlayerStop object:_deviceManager.device];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(notificationForDevicePauseToPlay:) name:DeviceEventPlayerPause object:_deviceManager.device];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(notificationForDeviceResumeToPlay:) name:DeviceEventPlayerResume object:_deviceManager.device];
         
+        /* 语音识别按钮 */
         button1 = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT)];
         [button1 setBackgroundImage:[UIImage imageNamed:@"voice_search.png"] forState:UIControlStateNormal];
         [button1 addTarget:self action:@selector(button1Click) forControlEvents:UIControlEventTouchUpInside];
         item1 = [[UIBarButtonItem alloc] initWithCustomView:button1];
         
+        /* 调出播放控制界面的按钮，也在这个按钮上显示当前正在播放的曲目 */
         button2 = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width-3*BUTTON_WIDTH-5*12, BUTTON_HEIGHT)];
         [button2.titleLabel setFont:[UIFont systemFontOfSize:15.0f]];
         [button2.titleLabel setNumberOfLines:2];
@@ -257,11 +272,13 @@ NSString const *MusicRelativeDir = @"songs";
         [button2 addTarget:self action:@selector(button2Click) forControlEvents:UIControlEventTouchUpInside];
         item2 = [[UIBarButtonItem alloc] initWithCustomView:button2];
         
+        /* 播放/暂停按钮 */
         button3 = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT)];
         [button3 setBackgroundImage:[UIImage imageNamed:@"playerPlay.png"] forState:UIControlStateNormal];
         [button3 addTarget:self action:@selector(button3Click) forControlEvents:UIControlEventTouchUpInside];
         item3 = [[UIBarButtonItem alloc] initWithCustomView:button3];
         
+        /* 播放下一首 */
         button4 = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT)];
         [button4 setBackgroundImage:[UIImage imageNamed:@"playerNext.png"] forState:UIControlStateNormal];
         [button4 addTarget:self action:@selector(button4Click) forControlEvents:UIControlEventTouchUpInside];
@@ -285,11 +302,13 @@ NSString const *MusicRelativeDir = @"songs";
 
 #pragma button click methods
 
+/** 语音识别按钮被点击 */
 - (void)button1Click {
     
     [button1 setEnabled:NO];
     [_buttonVoiceSearch setEnabled:NO];
     
+    /* 1秒后再enable该按钮，防止重复点击 */
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         [button1 setEnabled:YES];
         [_buttonVoiceSearch setEnabled:YES];
@@ -333,6 +352,7 @@ NSString const *MusicRelativeDir = @"songs";
     [recognizerVC startWithParams:paramsObject];
 }
 
+/** 调出播放控制界面 */
 - (void)button2Click {
     
     [button2 setEnabled:NO];
@@ -348,18 +368,20 @@ NSString const *MusicRelativeDir = @"songs";
     }
 }
 
+/** 播放/暂停 */
 - (void)button3Click {
 
     [button3 setEnabled:NO];
     [_buttonPlayPause setEnabled:NO];
-        
+    
+    /* 一秒后再enable该按钮 */
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         [button3 setEnabled:YES];
         [_buttonPlayPause setEnabled:YES];
     });
     
     if (nil == _playList || _playList.count <= 0) {
-        
+        /* 播放列表为空的时候 */
         if (DevicePlayerPlaying == _playerState) {
             [self playerPause];
         } else if (DevicePlayerPaused == _playerState) {
@@ -376,8 +398,8 @@ NSString const *MusicRelativeDir = @"songs";
     } else if (DevicePlayerPaused == _playerState) {
         [self playerResume];
     } else if (DevicePlayerStoped == _playerState) {
-        if (_playList.count > 0) {
-            if (playIndex < 0 || playIndex > _playList.count-1) {
+        if (_playList.count > 0) { // 播放列表内容不为空
+            if (playIndex < 0 || playIndex > _playList.count-1) { // 传入的播放偏移量超出列表的内容数量时
                 playIndex = 0;
             }
             
@@ -386,6 +408,7 @@ NSString const *MusicRelativeDir = @"songs";
     }
 }
 
+/** 播放前一首 */
 - (void)buttonPreviousClick {
     
     [_buttonPrevious setEnabled:NO];
@@ -395,7 +418,7 @@ NSString const *MusicRelativeDir = @"songs";
     });
     
     if (nil == _playList || _playList.count <= 0) {
-        
+        /* 播放列表为空 */
         if (DevicePlayerPlaying == _playerState) {
             [self playerPause];
         } else if (DevicePlayerPaused == _playerState) {
@@ -410,12 +433,14 @@ NSString const *MusicRelativeDir = @"songs";
     playIndex--;
 
     if (playIndex < 0 || playIndex > _playList.count-1) {
+        /* 传入的播放偏移量超出了播放列表内容的长度 */
         playIndex = _playList.count-1;
     }
     
     [self playAudioAtIndex:playIndex];
 }
 
+/** 播放下一首 */
 - (void)button4Click {
     
     NSLog(@"%s", __func__);
@@ -429,7 +454,7 @@ NSString const *MusicRelativeDir = @"songs";
     });
     
     if (nil == _playList || _playList.count <= 0) {
-        
+        /* 播放列表为空 */
         if (DevicePlayerPlaying == _playerState) {
             [self playerPause];
         } else if (DevicePlayerPaused == _playerState) {
@@ -448,6 +473,7 @@ NSString const *MusicRelativeDir = @"songs";
     
     playIndex++;
     if (playIndex >= _playList.count) {
+        /* 传入的播放偏移量超出了播放列表内容的长度 */
         playIndex = 0;
     }
     
@@ -455,7 +481,7 @@ NSString const *MusicRelativeDir = @"songs";
 }
 
 #pragma device player methods
-
+/** 暂停设备的播放 */
 - (void)playerPause {
     
     [_deviceManager.device pausePlay:^(YYTXDeviceReturnCode code) {
@@ -479,6 +505,7 @@ NSString const *MusicRelativeDir = @"songs";
     }];
 }
 
+/** 恢复设备的播放 */
 - (void)playerResume {
 
     [_deviceManager.device resumePlay:^(YYTXDeviceReturnCode code) {
@@ -502,6 +529,7 @@ NSString const *MusicRelativeDir = @"songs";
     }];
 }
 
+/** 播放前一首 */
 - (void)playPrevious {
     
     [_deviceManager.device playPrevious:^(YYTXDeviceReturnCode code) {
@@ -523,6 +551,7 @@ NSString const *MusicRelativeDir = @"songs";
     }];
 }
 
+/** 播放下一首 */
 - (void)playNext {
     
     NSLog(@"%s", __func__);
@@ -546,9 +575,14 @@ NSString const *MusicRelativeDir = @"songs";
     }];
 }
 
+/** 
+ 让设备播放网络资源
+ @param name 播放曲目的名称
+ @param url 播放曲目的资源地址
+ */
 - (void)playAudio:(NSString *)name netAddress:(NSString *)url {
         
-    [_deviceManager.device playFileTitle:name phoneID:[SystemToolClass IPAddress] url:url completionBlock:^(YYTXDeviceReturnCode code) {
+    [_deviceManager.device playFileTitle:name url:url completionBlock:^(YYTXDeviceReturnCode code) {
             
         if (YYTXDeviceIsAbsent == code) {
                 
@@ -569,11 +603,12 @@ NSString const *MusicRelativeDir = @"songs";
     }];
 }
 
+/** 停止播放 */
 - (void)stopPlaying {
-
     [_deviceManager.device stopPlay:nil];
 }
 
+/** 播放列表中偏移量为index的曲目 */
 - (void)playAudioAtIndex:(NSUInteger)index {
     
     NSLog(@"%s", __func__);
@@ -582,6 +617,7 @@ NSString const *MusicRelativeDir = @"songs";
     
     readyToPlay = [_playList objectAtIndex:index];
     
+    /* 反馈上层，即将要播出的曲目 */
     if ([_delegate respondsToSelector:@selector(indexOfPlaying:programTitle:)]) {
         [_delegate indexOfPlaying:playIndex programTitle:readyToPlay.title];
     }
@@ -595,6 +631,7 @@ NSString const *MusicRelativeDir = @"songs";
     [self playAudio:readyToPlay.title netAddress:readyToPlay.url];
 }
 
+/** 音量减 */
 - (void)buttonVolumeDownClick {
 
     [_buttonVolumeDown setEnabled:NO];
@@ -605,6 +642,7 @@ NSString const *MusicRelativeDir = @"songs";
     [_deviceManager.device setVolumeDown:nil];
 }
 
+/** 音量加 */
 - (void)buttonVolumeUpClick {
     
     [_buttonVolumeUp setEnabled:NO];
@@ -617,6 +655,7 @@ NSString const *MusicRelativeDir = @"songs";
 
 #pragma mark - BDRecognizerViewDelegate
 
+/** 百度语音识别结果回调 */
 - (void)onEndWithViews:(BDRecognizerViewController *)aBDRecognizerViewController withResults:(NSArray *)aResults; {
 
     if ([[[[BDVoiceRecognitionClient sharedInstance] getRecognitionPropertyList] objectAtIndex:0] integerValue] != EVoiceRecognitionPropertyInput) {
@@ -633,6 +672,7 @@ NSString const *MusicRelativeDir = @"songs";
         NSMutableArray *audioResultData = (NSMutableArray *)aResults;
         NSMutableString *tmpString = [[NSMutableString alloc] initWithString:@""];
         
+        /* 获取返回的语意字符串 */
         for (int i=0; i < [audioResultData count]; i++) {
             [tmpString appendFormat:@"%@\r\n",[audioResultData objectAtIndex:i]];
         }
@@ -642,9 +682,9 @@ NSString const *MusicRelativeDir = @"songs";
         NSLog(@"%s tmpString:%@, deviceOpenId:%@", __func__, tmpString, deviceOpenId);
         
         if ((nil == deviceOpenId) || (deviceOpenId.length < 1)) {
-            
+            /* 设备的OpenId尚未获取到 */
             NSString *message = NSLocalizedStringFromTable(@"getDeviceOpenIdFailed", @"hint", nil);
-            
+            /* 给用户弹出提示 */
             if ([SystemToolClass systemVersionIsNotLessThan:@"8.0"]) {
                 UIAlertController *alertController = [UIAlertController alertControllerWithTitle:[SystemToolClass appName] message:message preferredStyle:UIAlertControllerStyleAlert];
                 [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedStringFromTable(@"ok", @"hint", nil) style:UIAlertActionStyleDefault handler:nil]];
@@ -660,27 +700,30 @@ NSString const *MusicRelativeDir = @"songs";
             return;
         }
         
+        /* 请求宇音天下后台解析百度的语意结果 */
         [_deviceManager.serverService requestAnalysis:[tmpString dataUsingEncoding:NSUTF8StringEncoding]  deviceOpenId:_deviceManager.device.userData.generalData.openid requestFinish:^(NSDictionary *root) {
 
-            if (nil == root) {
-                [self showAnalysisServerAbnormal];
+            if (nil == root) { // 返回数据无效
+                [self showAnalysisServerAbnormal]; // 宇音天下后台解析服务器异常
                 return;
             }
             
+            /* 解析返回的结果 */
             YYTXJsonObject *jsonRequest = [[YYTXJsonObject alloc] init];
             NSDictionary *result = [jsonRequest getResultValueFromRootObject:root];
             NSDictionary *params;
             if (nil == result) {
-                [self showAnalysisServerAbnormal];
+                [self showAnalysisServerAbnormal]; // 无result，认为服务器异常
                 return;
             } else {
                 params = [jsonRequest getParamsValueFromRootObject:result];
                 if (nil == params) {
-                    [self showAnalysisServerAbnormal];
+                    [self showAnalysisServerAbnormal]; // 无params，认为服务器异常
                     return;
                 }
             }
 
+            /* 从params中解析出mediaInfo */
             EventIndClass *mediaInfo = [EventIndClass parseEventIndJsonItem:params];
             if (nil != mediaInfo.query) {
                 
@@ -694,6 +737,7 @@ NSString const *MusicRelativeDir = @"songs";
                     [_labelTitle setText:content];
                 }
             }
+            /* 发送解析出的结果给设备播放 */
             [_deviceManager.device sendAnalysisData:result completionBlock:^(YYTXDeviceReturnCode code) {
                     
                     if (YYTXDeviceIsAbsent == code) {
@@ -723,6 +767,7 @@ NSString const *MusicRelativeDir = @"songs";
     }
 }
 
+/** 给出设备未连接的提示 */
 - (void)showStatusNotConnected {
     
     NSLog(@"%s", __func__);
@@ -732,6 +777,7 @@ NSString const *MusicRelativeDir = @"songs";
     });
 }
 
+/** 给出播放失败的提示 */
 - (void)showStatusPlayingFailed {
     
     NSLog(@"%s", __func__);
@@ -741,6 +787,7 @@ NSString const *MusicRelativeDir = @"songs";
     });
 }
 
+/** 给出播放资源的url是空的提示 */
 - (void)showStatusUrlIsEmpty {
     
     NSLog(@"%s", __func__);
@@ -750,6 +797,7 @@ NSString const *MusicRelativeDir = @"songs";
     });
 }
 
+/** 给出播放列表是空的提示 */
 - (void)showStatusPlayListIsEmpty {
     
     NSLog(@"%s", __func__);
@@ -761,6 +809,7 @@ NSString const *MusicRelativeDir = @"songs";
     });
 }
 
+/** 更改UI－－－正在播放 */
 - (void)showStatusIsPlaying {
     
     NSLog(@"%s", __func__);
@@ -771,6 +820,7 @@ NSString const *MusicRelativeDir = @"songs";
     });
 }
 
+/** 更改UI－－－没有播放 */
 - (void)showStatusIsNotPlaying {
     
     NSLog(@"%s", __func__);
@@ -781,6 +831,7 @@ NSString const *MusicRelativeDir = @"songs";
     });
 }
 
+/** 更改UI－－－播放停止 */
 - (void)showStatusPlayerStopped {
     dispatch_async(dispatch_get_main_queue(), ^{
         [button2 setTitle:NSLocalizedStringFromTable(@"playerStopped", @"hint", nil) forState:UIControlStateNormal];
@@ -788,6 +839,7 @@ NSString const *MusicRelativeDir = @"songs";
     });
 }
 
+/** 给出识别服务器异常的提示 */
 - (void)showRecognitionServerAbnormal {
     dispatch_async(dispatch_get_main_queue(), ^{
         
@@ -796,6 +848,7 @@ NSString const *MusicRelativeDir = @"songs";
     });
 }
 
+/** 给出解析服务器异常的提示 */
 - (void)showAnalysisServerAbnormal {
     dispatch_async(dispatch_get_main_queue(), ^{
         
@@ -804,6 +857,7 @@ NSString const *MusicRelativeDir = @"songs";
     });
 }
 
+/** 接收Device开始播放的通知 */
 - (void)notificationForDeviceStartToPlay:(NSNotification *)sender {
     NSDictionary *userInfo = [sender userInfo];
     NSString *query = [userInfo objectForKey:JSONITEM_EVENTIND_QUERY];
@@ -820,6 +874,7 @@ NSString const *MusicRelativeDir = @"songs";
     [self showStatusIsPlaying];
 }
 
+/** 接收Device停止播放的通知 */
 - (void)notificationForDeviceStopToPlay:(NSNotification *)sender {
     NSDictionary *userInfo = [sender userInfo];
     NSString *query = [userInfo objectForKey:JSONITEM_EVENTIND_QUERY];
@@ -837,6 +892,7 @@ NSString const *MusicRelativeDir = @"songs";
     [self showStatusPlayerStopped];
 }
 
+/** 接收Device暂停播放的通知 */
 - (void)notificationForDevicePauseToPlay:(NSNotification *)sender {
     NSDictionary *userInfo = [sender userInfo];
     NSString *query = [userInfo objectForKey:JSONITEM_EVENTIND_QUERY];
@@ -853,6 +909,7 @@ NSString const *MusicRelativeDir = @"songs";
     [self showStatusIsNotPlaying];
 }
 
+/** 接收Device恢复播放的通知 */
 - (void)notificationForDeviceResumeToPlay:(NSNotification *)sender {
     NSDictionary *userInfo = [sender userInfo];
     NSString *query = [userInfo objectForKey:JSONITEM_EVENTIND_QUERY];

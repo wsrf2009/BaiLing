@@ -1349,7 +1349,7 @@
                                 </tableViewCellContentView>
                                 <animations/>
                                 <color key="backgroundColor" red="0.90196079019999997" green="0.90196079019999997" blue="0.90196079019999997" alpha="1" colorSpace="calibratedRGB"/>
-                                <inset key="separatorInset" minX="70" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                <inset key="separatorInset" minX="15" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 <connections>
                                     <outlet property="imageViewType" destination="hLt-te-E3W" id="YYq-DI-bfX"/>
                                     <outlet property="lableDetail" destination="2fU-gh-rRr" id="02n-IW-0wS"/>
@@ -1413,7 +1413,7 @@
                                 </tableViewCellContentView>
                                 <animations/>
                                 <color key="backgroundColor" red="0.90196079019999997" green="0.90196079019999997" blue="0.90196079019999997" alpha="1" colorSpace="calibratedRGB"/>
-                                <inset key="separatorInset" minX="70" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                <inset key="separatorInset" minX="15" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 <connections>
                                     <outlet property="imageViewType" destination="ltQ-YI-r6e" id="D2D-fx-oqS"/>
                                     <outlet property="labelDate" destination="K9x-bN-3si" id="esX-Ek-XLd"/>
@@ -1504,7 +1504,7 @@
                                 </tableViewCellContentView>
                                 <animations/>
                                 <color key="backgroundColor" red="0.90196079019999997" green="0.90196079019999997" blue="0.90196079019999997" alpha="1" colorSpace="calibratedRGB"/>
-                                <inset key="separatorInset" minX="70" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                <inset key="separatorInset" minX="15" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 <connections>
                                     <outlet property="dateType" destination="fEs-qT-Vp9" id="Ke5-vg-kpW"/>
                                     <outlet property="imageViewType" destination="MDI-1f-Dtj" id="GzP-cK-Ums"/>

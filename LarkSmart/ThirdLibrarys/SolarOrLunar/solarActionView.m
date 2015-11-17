@@ -488,7 +488,7 @@
             break;
     }
     
-    NSLog(@"%s indexYear:%d indexMonth:%d indexDay:%d", __func__, indexYear, indexMonth, indexDay);
+    NSLog(@"%s indexYear:%@ indexMonth:%@ indexDay:%@", __func__, @(indexYear), @(indexMonth), @(indexDay));
     
     NSString *year=[Date_string setYearInt:arrYear[indexYear]];
     NSString *month =[Date_string setMonthInt:arrMonthList[indexMonth]];
@@ -568,7 +568,7 @@
                 leapNumnber = 12;
             }
             
-            NSLog(@"%s %d", __func__, leapNumnber);
+            NSLog(@"%s %@", __func__, @(leapNumnber));
             for (int i=0; i<strMonth.length; i++) {
                 
                 [arrMonthList  addObject:MonthReferList[i]];

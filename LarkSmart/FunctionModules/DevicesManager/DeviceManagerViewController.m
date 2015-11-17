@@ -12,25 +12,19 @@
 #import "UIImageView+WebCache.h"
 #import "BoxDatabase.h"
 #import "DeviceConfigViewController.h"
-#import "MJRefresh.h"
 #import "JVFloatingDrawerViewController.h"
 #import "JVFloatingDrawerSpringAnimator.h"
 #import "UICustomAlertView.h"
+#import "QXToast.h"
 
 #define EXPAND          30589
 #define NOTEXPAND       30245
 
 @interface DeviceManagerViewController ()
 {
-
     NSMutableArray *productsInfo;
-
-    MJRefreshAutoNormalFooter *footer;
-    
     UIBarButtonItem *buttonRefresh;
-
     dispatch_semaphore_t semaphoreForInsertOrDeleteRow;
-    
     NSLock *refreshLock;
 }
 
@@ -56,23 +50,16 @@
 
     [self hideEmptySeparators:self.tableView];
 
-    productsInfo = [BoxDatabase getItemsFromProducsInfo];
-
-    footer = [MJRefreshAutoNormalFooter footerWithRefreshingTarget:nil refreshingAction:nil];
-    [footer setTitle:NSLocalizedStringFromTable(@"noDeviceFound", @"hint", nil) forState:MJRefreshStateNoMoreData];
-    [footer setTitle:NSLocalizedStringFromTable(@"refreshingDeviceList", @"hint", nil) forState:MJRefreshStateRefreshing];
-    self.tableView.footer = footer;
+    productsInfo = [BoxDatabase getItemsFromProducsInfo]; // 从数据库中获取出产品信息列表
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
-    NSLog(@"%s", __func__);
-    
     self.deviceManager.delegate = self;
-    [self.deviceManager searchDeviceInHighFreq];
+    [self.deviceManager searchDeviceInHighFreq]; // 进入该界面后以较高频率搜索设备
     
-    [self refreshDeviceList];
+    [self refreshDeviceList]; // 刷新设备列表
     
     [self.navigationController setNavigationBarHidden:NO];
     [self.navigationController setToolbarHidden:NO];
@@ -83,27 +70,15 @@
 
     NSLog(@"%s", __func__);
     
-    [self.deviceManager searchDeviceInLowFreq];
-//    [self.deviceManager pauseSearchDevice];
+    [self.deviceManager searchDeviceInLowFreq]; // 离开该界面后以较低的频率搜索设备
     self.deviceManager.delegate = nil;
 }
 
 #pragma UITableView DataSource
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    NSLog(@"%s", __func__);
-    
     NSUInteger count = [self.deviceManager deviceCount];
-    
-    if (count <= 0) {
-        
-        [footer setState:MJRefreshStateNoMoreData];
-        [self.tableView.footer setHidden:NO];
-    } else {
-        
-        [self.tableView.footer setHidden:YES];
-    }
-    
+
     [self.navigationItem setTitle:[NSString stringWithFormat:NSLocalizedStringFromTable(@"deviceCount", @"hint", nil), (unsigned long)count]];
     
     return count;
@@ -119,15 +94,16 @@
     }
         
     if (nil == device.deviceIconUrl) {
+        /* 若设备的icon url为空则在产品信息列表中找到对应产品ID的icon url */
         for (NSDictionary *product in productsInfo) {
                 
             if ([device.userData.deviceInfo.productId isEqualToString:[product objectForKey:PRODUCTINFO_PRODUCTID]]) {
                 device.deviceIconUrl = [product objectForKey:PRODUCTINFO_ICON];
-                [cell.imageViewPicture sd_setImageWithURL:[NSURL URLWithString:device.deviceIconUrl] placeholderImage:[UIImage imageNamed:@"default_small.png"]];
+                [cell.imageViewPicture sd_setImageWithURL:[NSURL URLWithString:device.deviceIconUrl] placeholderImage:[UIImage imageNamed:@"default_small.png"]]; // 从网络获取设备的icon
             }
         }
     } else {
-        [cell.imageViewPicture sd_setImageWithURL:[NSURL URLWithString:device.deviceIconUrl] placeholderImage:[UIImage imageNamed:@"default_small.png"]];
+        [cell.imageViewPicture sd_setImageWithURL:[NSURL URLWithString:device.deviceIconUrl] placeholderImage:[UIImage imageNamed:@"default_small.png"]]; // 从网络获取设备的icon
     }
         
     [cell.labelDeviceName setText:device.userData.generalData.nickName];
@@ -149,10 +125,11 @@
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
     if (self.isAnimating) {
+        /* 如果当前界面还未完成跳转，则忽略此次点击 */
         return;
     }
 
-    DeviceDataClass *device = [self.deviceManager deviceAtIndex:indexPath.row];
+    DeviceDataClass *device = [self.deviceManager deviceAtIndex:indexPath.row]; // 获取出对应的device
 
     [self showBusying:nil];
     
@@ -163,6 +140,7 @@
         [[UIApplication sharedApplication] endIgnoringInteractionEvents];
     });
     
+    /* 播放“已连接”提示 */
     [device playFileId:devicePromptFileIdConnected completionBlock:^(YYTXDeviceReturnCode code) {
         
         if (YYTXOperationSuccessful == code) {
@@ -172,6 +150,7 @@
             device.isSelect = YES;
             self.deviceManager.device = device;
 
+            /* 跳转到主菜单界面 */
             JVFloatingDrawerViewController *drawerViewController = [[JVFloatingDrawerViewController alloc] init];
             NSLog(@"%s isMainThread:%@", __func__, [NSThread isMainThread]?@"YES":@"NO");
             drawerViewController.deviceManager = self.deviceManager;
@@ -182,7 +161,7 @@
                 }
             });
         } else {
-            [self showMessage:NSLocalizedStringFromTable(@"connectionFailed", @"hint", nil) messageType:0];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"connectionFailed", @"hint", nil)];
         }
     }];
 }
@@ -193,6 +172,7 @@
     [button setEnabled:YES];
 }
 
+/** 弹出更改设备昵称的弹窗 */
 - (IBAction)buttonClick_ChangeNickName:(UIButton *)button {
 
     NSLog(@"%s row index:%ld", __func__, (long)button.tag);
@@ -247,16 +227,18 @@
 - (void)device:(DeviceDataClass *)device changeNickName:(NSString *)newName indexPath:(NSIndexPath *)indexPath {
     
     if (newName.length > MAXNICKNAMELENGTH) {
+        /* 新的名字长度超过了允许的最大长度 */
         NSString *message1 = NSLocalizedStringFromTable(@"changeNickNameFailed", @"hint", nil);
         NSString *message2 = [NSString stringWithFormat: NSLocalizedStringFromTable(@"maxNicknameLenth%d", @"hint", nil), MAXNICKNAMELENGTH];
         NSString *message = [NSString stringWithFormat:@"%@，%@", message1, message2];
-        [self showMessage:message messageType:0];
+        [QXToast showMessage:message];
         
         return;
     }
     
     device.userData.generalData.nickName = newName;
     
+    /* 修改昵称 */
     [device modifyGeneral:@{DevicePlayFileWhenOperationSuccessful:devicePromptFileIdModifySuccessful, DevicePlayFileWhenOperationFailed:devicePromptFileIdModifyFailed} completionBlock:^(YYTXDeviceReturnCode code) {
         
         if (YYTXOperationSuccessful == code) {
@@ -288,6 +270,7 @@
     [device playFileId:devicePromptFileIdIMHere completionBlock:nil];
 }
 
+/** 跳转到添加设备－－－FSK界面 */
 - (void)buttonClick_AddDevice:(id)sender {
     
     if (self.isAnimating) {
@@ -304,25 +287,22 @@
     
 }
 
-- (void)enableRefreshList {
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-
-        [buttonRefresh setEnabled:YES];
-    });
-}
-
+/** 刷新设备列表 */
 - (void)refreshDeviceList {
 
     if (![refreshLock tryLock]) {
         return;
     }
     
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [buttonRefresh setEnabled:NO];
-        [NSTimer scheduledTimerWithTimeInterval:3.0f target:self selector:@selector(enableRefreshList) userInfo:nil repeats:NO];
-        [footer setState:MJRefreshStateRefreshing];
+    [buttonRefresh setEnabled:NO];
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [buttonRefresh setEnabled:YES];
+        if ([self.deviceManager deviceCount] <= 0) {
+            [QXToast showMessage:NSLocalizedStringFromTable(@"noDeviceFound", @"hint", nil)];
+        }
     });
+    
 
     [self.deviceManager clearDevices];
         
@@ -333,21 +313,15 @@
     [refreshLock unlock];
 }
 
+/** 设备列表有更新 */
 - (void)deviceListUpdate {
-    
-    NSLog(@"%s 1", __func__);
 
     dispatch_semaphore_wait(semaphoreForInsertOrDeleteRow, DISPATCH_TIME_FOREVER);
-    
-    NSLog(@"%s 2", __func__);
-    
+
     dispatch_async(dispatch_get_main_queue(), ^{
-        
-        NSLog(@"%s 3", __func__);
+
         [self.tableView reloadData];
         dispatch_semaphore_signal(semaphoreForInsertOrDeleteRow);
-        
-        NSLog(@"%s 4", __func__);
     });
 }
 

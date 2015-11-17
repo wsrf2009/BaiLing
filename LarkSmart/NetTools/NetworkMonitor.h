@@ -18,9 +18,15 @@
 @interface NetworkMonitor : NSObject
 @property (nonatomic, retain) id <NetworkMonitorDelegate> delegate;
 
+/** 手机当前是否已使用WIFI */
 + (BOOL)isEnableWIFI;
+
 - (instancetype)initWithDelegate:(id)delegate;
+
+/** 获取手机当前连接到的SSID */
 + (NSString *)currentWifiSSID;
+
+/** 检查手机当前的网络连接状态 */
 - (void)checkNetworkStatus;
 
 @end

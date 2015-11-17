@@ -37,7 +37,7 @@
     [super viewWillDisappear:animated];
     self.deviceManager.delegate = nil;
     
-    [self.deviceManager.device stopPlay:nil];
+    [self.deviceManager.device stopPlay:nil]; // 要离开此界面，则停止播放正在试听的起床闹铃
 }
 
 - (void)didReceiveMemoryWarning {
@@ -66,14 +66,14 @@
     return cell;
 }
 
--(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
-{
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     NSLog(@"%s", __func__);
     
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
     NSInteger row = indexPath.row;
 
+    /* 选中起床闹铃 */
     _selectRow = row;
     _getupSet.ringPath = [AlarmRingClass getPathViaIndex:row];
     _getupSet.ringType = RING_TYPE_LOCAL;
@@ -82,6 +82,7 @@
 
 #pragma ring test
 
+/** 试听起床闹铃 */
 - (IBAction)buttonClick_test:(UIButton *)button {
     
     NSLog(@"%s row:%ld", __func__, (long)button.tag);

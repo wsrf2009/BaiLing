@@ -25,7 +25,10 @@
 
 - (NSInteger)getIndexAccrodingToVolumeTitle:(NSString *)title;
 - (NSString *)getVolumeTitleAccrodingToIndex:(NSInteger)index;
+
+/** 解析勿扰控制 */
 - (BOOL)parseUndisturbedControl:(NSDictionary *)undisturbedControlItem;
+
 - (NSDictionary *)modify;
 
 @end

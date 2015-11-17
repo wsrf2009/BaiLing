@@ -38,9 +38,7 @@
 
     [_webServer startWithPort:[[SystemToolClass httpServerPort] integerValue]  bonjourName:nil];
     NSLog(@"Visit %@ in your web browser", _webServer.serverURL);
-    
-    
-    
+
     return YES;
 }
 

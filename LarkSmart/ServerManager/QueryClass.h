@@ -16,6 +16,7 @@
 @property (nonatomic, retain) NSString *xmlyHelpUrl;
 @property (nonatomic, retain) NSString *weiXinUrl;
 
+/** 从data中解析出urlBuy，urlHlep，urlProduct，xmlyHelpUrl，weiXinUrl */
 + (QueryClass *)parseQuery:(NSData *)data;
 
 @end

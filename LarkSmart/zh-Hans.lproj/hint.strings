@@ -52,7 +52,7 @@
 "addDevice" = "添加设备";
 "pullDownTorefresh" = "下拉刷新设备列表";
 "gettingDeviceList" = "正在获取设备列表...";
-"noDeviceFound" = "没有扫描到设备哦，赶快去添加吧~";
+"noDeviceFound" = "没有扫描到设备哦，点击下方的“添加设备”去添加吧~";
 "deviceCount" = "我的设备(%lu)";
 "changeNickname" = "更改昵称";
 "maxNicknameLenth%d" = "昵称的长度不可超过%d";

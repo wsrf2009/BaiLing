@@ -32,6 +32,7 @@
     [_activityInd setColor:[UIColor grayColor]];
     [self.navigationController.navigationBar addSubview:_activityInd];
     
+    /* 是否自动弹出喜马拉雅帮助界面 */
     _isAutoPop = [BoxDatabase autoPopHimalayaHelper];
     if (_isAutoPop) {
         [_buttonPopHelper setSelected:NO];
@@ -45,7 +46,7 @@
     
     [self.navigationItem setTitle:NSLocalizedStringFromTable(@"himalayaHelp", @"hint", nil)];
     
-    _finalUrl = [BoxDatabase getUrlWithName:DT_ITEM_XMLYHELPURL];
+    _finalUrl = [BoxDatabase getUrlWithName:DT_ITEM_XMLYHELPURL]; // 喜马拉雅帮助界面的url
     
     [self getWebPage];
 }
@@ -65,6 +66,7 @@
     [super didReceiveMemoryWarning];
 }
 
+/** 加载web页面 */
 - (void)getWebPage {
     NSURLRequest *request =[NSURLRequest requestWithURL:[NSURL URLWithString:_finalUrl]];
     
@@ -72,6 +74,8 @@
     
     [_webview loadRequest:request];
 }
+
+#pragma UIWebViewDelegate
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
     

@@ -137,7 +137,7 @@
 
 - (BOOL)contentLengthCheck {
     NSInteger length = _textViewContent.text.length;
-    NSString *str = [NSString stringWithFormat:@"%d/%d", length, MAXCONTENTLENGTH];
+    NSString *str = [NSString stringWithFormat:@"%@/%@", @(length), @MAXCONTENTLENGTH];
     NSRange range = [str rangeOfString:@"/"];
     NSLog(@"%s range:%@", __func__, NSStringFromRange(range));
     NSRange range1 = NSMakeRange(0, range.location);
@@ -171,9 +171,9 @@
     if (![self contentLengthCheck]) {
         
         if (_remind.content.length <= 0) {
-            [self showMessage:NSLocalizedStringFromTable(@"theRemindIsEmpty", @"hint", nil) messageType:0];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"theRemindIsEmpty", @"hint", nil)];
         } else {
-            [self showMessage:NSLocalizedStringFromTable(@"remindIsTooLong", @"hint", nil) messageType:0];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"remindIsTooLong", @"hint", nil)];
         }
         
         [_textViewContent becomeFirstResponder];
@@ -189,7 +189,7 @@
     if (str.length <= 0) {
         
         [_textViewContent becomeFirstResponder];
-        [self showMessage:NSLocalizedStringFromTable(@"theRemindInvalid", @"hint", nil) messageType:0];
+        [QXToast showMessage:NSLocalizedStringFromTable(@"theRemindInvalid", @"hint", nil)];
         return NO;
     } else {
         _remind.content = str;
@@ -198,7 +198,7 @@
     NSString *current = [[NSDate date] getDateString];
     if ([_remind.date compare:current] == NSOrderedAscending) {
         
-        [self showMessage:NSLocalizedStringFromTable(@"theDateOfRemindIsInvalid", @"hint", nil) messageType:0];
+        [QXToast showMessage:NSLocalizedStringFromTable(@"theDateOfRemindIsInvalid", @"hint", nil)];
         
         return NO;
     }
@@ -320,7 +320,7 @@
         /* 检查是否以包含空格 */
         NSRange range1 = [textView.text rangeOfString:@" "];
         if (NSNotFound != range1.location) {
-            [self showMessage:NSLocalizedStringFromTable(@"invalidCharacterOrFormatForRemindInfo", @"hint", nil) messageType:0];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"invalidCharacterOrFormatForRemindInfo", @"hint", nil)];
             textView.text = [textView.text stringByReplacingOccurrencesOfString:@" " withString:@""];
             [self contentLengthCheck];
             return;
@@ -345,7 +345,7 @@
         /* 检查是否包含回车符 */
         NSRange range2 = [textView.text rangeOfString:@"\n"];
         if (NSNotFound != range2.location) {
-            [self showMessage:NSLocalizedStringFromTable(@"invalidCharacterOrFormatForRemindInfo", @"hint", nil) messageType:0];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"invalidCharacterOrFormatForRemindInfo", @"hint", nil)];
             textView.text = [textView.text stringByReplacingOccurrencesOfString:@"\n" withString:@""];
             [self contentLengthCheck];
             return;

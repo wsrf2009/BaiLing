@@ -28,6 +28,7 @@
 + (NSArray *)modifyBirthday:(BirthdayClass *)birthday;
 + (NSArray *)deleteBirthdayWithBirthdayId:(NSInteger)birthdayId;
 
+/** 解析生日闹铃，将结果存放于list中 */
 + (BOOL)parseBirthdays:(NSArray *)birthdaysItem birthdayList:(NSMutableArray *)list;
 
 @end

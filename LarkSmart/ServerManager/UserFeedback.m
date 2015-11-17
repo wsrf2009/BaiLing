@@ -54,14 +54,13 @@ NSString *const jsonItemKeyYunBaoOpenId = @"yunbao_openid";
         return nil;
     }
     YYTXJsonObject *object = [[YYTXJsonObject alloc] init];
-    NSDictionary *errItem = [object getErrorValueFromRootObject:root];
-    
+    NSDictionary *errItem = [object getErrorValueFromRootObject:root]; // 获取ErrorItem
     if (nil == errItem) {
         return nil;
     }
     
-    NSNumber *codeItem = [object getCodeValueFromErrorObject:errItem];
-    NSString *message = [object getMessageValueFromErrorObject:errItem];
+    NSNumber *codeItem = [object getCodeValueFromErrorObject:errItem]; // 从ErrorItem中获取错误码
+    NSString *message = [object getMessageValueFromErrorObject:errItem]; // 从ErrorItem中获取错误信息
     if (nil != codeItem) {
         if (SUBMITSUCCESSFUL == codeItem.integerValue) {
             return nil;

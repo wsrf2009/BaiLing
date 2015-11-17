@@ -27,6 +27,7 @@
 
 - (NSDictionary *)modify;
 
+/** 解析General数据 */
 - (BOOL)parseGeneral:(NSDictionary *)generalItem;
 
 @end

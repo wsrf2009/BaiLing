@@ -43,7 +43,7 @@
 - (void)backButtonClick {
     
     NSLog(@"%s", __func__);
-    
+    /* 返回到主菜单 */
     for (UIViewController *controller in self.navigationController.viewControllers) {
         if ([controller isKindOfClass:[MainMenuViewController class]]) {
             [self.navigationController popToViewController:controller animated:YES];
@@ -64,10 +64,11 @@
     listVC.deviceManager = _deviceManager;
     listVC.toolBarPlayer = _toolBarPlayer;
     if (nil != listVC) {
-        [self.navigationController pushViewController:listVC animated:YES];
+        [self.navigationController pushViewController:listVC animated:YES]; // 进入到喜马拉雅节目列表界面
     }
 }
 
+/** 进入到喜马拉雅的帮助界面 */
 - (void)gotoXMLYHelp {
 
     XMLYHelpViewController *xmlyHelpVC = [[UIStoryboard storyboardWithName:@"Himalaya" bundle:nil] instantiateViewControllerWithIdentifier:@"XMLYHelpViewController"];

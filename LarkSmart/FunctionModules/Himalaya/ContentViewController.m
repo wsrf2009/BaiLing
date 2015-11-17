@@ -69,9 +69,9 @@
     footer.stateLabel.textColor = [UIColor grayColor]; // 设置颜色
     self.tableView.footer = footer;
     
-    selectRow = -1;
+    selectRow = -1; // 初始化
     
-    page_ = 1;
+    page_ = 1; // 初始化，获取第一页
     [self.tableView.footer setState:MJRefreshStateRefreshing];
 
     [self.navigationItem setTitle:_categoryTitle];
@@ -94,6 +94,7 @@
     [super didReceiveMemoryWarning];
 }
 
+/** 返回主菜单 */
 - (void)returnToMainMenu {
     for (UIViewController *controller in self.navigationController.viewControllers) {
         if ([controller isKindOfClass:[MainMenuViewController class]]) {
@@ -112,10 +113,10 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     ContentItemViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ContentItemViewCell" forIndexPath:indexPath];
     
-    NSLog(@"%s %ld %d", __func__, (long)indexPath.section, indexPath.row);
+    NSLog(@"%s %@ %@", __func__, @(indexPath.section), @(indexPath.row));
 
-    AudioClass *audio = [_programArray objectAtIndex:indexPath.row];
-    if (selectRow == indexPath.row) {
+    AudioClass *audio = [_programArray objectAtIndex:indexPath.row]; // 获取曲目
+    if (selectRow == indexPath.row) { // 当前行是否为选中的行
         [cell.title setTextColor:HightLightColor];
         [cell.time setTextColor:HightLightColor];
     } else {
@@ -123,9 +124,10 @@
         [cell.time setTextColor:[UIColor grayColor]];
     }
 
-    [cell.image sd_setImageWithURL:[NSURL URLWithString:audio.icon] placeholderImage:[UIImage imageNamed:@"default_small.png"]];
+    [cell.image sd_setImageWithURL:[NSURL URLWithString:audio.icon] placeholderImage:[UIImage imageNamed:@"default_small.png"]]; // 从网络获取曲目的icon
     [cell.title setText:audio.title];
     
+    /* 曲目时长 */
     NSUInteger min = audio.duration/60;
     NSUInteger sec = audio.duration%60;
     [cell.time setText:[NSString stringWithFormat:@"%02lu:%02lu", (unsigned long)min, (unsigned long)sec]];
@@ -137,7 +139,7 @@
     
     [[UIApplication sharedApplication] beginIgnoringInteractionEvents];
     
-    [self showBusying:NSLocalizedStringFromTable(@"pleaseWaiting", @"hint", nil)];
+    [self showBusying:NSLocalizedStringFromTable(@"pleaseWaiting", @"hint", nil)]; // 提示用户当前正忙，也防止频繁点击
     
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
@@ -148,15 +150,19 @@
         [[UIApplication sharedApplication] endIgnoringInteractionEvents];
     });
     
+    /* 播放选中的曲目 */
     _toolBarPlayer.playList = _programArray;
     _toolBarPlayer.delegate = self;
     [_toolBarPlayer playAudioAtIndex:indexPath.row];
 }
 
+#pragma ToolBarPlayerDelegate
+
 - (void)indexOfPlaying:(NSUInteger)index programTitle:(NSString *)title {
 
     dispatch_async(dispatch_get_main_queue(), ^{
         if (selectRow >= 0) {
+            /* 将之前已选中的行更改状态 */
             NSIndexPath *indexPath = [NSIndexPath indexPathForRow:selectRow inSection:0];
             ContentItemViewCell *cell = (ContentItemViewCell *)[self.tableView cellForRowAtIndexPath:indexPath];
             [cell.title setTextColor:[UIColor blackColor]];
@@ -164,7 +170,7 @@
         }
     
         selectRow = index;
-    
+        /* 将第selectRow行置为已选中的行 */
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:selectRow inSection:0];
         ContentItemViewCell *cell = (ContentItemViewCell *)[self.tableView cellForRowAtIndexPath:indexPath];
         [cell.title setTextColor:HightLightColor];
@@ -173,32 +179,36 @@
     });
 }
 
+/** 从后台获取播放曲目列表 */
 - (void)getContent:(NSUInteger)page {
 
     [self.deviceManager.serverService requestAudioListWithCategoryId:_parentCategoryID pageNo:page itemsPerpage:ProgramsNumberPerPage requestMode:YYTXHttpRequestPostAndAsync requestFinish:^(NSMutableArray *audioList, YYTXHttpRequestReturnCode code) {
         
         if (YYTXHttpRequestSuccessful == code) {
-
+            /* 获取成功 */
             if (audioList.count > 1) {
-                [audioList removeObjectAtIndex:0];
+                [audioList removeObjectAtIndex:0]; // 第一个是父类，需要去掉
 
                 [_programArray addObjectsFromArray:audioList];
                 
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (audioList.count < ProgramsNumberPerPage) {
+                        /* 已经加载完成 */
                         [footer setTitle:NSLocalizedStringFromTable(@"noMoreProgram", @"hint", nil) forState:MJRefreshStateNoMoreData];
                         [self.tableView.footer setState:MJRefreshStateNoMoreData];
                     } else {
                         [self.tableView.footer setState:MJRefreshStateIdle];
                     }
-                    [self.tableView reloadData];
+                    [self.tableView reloadData]; // 刷新列表
                 });
             } else if (audioList.count <= 1) {
-                
+                /* 没有获取到曲目 */
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (_programArray.count <= 0) {
+                        /* 该节目类下没有曲目 */
                         [footer setTitle:NSLocalizedStringFromTable(@"noProgramFound", @"hint", nil) forState:MJRefreshStateNoMoreData];
                     } else {
+                        /* 已经加载完成 */
                         [footer setTitle:NSLocalizedStringFromTable(@"noMoreProgram", @"hint", nil) forState:MJRefreshStateNoMoreData];
                     }
                 
@@ -206,13 +216,14 @@
                 });
             }
         } else if (YYTXHttpRequestTimeout == code) {
-
+            /* 超时 */
             dispatch_async(dispatch_get_main_queue(), ^{
                 
                 [footer setTitle:NSLocalizedStringFromTable(@"networkTimeout", @"hint", nil) forState:MJRefreshStateNoMoreData];
                 [self.tableView.footer setState:MJRefreshStateIdle];
             });
         } else if (YYTXHttpRequestUnknownError == code) {
+            /* 未知错误 */
             dispatch_async(dispatch_get_main_queue(), ^{
                     
                 [footer setTitle:NSLocalizedStringFromTable(@"getProgramListFailed", @"hint", nil) forState:MJRefreshStateNoMoreData];
@@ -222,6 +233,7 @@
     }];
 }
 
+/* 加载曲目 */
 - (void)loadMoreData {
     NSLog(@"%s", __func__);
     

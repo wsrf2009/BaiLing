@@ -100,6 +100,7 @@ NSString *const YYTXNewWIFISSID = @"YYTXNewWIFISSID";
     [_connectedDevices removeAllObjects];
 }
 
+/** 将所有已扫描到的设备断开连接，并释放它们的资源 */
 - (void)disconnectAllDevices {
 
     NSLog(@"%s", __func__);
@@ -135,15 +136,10 @@ NSString *const YYTXNewWIFISSID = @"YYTXNewWIFISSID";
 }
 #endif
 - (NSUInteger)deviceCount {
-    
-    NSLog(@"%s %d", __func__, [_connectedDevices count]);
-    
     return [_connectedDevices count];
 }
 
 - (DeviceDataClass *)deviceAtIndex:(NSUInteger)index {
-    
-//    NSLog(@"%s", __func__);
     if (index >= ([_connectedDevices count])) {
         return nil;
     }
@@ -151,21 +147,25 @@ NSString *const YYTXNewWIFISSID = @"YYTXNewWIFISSID";
     return [_connectedDevices objectAtIndex:index];
 }
 
+/** 添加新的设备到已发现设备列表 */
 - (void)addNewDeviceWithHost:(NSString *)host port:(UInt16)port {
 
-    NSLog(@"%s %d", __func__, _foundDevices.count);
+    NSLog(@"%s %@", __func__, @(_foundDevices.count));
     
     NSMutableArray *arr = [NSMutableArray arrayWithArray:_foundDevices];
     for (DeviceDataClass *device in arr) {
         if ([device.host isEqualToString:host] && device.port == port) {
+            /* 该设备已存在于已发现设备的列表则返回 */
             return;
         }
     }
     
+    /* 以设备的host和port为参数创建新的设备，并将其添加到已发现设备的列表中 */
     DeviceDataClass *device = [[DeviceDataClass alloc] initWithHost:host port:port delegate:self];
     [_foundDevices addObject:device];
 }
 
+/** 获取当前视图层级中位于最上层的用户直接能看到的视图 */
 - (UIViewController *)appRootViewController {
     UIViewController *appRootVC = [UIApplication sharedApplication].keyWindow.rootViewController;
     UIViewController *topVC = appRootVC;
@@ -178,20 +178,24 @@ NSString *const YYTXNewWIFISSID = @"YYTXNewWIFISSID";
 - (BOOL)checkServerStatus:(NSString **)status {
     
     if (nil == _device.userData.deviceInfo.host || nil == _device.userData.deviceInfo.host) {
+        /* 如果还没有从设备设备端获取到所连服务器信息，则返回 */
         return NO;
     }
     
     NSLog(@"%s deviceInfo:%@", __func__, _device.userData.deviceInfo);
     
-    NSString *deviceServerAddr = _device.userData.deviceInfo.host;
-    NSString *appServerAddr = _serverService.ServerAddress;
+    NSString *deviceServerAddr = _device.userData.deviceInfo.host; // 设备所用服务器
+    NSString *appServerAddr = _serverService.ServerAddress; // APP所用服务器
     if ([deviceServerAddr isEqualToString:YYTXServerNormal] && [appServerAddr isEqualToString:YYTXServerNormal]) {
+        /* 设备和APP都用的是正式服务器 */
         *status = @"正常";
         return NO;
     } else if ([deviceServerAddr isEqualToString:YYTXServerTest] && [appServerAddr isEqualToString:YYTXServerTest]) {
+        /* 设备和APP都用的是测试服务器 */
         *status = @"测试";
         return YES;
     } else {
+        /* 设备和APP所用的服务器不一样 */
         NSString *hardStr;
         NSString *softStr;
         if ([deviceServerAddr isEqualToString:YYTXServerNormal]) {
@@ -216,6 +220,7 @@ NSString *const YYTXNewWIFISSID = @"YYTXNewWIFISSID";
         NSString *message = [NSLocalizedStringFromTable(@"ServerAbnormal", @"hint", nil) stringByAppendingString:*status];
         NSString *buttonOkTitle = NSLocalizedStringFromTable(@"ok", @"hint", nil);
         
+        /* 在屏幕上以弹窗的形式告知用户当前APP和设备所用的服务器是不一样的 */
         if ([SystemToolClass systemVersionIsNotLessThan:@"8.0"]) {
             /* IOS8.0及以后的系统 */
             UIAlertController *alertController = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
@@ -236,6 +241,7 @@ NSString *const YYTXNewWIFISSID = @"YYTXNewWIFISSID";
 
 #pragma Mark:UdpServce 代理
 
+/** UDP发现了新的设备 */
 - (void)foundHost:(NSString *)host port:(UInt16)port {
     
     NSLog(@"%s host:%@ port:%d", __func__, host, port);
@@ -246,6 +252,7 @@ NSString *const YYTXNewWIFISSID = @"YYTXNewWIFISSID";
 
 #pragma Mark:设备代理
 
+/** TCP已与设备建立了稳定的连接 */
 - (void)devicePresent:(DeviceDataClass *)device {
     
     NSLog(@"%s %@", __func__, device.userData.generalData.nickName);
@@ -258,14 +265,16 @@ NSString *const YYTXNewWIFISSID = @"YYTXNewWIFISSID";
        [_deviceMacArray addObject:device.userData.generalData.deviceId];
     }
 #endif
-    if (![_connectedDevices containsObject:device]) {
+    if (![_connectedDevices containsObject:device]) { // 已连接设备列表中是否已包含该设备
 
-        [_connectedDevices addObject:device];
+        [_connectedDevices addObject:device]; // 将设备添加到已连接设备列表中
         
         if ([device.host isEqualToString:_device.host] && device.port == _device.port) {
+            /** 若该设备为当前正在操作的设备 */
             _device = device;
             
             if (_alertIsPresent) {
+                /* 若已有弹窗提示设备已端开连接，则将此弹窗dismiss */
                 dispatch_async(dispatch_get_main_queue(), ^{
                     
                     if ([SystemToolClass systemVersionIsNotLessThan:@"8.0"]) {
@@ -305,21 +314,25 @@ NSString *const YYTXNewWIFISSID = @"YYTXNewWIFISSID";
     }
 }
 
+/** 设备的TCP连接已端开，被认为不在当前网络 */
 - (void)deviceRemoved:(DeviceDataClass *)device {
     
     NSLog(@"%s", __func__);
     
+    /* 从已发现的设备列表和已连接的设备列表移去该设备 */
     [_foundDevices removeObject:device];
     [_connectedDevices removeObject:device];
     
     if ([device.host isEqualToString:_device.host] && device.port == _device.port) {
         
+        /* 若该设备为当前正在操控的设备 */
         dispatch_async(dispatch_get_main_queue(), ^{
             
             NSString *title = [SystemToolClass appName];
             NSString *message = [NSString stringWithFormat:NSLocalizedStringFromTable(@"iphoneDisconnectedTo %@", @"hint", nil), device.userData.generalData.nickName];
             NSString *buttonRescanTitle = NSLocalizedStringFromTable(@"rescanningDevice", @"hint", nil);
             
+            /* 在手机屏幕上弹出提示，告知用户该设备已与手机端开连接 */
             if ([SystemToolClass systemVersionIsNotLessThan:@"8.0"]) {
                 /* IOS8.0及以后的系统 */
                 _alertController = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
@@ -366,6 +379,7 @@ NSString *const YYTXNewWIFISSID = @"YYTXNewWIFISSID";
     }
 }
 
+/** 跳转到扫描设备的视图 */
 - (void)gotoScanningVC {
         
     UIViewController *VC = [self appRootViewController];
@@ -383,6 +397,7 @@ NSString *const YYTXNewWIFISSID = @"YYTXNewWIFISSID";
 
 #pragma Mark:NetworkMonitor 代理
 
+/** 手机的WIFI已端开连接 */
 - (void)wifiDisconnected {
 
     NSLog(@"%s", __func__);
@@ -391,7 +406,7 @@ NSString *const YYTXNewWIFISSID = @"YYTXNewWIFISSID";
     [_foundDevices removeAllObjects];
     [_connectedDevices removeAllObjects];
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:YYTXDeviceManagerWIFIDisconnected object:self userInfo:nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:YYTXDeviceManagerWIFIDisconnected object:self userInfo:nil]; // 发送通知，告知（FSK配置中输入SSID和密码界面）手机的WIFI已端开连接
     
     if ([_delegate respondsToSelector:@selector(deviceListUpdate)]) {
         [_delegate deviceListUpdate];
@@ -412,6 +427,7 @@ NSString *const YYTXNewWIFISSID = @"YYTXNewWIFISSID";
             buttonTitle = titleRescan;
         }
         
+        /** 在屏幕上弹出提示告知用户WIFI没连接上 */
         if ([SystemToolClass systemVersionIsNotLessThan:@"8.0"]) {
             /* IOS8.0及以后的系统 */
             UIAlertController *alertController = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
@@ -456,12 +472,14 @@ NSString *const YYTXNewWIFISSID = @"YYTXNewWIFISSID";
     });
 }
 
+/** 手机已连接到WIFI网络 */
 - (void)connectedToSSID:(NSString *)ssid {
 
     NSLog(@"%s", __func__);
 
     dispatch_async(dispatch_get_main_queue(), ^{
 
+        /* 会在屏幕上给出提示当前手机连接的是哪个SSID */
         if (nil != ssid) {
             [QXToast showMessage:[NSString stringWithFormat:NSLocalizedStringFromTable(@"connectedToWireless:%@", @"hint", nil), ssid]];
         } else {
@@ -470,7 +488,7 @@ NSString *const YYTXNewWIFISSID = @"YYTXNewWIFISSID";
     });
     
     if (nil != ssid) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:YYTXDeviceManagerWIFIConnected object:self userInfo:@{YYTXNewWIFISSID:ssid}];
+        [[NSNotificationCenter defaultCenter] postNotificationName:YYTXDeviceManagerWIFIConnected object:self userInfo:@{YYTXNewWIFISSID:ssid}]; // 通知（FSK配置中输入SSID和密码界面）手机已连上WIFI网络
     }
 
     if (nil != udpServce) {
@@ -488,9 +506,5 @@ NSString *const YYTXNewWIFISSID = @"YYTXNewWIFISSID";
     
     [_serverService requestProductInfo];
 }
-
-#pragma 手机音乐
-
-
 
 @end

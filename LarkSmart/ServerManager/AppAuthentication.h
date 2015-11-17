@@ -10,6 +10,7 @@
 
 @interface AppAuthentication : NSObject
 
+/** 从NSData中获取出OpenId */
 + (NSString *)getOpenid:(NSData *)data;
 
 @end

@@ -35,7 +35,7 @@
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
-    _needFSKConfig = NO;
+    _needFSKConfig = NO; // 初始化
 }
 
 - (void)didReceiveMemoryWarning {
@@ -137,6 +137,7 @@
     if (0 == indexPath.section) {
         if (0 == indexPath.row) {
             
+            /* 从MPVolumeView中获取出音量控制器MPVolumeSlider */
             MPVolumeView *volumeView = [[MPVolumeView alloc] init];
             UISlider* volumeViewSlider = nil;
             for (UIView *view in [volumeView subviews]){
@@ -164,11 +165,11 @@
 
 - (void)resend {
     
-    if (self.isAnimating) {
+    if (self.isAnimating) { // 当前视图是否已加载完成
         return;
     }
     
-    _needFSKConfig = YES;
+    _needFSKConfig = YES; // 重新发送FSK声波
     [self.navigationController popViewControllerAnimated:YES];
 }
 

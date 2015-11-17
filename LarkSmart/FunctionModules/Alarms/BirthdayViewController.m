@@ -146,9 +146,10 @@
     return 0;
 }
 
+/** 寿星名字长度检查 */
 - (BOOL)nameLengthCheck {
     NSInteger length = _textFeildName.text.length;
-    NSString *str = [NSString stringWithFormat:@"%d/%d", length, MAXNAMELENGTH];
+    NSString *str = [NSString stringWithFormat:@"%@/%@", @(length), @MAXNAMELENGTH];
     NSRange range = [str rangeOfString:@"/"];
     NSLog(@"%s range:%@", __func__, NSStringFromRange(range));
     NSRange range1 = NSMakeRange(0, range.location);
@@ -264,7 +265,7 @@
         /* 检查是否以包含空格 */
         NSRange range1 = [textField.text rangeOfString:@" "];
         if (NSNotFound != range1.location) {
-            [self showMessage:NSLocalizedStringFromTable(@"invalidCharacterOrFormatForLongevityName", @"hint", nil) messageType:0];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"invalidCharacterOrFormatForLongevityName", @"hint", nil)];
             textField.text = [textField.text stringByReplacingOccurrencesOfString:@" " withString:@""];
             [self nameLengthCheck];
             return;
@@ -289,7 +290,7 @@
         /* 检查是否包含回车符 */
         NSRange range2 = [textField.text rangeOfString:@"\n"];
         if (NSNotFound != range2.location) {
-            [self showMessage:NSLocalizedStringFromTable(@"invalidCharacterOrFormatForLongevityName", @"hint", nil) messageType:0];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"invalidCharacterOrFormatForLongevityName", @"hint", nil)];
             textField.text = [textField.text stringByReplacingOccurrencesOfString:@"\n" withString:@""];
             [self nameLengthCheck];
             return;
@@ -468,9 +469,9 @@
     if (![self nameLengthCheck]) {
         
         if (_birthday.who.length <= 0) {
-            [self showMessage:NSLocalizedStringFromTable(@"theLongevityNameIsEmpty", @"hint", nil) messageType:0];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"theLongevityNameIsEmpty", @"hint", nil)];
         } else {
-            [self showMessage:NSLocalizedStringFromTable(@"longevityNameIsTooLong", @"hint", nil) messageType:0];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"longevityNameIsTooLong", @"hint", nil)];
         }
         
         [_textFeildName becomeFirstResponder];
@@ -486,7 +487,7 @@
     if (str.length <= 0) {
         [_textFeildName setText:@""];
         [_textFeildName becomeFirstResponder];
-        [self showMessage:NSLocalizedStringFromTable(@"theLongevityInvalid", @"hint", nil) messageType:0];
+        [QXToast showMessage:NSLocalizedStringFromTable(@"theLongevityInvalid", @"hint", nil)];
         return NO;
     } else {
         _birthday.who = str;
@@ -507,9 +508,9 @@
     if (![self nameLengthCheck]) {
         
         if (_birthday.who.length <= 0) {
-            [self showMessage:NSLocalizedStringFromTable(@"pleaseInputLongevity", @"hint", nil) messageType:0];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"pleaseInputLongevity", @"hint", nil)];
         } else {
-            [self showMessage:NSLocalizedStringFromTable(@"longevityNameIsTooLong", @"hint", nil) messageType:0];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"longevityNameIsTooLong", @"hint", nil)];
         }
         
         [_textFeildName becomeFirstResponder];

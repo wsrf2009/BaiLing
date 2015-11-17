@@ -32,7 +32,7 @@
     
     [self.navigationItem setTitle:NSLocalizedStringFromTable(@"larkerHelper", @"hint", nil)];
 
-    NSString *url = [BoxDatabase getUrlWithName:DT_ITEM_HELPURL];
+    NSString *url = [BoxDatabase getUrlWithName:DT_ITEM_HELPURL]; // 从数据库中获取白灵帮助的url
     finalUrl = [NSString stringWithFormat:@"%@%@/%@", url, _deviceManager.device.userData.deviceInfo.productId, @"LarkHelp.html"];
 }
 
@@ -60,12 +60,15 @@
     [_webView loadRequest:request];
 }
 
+#pragma UIWebViewDelegate
+
 - (void)webViewDidStartLoad:(UIWebView *)webView {
     
     NSLog(@"%s", __func__);
     
     [self performSelectorOnMainThread:@selector(setActivityIndState:) withObject:[NSNumber numberWithBool:YES] waitUntilDone:NO];
 }
+
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
     
     NSLog(@"%s", __func__);
@@ -98,6 +101,7 @@
     
 }
 
+/** 点击了后退按钮 */
 - (void)backButtonClick {
     
     NSLog(@"%s", __func__);
@@ -109,6 +113,7 @@
     }
 }
 
+/** 活动指示 */
 - (void)setActivityIndState:(NSNumber *)state {
     
     if ([state boolValue]) {

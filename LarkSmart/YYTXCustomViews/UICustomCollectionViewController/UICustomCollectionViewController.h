@@ -11,6 +11,6 @@
 
 @interface UICustomCollectionViewController : UICollectionViewController
 @property (nonatomic, retain) YYTXDeviceManager *deviceManager;
-@property (nonatomic, assign) BOOL isAnimating;
+@property (nonatomic, assign) BOOL isAnimating; // 视图正在切换的标志
 
 @end

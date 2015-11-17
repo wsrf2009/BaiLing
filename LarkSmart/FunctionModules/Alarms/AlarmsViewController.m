@@ -11,7 +11,6 @@
 #import "AlarmDetailViewController.h"
 #import "RemindViewController.h"
 #import "BirthdayViewController.h"
-#import "MJRefresh.h"
 #import "QXToast.h"
 #import "BirthdayTableViewCell.h"
 #import "RemindTableViewCell.h"
@@ -32,22 +31,29 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
 @interface AlarmsViewController ()
 {
     AlarmClass *selectAlarm;
-    
+    /** 起床闹铃个数 */
     NSUInteger getupAlarmNumber;
+    /** 自定义闹铃数量 */
     NSUInteger customAlarmNumber;
+    /** 备忘信息数量 */
     NSUInteger remindNumber;
+    /** 生日闹铃数量 */
     NSUInteger birthdayNumber;
 
+    /** 闹铃总数量 */
     NSInteger totalNumber;
-    
-    MJRefreshAutoNormalFooter *footer;
+
     UIBarButtonItem *buttonRefresh;
 }
 
 @property (nonatomic, retain) UIBarButtonItem *barButtonAdd;
+/** 起床闹铃列表 */
 @property (nonatomic, retain) NSMutableArray *getupAlarmArray;
+/** 自定义闹铃列表 */
 @property (nonatomic, retain) NSMutableArray *customAlarmArray;
+/** 备忘信息列表 */
 @property (nonatomic, retain) NSMutableArray *remindArray;
+/** 生日闹铃列表 */
 @property (nonatomic, retain) NSMutableArray *birthdayArray;
 
 @end
@@ -56,9 +62,7 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    NSLog(@"%s", __func__);
-    
+
     self.deviceManager.delegate = self;
 
     buttonRefresh = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedStringFromTable(@"refresh", @"hint", nil) style:UIBarButtonItemStylePlain target:self action:@selector(getAlarms)];
@@ -68,6 +72,7 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
     _barButtonAdd = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedStringFromTable(@"insertAlarm", @"hint", nil) style:UIBarButtonItemStyleDone target:self action:@selector(addAlarm)];
     self.toolbarItems = [NSArray arrayWithObjects:space, _barButtonAdd, space, nil];
     
+    /* 闹铃列表初始化 */
     _getupAlarmArray = [NSMutableArray array];
     _customAlarmArray = [NSMutableArray array];
     _remindArray = [NSMutableArray array];
@@ -77,11 +82,6 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
     remindNumber = 0;
     birthdayNumber = 0;
 
-    footer = [MJRefreshAutoNormalFooter footerWithRefreshingTarget:nil refreshingAction:nil];
-    [footer setTitle:NSLocalizedStringFromTable(@"noAlarmFound", @"hint", nil) forState:MJRefreshStateNoMoreData];
-    [footer setTitle:NSLocalizedStringFromTable(@"gettingAlarmList", @"hint", nil) forState:MJRefreshStateRefreshing];
-    self.tableView.footer = footer;
-    
     [self hideEmptySeparators:self.tableView];
 }
 
@@ -90,10 +90,11 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
     
     NSLog(@"%s", __func__);
     
-    [self getAlarms];
+    [self getAlarms]; // 进入该界面即获取闹铃列表
     
     [self.navigationController setToolbarHidden:NO animated:YES];
     
+    /* 1秒后再enable闹铃添加按钮 */
     [_barButtonAdd setEnabled:NO];
     [NSTimer scheduledTimerWithTimeInterval:1.0f target:self selector:@selector(enableBarButtonAdd) userInfo:nil repeats:NO];
     
@@ -102,10 +103,7 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    
-    NSLog(@"%s nav:%@", __func__, self.navigationController);
-    
-    
+
     self.deviceManager.delegate = nil;
 }
 
@@ -116,23 +114,13 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
 #pragma mark - Table view data source
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-
+    /* 统计闹铃数量 */
     getupAlarmNumber = _getupAlarmArray.count;
     customAlarmNumber = _customAlarmArray.count;
     remindNumber = _remindArray.count;
     birthdayNumber = _birthdayArray.count;
-    
     totalNumber = getupAlarmNumber+customAlarmNumber+remindNumber+birthdayNumber;
-    
-    NSLog(@"%s %ld", __func__, (long)totalNumber);
-    
-    if (totalNumber <= 0) {
-        [footer setState:MJRefreshStateNoMoreData];
-        [self.tableView.footer setHidden:NO];
-    } else {
-        [self.tableView.footer setHidden:YES];
-    }
-    
+
     [self.navigationItem setTitle:[NSString stringWithFormat:NSLocalizedStringFromTable(@"alarmCount", @"hint", nil), (long)totalNumber]];
     
     return totalNumber;
@@ -144,11 +132,10 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
     NSInteger rowIndex = indexPath.row;
     
     if (rowIndex < getupAlarmNumber) {
+        /* 起床闹铃 */
         AlarmTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"AlarmTableViewCell" forIndexPath:indexPath];
-        
-        AlarmClass *alarm = [_getupAlarmArray objectAtIndex:rowIndex];
+        AlarmClass *alarm = [_getupAlarmArray objectAtIndex:rowIndex]; // 取得对应的起床闹铃
         if (nil != alarm) {
-
             [cell.lableTime setText:[alarm.clock substringToIndex:5]];
             if (FRE_MODE_ONEOFF == alarm.fre_mode) {
                 [cell.lableDetail setText:alarm.date];
@@ -157,7 +144,7 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
             }
         
             if ([alarm is_valid]) {
-
+                /* 闹铃已被开启 */
                 [cell.imageViewType setImage:[UIImage imageNamed:@"awakealart_pre.png"]];
                 
                 [cell.lableTitle setText:alarm.title];
@@ -166,6 +153,7 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
                 [cell.lableTime setTextColor:[UIColor blackColor]];
                 [cell.lableTitle setTextColor:[UIColor blackColor]];
             } else {
+                /* 闹铃已被关闭 */
                 [cell.imageViewType setImage:[UIImage imageNamed:@"awakealart_nor.png"]];
                 
                 [cell.lableTitle setText:[alarm.title stringByAppendingFormat:@"(%@)", NSLocalizedStringFromTable(@"closed", @"hint", nil)]];
@@ -175,25 +163,10 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
                 [cell.lableTitle setTextColor:[UIColor grayColor]];
             }
         }
-#if 0
-        if (![SystemToolClass systemVersionIsNotLessThan:@"8.0"]) {
-            NSMutableArray *rightUtilityButtons = [NSMutableArray array];
-            NSString *deleteTitle = NSLocalizedStringFromTable(@"delete", @"hint", nil);
-            [rightUtilityButtons sw_addUtilityButtonWithColor:[UIColor redColor] title:deleteTitle];
-            
-            NSString *openTitle;
-            if ([alarm is_valid]) {
-                openTitle = NSLocalizedStringFromTable(@"close", @"hint", nil);
-            } else {
-                openTitle = NSLocalizedStringFromTable(@"open", @"hint", nil);
-            }
-            [rightUtilityButtons sw_addUtilityButtonWithColor:[UIColor blueColor] title:openTitle];
-            cell.rightUtilityButtons = rightUtilityButtons;
-            cell.delegate = self;
-        }
-#endif
+
         return cell;
     } else if (rowIndex < (getupAlarmNumber+customAlarmNumber)) {
+        /* 自定义闹铃 */
         AlarmTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"AlarmTableViewCell" forIndexPath:indexPath];
         
         AlarmClass *alarm = [_customAlarmArray objectAtIndex:(rowIndex-getupAlarmNumber)];
@@ -207,6 +180,7 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
             }
             
             if ([alarm is_valid]) {
+                /* 闹铃已被开启 */
                 [cell.imageViewType setImage:[UIImage imageNamed:@"definedalart_pre.png"]];
                 
                 [cell.lableTitle setText:alarm.title];
@@ -215,6 +189,7 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
                 [cell.lableTime setTextColor:[UIColor blackColor]];
                 [cell.lableTitle setTextColor:[UIColor blackColor]];
             } else {
+                /* 闹铃已被关闭 */
                 [cell.imageViewType setImage:[UIImage imageNamed:@"definedalart_nor.png"]];
                 
                 [cell.lableTitle setText:[alarm.title stringByAppendingFormat:@"(%@)", NSLocalizedStringFromTable(@"closed", @"hint", nil)]];
@@ -224,26 +199,10 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
                 [cell.lableTitle setTextColor:[UIColor grayColor]];
             }
         }
-#if 0
-        if (![SystemToolClass systemVersionIsNotLessThan:@"8.0"]) {
-            NSMutableArray *rightUtilityButtons = [NSMutableArray array];
-            NSString *deleteTitle = NSLocalizedStringFromTable(@"delete", @"hint", nil);
-            [rightUtilityButtons sw_addUtilityButtonWithColor:[UIColor redColor] title:deleteTitle];
-            
-            NSString *openTitle;
-            if ([alarm is_valid]) {
-                openTitle = NSLocalizedStringFromTable(@"close", @"hint", nil);
-            } else {
-                openTitle = NSLocalizedStringFromTable(@"open", @"hint", nil);
-            }
-            [rightUtilityButtons sw_addUtilityButtonWithColor:[UIColor blueColor] title:openTitle];
-            cell.rightUtilityButtons = rightUtilityButtons;
-            cell.delegate = self;
-        }
-#endif
+
         return cell;
     } else if (rowIndex < (getupAlarmNumber+customAlarmNumber+remindNumber)) {
-        
+        /* 备忘信息 */
         RemindTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"RemindTableViewCell" forIndexPath:indexPath];
         
         RemindClass *remind = [_remindArray objectAtIndex:(rowIndex-(getupAlarmNumber+customAlarmNumber))];
@@ -252,7 +211,7 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
             [cell.labelDate setText:remind.date];
         
             if ([remind is_valid]) {
-                
+                /* 备忘提醒已开启 */
                 [cell.imageViewType setImage:[UIImage imageNamed:@"remind_pre.png"]];
                 
                 [cell.remind setText:remind.content];
@@ -261,6 +220,7 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
                 [cell.labelDate setTextColor:[UIColor blackColor]];
                 [cell.remind setTextColor:[UIColor blackColor]];
             } else {
+                /* 备忘提醒已关闭 */
                 [cell.imageViewType setImage:[UIImage imageNamed:@"remind_nor.png"]];
                 
                 [cell.remind setText:[remind.content stringByAppendingFormat:@"(%@)", NSLocalizedStringFromTable(@"closed", @"hint", nil)]];
@@ -270,39 +230,24 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
                 [cell.remind setTextColor:[UIColor grayColor]];
             }
         }
-#if 0
-        if (![SystemToolClass systemVersionIsNotLessThan:@"8.0"]) {
-            NSMutableArray *rightUtilityButtons = [NSMutableArray array];
-            NSString *deleteTitle = NSLocalizedStringFromTable(@"delete", @"hint", nil);
-            [rightUtilityButtons sw_addUtilityButtonWithColor:[UIColor redColor] title:deleteTitle];
-            
-            NSString *openTitle;
-            if ([remind is_valid]) {
-                openTitle = NSLocalizedStringFromTable(@"close", @"hint", nil);
-            } else {
-                openTitle = NSLocalizedStringFromTable(@"open", @"hint", nil);
-            }
-            [rightUtilityButtons sw_addUtilityButtonWithColor:[UIColor blueColor] title:openTitle];
-            cell.rightUtilityButtons = rightUtilityButtons;
-            cell.delegate = self;
-        }
-#endif
+
         return cell;
     } else if (rowIndex < (getupAlarmNumber+customAlarmNumber+remindNumber+birthdayNumber)) {
-        
+        /* 生日闹铃 */
         BirthdayTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"BirthdayTableViewCell" forIndexPath:indexPath];
         
         BirthdayClass *birthday = [_birthdayArray objectAtIndex:(rowIndex-(getupAlarmNumber+customAlarmNumber+remindNumber))];
         if (nil != birthday) {
-        
             [cell.imageViewType setImage:[UIImage imageNamed:@"birthdayalart_pre.png"]];
 
             NSString *dateType;
             NSString *dateValue;
             if (DATETYPE_LUNAR == birthday.date_type) {
+                /* 农历 */
                 dateValue = [BirthdayViewController tileLunarFromLarkLunar:birthday.date_value];
                 dateType = DATE_TYPE_LUNAR;
             } else if (DATETYPE_SOLAR == birthday.date_type) {
+                /* 阳历 */
                 NSArray *arr = [birthday.date_value componentsSeparatedByString:@"-"];
                 if (nil != arr && arr.count >=3) {
                     dateValue = [NSString stringWithFormat:@"%@月%@日", arr[1], arr[2]];
@@ -319,15 +264,7 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
 
             [cell setBackgroundColor:[UIColor whiteColor]];
         }
-#if 0
-        if (![SystemToolClass systemVersionIsNotLessThan:@"8.0"]) {
-            NSMutableArray *rightUtilityButtons = [NSMutableArray array];
-            NSString *deleteTitle = NSLocalizedStringFromTable(@"delete", @"hint", nil);
-            [rightUtilityButtons sw_addUtilityButtonWithColor:[UIColor redColor] title:deleteTitle];
-            cell.rightUtilityButtons = rightUtilityButtons;
-            cell.delegate = self;
-        }
-#endif
+
         return cell;
     }
 
@@ -341,7 +278,7 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
     NSInteger rowIndex = indexPath.row;
     
     if (rowIndex < getupAlarmNumber) {
-        /* alarm */
+        /* 起床闹铃 */
         AlarmDetailViewController *alarmDetailVC = [self.storyboard instantiateViewControllerWithIdentifier:@"AlarmDetailViewController"];
         alarmDetailVC.deviceManager = self.deviceManager;
         alarmDetailVC.isAddAlarm = NO;
@@ -352,6 +289,7 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
             [self.navigationController pushViewController:alarmDetailVC animated:YES];
         }
     } else if (rowIndex < (getupAlarmNumber+customAlarmNumber)) {
+        /* 自定义闹铃 */
         AlarmDetailViewController *alarmDetailVC = [self.storyboard instantiateViewControllerWithIdentifier:@"AlarmDetailViewController"];
         alarmDetailVC.deviceManager = self.deviceManager;
         alarmDetailVC.isAddAlarm = NO;
@@ -362,7 +300,7 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
             [self.navigationController pushViewController:alarmDetailVC animated:YES];
         }
     } else if (rowIndex < (getupAlarmNumber+customAlarmNumber+remindNumber)) {
-        /* remind */
+        /* 备忘信息 */
         RemindViewController *remindVC = [self.storyboard instantiateViewControllerWithIdentifier:@"RemindViewController"];
         remindVC.deviceManager = self.deviceManager;
         remindVC.isAddAlarm = NO;
@@ -372,7 +310,7 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
         }
         
     } else if (rowIndex < (getupAlarmNumber+customAlarmNumber+remindNumber+birthdayNumber)) {
-        /* birthday */
+        /* 生日闹铃 */
         BirthdayViewController *birthdayVC = [self.storyboard instantiateViewControllerWithIdentifier:@"BirthdayViewController"];
         birthdayVC.deviceManager = self.deviceManager;
         birthdayVC.isAddAlarm = NO;
@@ -382,481 +320,8 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
         }
     }
 }
-#if 0
-- (void)swipeableTableViewCell:(SWTableViewCell *)cell didTriggerRightUtilityButtonWithIndex:(NSInteger)index {
-    NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
-    UIButton *button = [cell.rightUtilityButtons objectAtIndex:index];
-    NSString *title = [button titleForState:UIControlStateNormal];
-    
-    if ([title isEqualToString:NSLocalizedStringFromTable(@"delete", @"hint", nil)]) {
-        [self beSureToDelete:indexPath];
-    } else if ([title isEqualToString:NSLocalizedStringFromTable(@"open", @"hint", nil)]) {
-        [self beSureToOpen:YES indexPath:indexPath];
-    } else if ([title isEqualToString:NSLocalizedStringFromTable(@"close", @"hint", nil)]) {
-        [self beSureToOpen:NO indexPath:indexPath];
-    }
-}
 
-- (NSArray *)tableView:(UITableView *)tableView editActionsForRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-    // 设置删除按钮
-    UITableViewRowAction *actionDeleteAlarm = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive title:NSLocalizedStringFromTable(@"delete", @"hint", nil) handler:^(UITableViewRowAction *action, NSIndexPath *indexPath) {
-        
-        [self beSureToDelete:indexPath];
-    }];
-
-    // 设置开启或关闭闹铃按钮，只有起床闹铃、自定义闹铃和备忘提醒有效
-    if (indexPath.row < (getupAlarmNumber+customAlarmNumber+remindNumber)) {
-        
-        /* 根据闹铃的状态设置按钮的标题：打开或关闭 */
-        NSString *title;
-        if (indexPath.row < getupAlarmNumber) {
-            AlarmClass *alarm = [_getupAlarmArray objectAtIndex:indexPath.row];
-            if ([alarm is_valid]) {
-                title = NSLocalizedStringFromTable(@"close", @"hint", nil);
-            } else {
-                title = NSLocalizedStringFromTable(@"open", @"hint", nil);
-            }
-        } else if (indexPath.row < (getupAlarmNumber+customAlarmNumber)) {
-            AlarmClass *alarm = [_customAlarmArray objectAtIndex:indexPath.row-getupAlarmNumber];
-            if ([alarm is_valid]) {
-                title = NSLocalizedStringFromTable(@"close", @"hint", nil);
-            } else {
-                title = NSLocalizedStringFromTable(@"open", @"hint", nil);
-            }
-        } else if (indexPath.row < (getupAlarmNumber+customAlarmNumber+remindNumber)) {
-            RemindClass *remind = [_remindArray objectAtIndex:(indexPath.row-(getupAlarmNumber+customAlarmNumber))];
-            if ([remind is_valid]) {
-                title = NSLocalizedStringFromTable(@"close", @"hint", nil);
-            } else {
-                title = NSLocalizedStringFromTable(@"open", @"hint", nil);
-            }
-        }
-        
-        UITableViewRowAction *actionSwitchAlarm = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:title handler:^(UITableViewRowAction *action, NSIndexPath *indexPath) {
-            
-            if ([action.title isEqualToString:NSLocalizedStringFromTable(@"open", @"hint", nil)]) {
-                [self beSureToOpen:YES indexPath:indexPath];
-            } else {
-                [self beSureToOpen:NO indexPath:indexPath];
-            }
-
-        }];
-        actionSwitchAlarm.backgroundEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
-        actionSwitchAlarm.backgroundColor = [UIColor greenColor];
-        
-        return @[actionSwitchAlarm, actionDeleteAlarm];
-        
-    } else {
-        return @[actionDeleteAlarm];
-    }
-}
-
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-}
-
-- (void)beSureToDelete:(NSIndexPath *)indexPath {
-    NSString *message;
-    NSInteger rowIndex = indexPath.row;
-    if (rowIndex < getupAlarmNumber) {
-        
-        /* alarm */
-        message = NSLocalizedStringFromTable(@"deleteThisAlarm?", @"hint", nil);
-    } else if (rowIndex < (getupAlarmNumber+customAlarmNumber)) {
-        
-        message = NSLocalizedStringFromTable(@"deleteThisAlarm?", @"hint", nil);
-    } else if (rowIndex < (getupAlarmNumber+customAlarmNumber + remindNumber)) {
-        
-        /* remind */
-        message = NSLocalizedStringFromTable(@"deleteThisRemind?", @"hint", nil);
-    } else if (rowIndex < (getupAlarmNumber+customAlarmNumber + remindNumber + birthdayNumber)) {
-        
-        /* birthday */
-        message = NSLocalizedStringFromTable(@"deleteThisBirthday?", @"hint", nil);
-    }
-    
-    NSString *buttonCancelTitle = NSLocalizedStringFromTable(@"cancel", @"hint", nil);
-    NSString *buttonDeleteTitle = NSLocalizedStringFromTable(@"delete", @"hint", nil);
-    if ([SystemToolClass systemVersionIsNotLessThan:@"8.0"]) {
-        /* IOS8.0及以后 */
-        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:[SystemToolClass appName] message:message preferredStyle:UIAlertControllerStyleAlert];
-        [alertController addAction:[UIAlertAction actionWithTitle:buttonCancelTitle style:UIAlertActionStyleDefault handler:nil]];
-        [alertController addAction:[UIAlertAction actionWithTitle:buttonDeleteTitle style:UIAlertActionStyleDestructive handler:^(UIAlertAction *action) {
-            
-            [self deleteAlarmAtIndexPath:indexPath];
-        }]];
-        
-        if (nil != alertController) {
-            NSLog(@"%s +++++++++++++", __func__);
-            [self presentViewController:alertController animated:YES completion:nil];
-        }
-    } else {
-        /* IOS6.0 及以后，但是低于IOS8.0 */
-        UICustomAlertView *alertView = [[UICustomAlertView alloc] initWithTitle:[SystemToolClass appName] message:message delegate:self cancelButtonTitle:buttonCancelTitle otherButtonTitles:buttonDeleteTitle, nil];
-        NSLog(@"%s ----------------", __func__);
-        [alertView showAlertViewWithCompleteBlock:^(UIAlertView *alertView, NSInteger buttonIndex) {
-            
-            NSString *title = [alertView buttonTitleAtIndex:buttonIndex];
-            if ([title isEqualToString:buttonDeleteTitle]) {
-                [self deleteAlarmAtIndexPath:indexPath];
-            }
-        }];
-    }
-}
-
-- (void)beSureToOpen:(BOOL)open indexPath:(NSIndexPath *)indexPath {
-    NSString *message;
-    NSString *title;
-    if (indexPath.row < getupAlarmNumber) {
-        if (open) {
-            message = NSLocalizedStringFromTable(@"openThisAlarm?", @"hint", nil);
-            title = NSLocalizedStringFromTable(@"open", @"hint", nil);
-            
-        } else {
-            message = NSLocalizedStringFromTable(@"closeThisAlarm?", @"hint", nil);
-            title = NSLocalizedStringFromTable(@"close", @"hint", nil);
-        }
-    } else if (indexPath.row < (getupAlarmNumber+customAlarmNumber)) {
-        if (open) {
-            message = NSLocalizedStringFromTable(@"openThisAlarm?", @"hint", nil);
-            title = NSLocalizedStringFromTable(@"open", @"hint", nil);
-            
-        } else {
-            message = NSLocalizedStringFromTable(@"closeThisAlarm?", @"hint", nil);
-            title = NSLocalizedStringFromTable(@"close", @"hint", nil);
-        }
-    } else if (indexPath.row < (getupAlarmNumber+customAlarmNumber+remindNumber)) {
-        if (open) {
-            message = NSLocalizedStringFromTable(@"openThisRemind?", @"hint", nil);
-            title = NSLocalizedStringFromTable(@"open", @"hint", nil);
-        } else {
-            message = NSLocalizedStringFromTable(@"closeThisRemind?", @"hint", nil);
-            title = NSLocalizedStringFromTable(@"close", @"hint", nil);
-        }
-    }
-    
-    NSString *buttonCancelTitle = NSLocalizedStringFromTable(@"cancel", @"hint", nil);
-    if ([SystemToolClass systemVersionIsNotLessThan:@"8.0"]) {
-        /* IOS8.0及以后 */
-        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:[SystemToolClass appName] message:message preferredStyle:UIAlertControllerStyleAlert];
-        [alertController addAction:[UIAlertAction actionWithTitle:buttonCancelTitle style:UIAlertActionStyleDefault handler:nil]];
-        [alertController addAction:[UIAlertAction actionWithTitle:title style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-            
-            [self switchAlarm:open indexPath:indexPath];
-            
-        }]];
-        
-        if (nil != alertController) {
-            [self presentViewController:alertController animated:YES completion:nil];
-        }
-    } else {
-        /* IOS6.0 及以后，但是低于IOS8.0 */
-        UICustomAlertView *alertView = [[UICustomAlertView alloc] initWithTitle:[SystemToolClass appName] message:message delegate:self cancelButtonTitle:buttonCancelTitle otherButtonTitles:title, nil];
-        
-        NSLog(@"%s ----------------", __func__);
-        
-        [alertView showAlertViewWithCompleteBlock:^(UIAlertView *alertView, NSInteger buttonIndex) {
-            
-            NSString *buttonTitle = [alertView buttonTitleAtIndex:buttonIndex];
-            if ([buttonTitle isEqualToString:title]) {
-                [self switchAlarm:open indexPath:indexPath];
-            }
-        }];
-    }
-}
-
-- (void)deleteAlarmAtIndexPath:(NSIndexPath *)indexPath {
-    NSString *successful = NSLocalizedStringFromTable(@"deleteSuccessful", @"hint", nil);
-    NSString *failed = NSLocalizedStringFromTable(@"deleteFailed", @"hint", nil);
-    NSInteger rowIndex = indexPath.row;
-    if (rowIndex < getupAlarmNumber) {
-        /* alarm */
-        AlarmClass *alarm = [_getupAlarmArray objectAtIndex:rowIndex];
-            
-        [buttonRefresh setEnabled:NO];
-        [self showActiviting];
-            
-        [self.deviceManager.device deleteAlarm:alarm.ID params:@{DevicePlayTTSWhenOperationSuccessful:successful, DevicePlayTTSWhenOperationFailed:failed} completionBlock:^(YYTXDeviceReturnCode code) {
-                
-            dispatch_async(dispatch_get_main_queue(), ^{
-                    
-                if (YYTXOperationSuccessful == code) {
-                    [self removeEffectView];
-                    [_getupAlarmArray removeObject:alarm];
-                    [self.tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
-                } else if (YYTXTransferFailed == code) {
-                        
-                    [self showTitle:NSLocalizedStringFromTable(@"deletingAlarmFailed", @"hint", nil) hint:NSLocalizedStringFromTable(@"hintForTransferFailed", @"hint", nil)];
-                } else if (YYTXDeviceIsAbsent == code) {
-                        
-                    [self showTitle:[NSString stringWithFormat:NSLocalizedStringFromTable(@"iphoneDisconnectedTo %@", @"hint", nil), self.deviceManager.device.userData.generalData.nickName] hint:NSLocalizedStringFromTable(@"hintForDeviceDisconnect", @"hint", nil)];
-                } else if (YYTXOperationIsTooFrequent == code) {
-                        [self removeEffectView];
-                        
-                } else {
-                    [self removeEffectView];
-                    [Toast showWithText:NSLocalizedStringFromTable(@"deletingAlarmFailed", @"hint", nil)];
-                }
-                    
-                [buttonRefresh setEnabled:YES];
-            });
-        }];
-    } else if (rowIndex < (getupAlarmNumber+customAlarmNumber)) {
-        AlarmClass *alarm = [_customAlarmArray objectAtIndex:rowIndex-getupAlarmNumber];
-        
-        [buttonRefresh setEnabled:NO];
-        [self showActiviting];
-        
-        [self.deviceManager.device deleteAlarm:alarm.ID params:@{DevicePlayTTSWhenOperationSuccessful:successful, DevicePlayTTSWhenOperationFailed:failed} completionBlock:^(YYTXDeviceReturnCode code) {
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                
-                if (YYTXOperationSuccessful == code) {
-                    [self removeEffectView];
-                    [_customAlarmArray removeObject:alarm];
-                    [self.tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
-                } else if (YYTXTransferFailed == code) {
-                    
-                    [self showTitle:NSLocalizedStringFromTable(@"deletingAlarmFailed", @"hint", nil) hint:NSLocalizedStringFromTable(@"hintForTransferFailed", @"hint", nil)];
-                } else if (YYTXDeviceIsAbsent == code) {
-                    
-                    [self showTitle:[NSString stringWithFormat:NSLocalizedStringFromTable(@"iphoneDisconnectedTo %@", @"hint", nil), self.deviceManager.device.userData.generalData.nickName] hint:NSLocalizedStringFromTable(@"hintForDeviceDisconnect", @"hint", nil)];
-                } else if (YYTXOperationIsTooFrequent == code) {
-                    [self removeEffectView];
-                    
-                } else {
-                    [self removeEffectView];
-                    [Toast showWithText:NSLocalizedStringFromTable(@"deletingAlarmFailed", @"hint", nil)];
-                }
-                
-                [buttonRefresh setEnabled:YES];
-            });
-        }];
-    } else if (rowIndex < (getupAlarmNumber+customAlarmNumber+remindNumber)) {
-        /* remind */
-        RemindClass *remind = [_remindArray objectAtIndex:rowIndex-(getupAlarmNumber+customAlarmNumber)];
-            
-        [buttonRefresh setEnabled:NO];
-        [self showActiviting];
-            
-        [self.deviceManager.device deleteRemind:remind.ID params:@{DevicePlayTTSWhenOperationSuccessful:successful, DevicePlayTTSWhenOperationFailed:failed} completionBlock:^(YYTXDeviceReturnCode code) {
-                
-            dispatch_async(dispatch_get_main_queue(), ^{
-
-                if (YYTXOperationSuccessful == code) {
-
-                    [self removeEffectView];
-                    [_remindArray removeObject:remind];
-                    [self.tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
-                } else if (YYTXTransferFailed == code) {
-                            
-                    [self showTitle:NSLocalizedStringFromTable(@"deletingAlarmFailed", @"hint", nil) hint:NSLocalizedStringFromTable(@"hintForTransferFailed", @"hint", nil)];
-                } else if (YYTXDeviceIsAbsent == code) {
-                            
-                    [self showTitle:[NSString stringWithFormat:NSLocalizedStringFromTable(@"iphoneDisconnectedTo %@", @"hint", nil), self.deviceManager.device.userData.generalData.nickName] hint:NSLocalizedStringFromTable(@"hintForDeviceDisconnect", @"hint", nil)];
-                } else if (YYTXOperationIsTooFrequent == code) {
-                        [self removeEffectView];
-                } else {
-                    [self removeEffectView];
-                    [Toast showWithText:NSLocalizedStringFromTable(@"deletingAlarmFailed", @"hint", nil)];
-                }
-                    
-                [buttonRefresh setEnabled:YES];
-            });
-        }];
-    } else if (rowIndex < (getupAlarmNumber+customAlarmNumber+remindNumber+birthdayNumber)) {
-        /* birthday */
-        BirthdayClass *birthday = [_birthdayArray objectAtIndex:rowIndex-((getupAlarmNumber+customAlarmNumber+remindNumber))];
-
-        [buttonRefresh setEnabled:NO];
-        [self showActiviting];
-
-        [self.deviceManager.device deleteBirthday:birthday.ID params:@{DevicePlayTTSWhenOperationSuccessful:successful, DevicePlayTTSWhenOperationFailed:failed} completionBlock:^(YYTXDeviceReturnCode code) {
-                
-            dispatch_async(dispatch_get_main_queue(), ^{
-
-                if (YYTXOperationSuccessful == code) {
-
-                    [self removeEffectView];
-                    [_birthdayArray removeObject:birthday];
-                    [self.tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
-                } else if (YYTXTransferFailed == code) {
-                            
-                    [self showTitle:NSLocalizedStringFromTable(@"deletingAlarmFailed", @"hint", nil) hint:NSLocalizedStringFromTable(@"hintForTransferFailed", @"hint", nil)];
-                } else if (YYTXDeviceIsAbsent == code) {
-                        
-                    [self showTitle:[NSString stringWithFormat:NSLocalizedStringFromTable(@"iphoneDisconnectedTo %@", @"hint", nil), self.deviceManager.device.userData.generalData.nickName] hint:NSLocalizedStringFromTable(@"hintForDeviceDisconnect", @"hint", nil)];
-                } else if (YYTXOperationIsTooFrequent == code) {
-                    [self removeEffectView];
-
-                } else {
-                    [self removeEffectView];
-                    [Toast showWithText:NSLocalizedStringFromTable(@"deletingAlarmFailed", @"hint", nil)];
-                }
-                    
-                [buttonRefresh setEnabled:YES];
-            });
-        }];
-    }
-}
-
-- (void)switchAlarm:(BOOL)open indexPath:(NSIndexPath *)indexPath {
-    if (indexPath.row < getupAlarmNumber) {
-        AlarmClass *alarm = [_getupAlarmArray objectAtIndex:indexPath.row];
-        NSString *successful;
-        NSString *failed;
-        if (open) {
-            alarm.is_valid = 1;
-            successful = NSLocalizedStringFromTable(@"openGetupAlarmSuccessful", @"hint", nil);
-            failed = NSLocalizedStringFromTable(@"openGetupAlarmFailed", @"hint", nil);
-        } else {
-            alarm.is_valid = 0;
-            successful = NSLocalizedStringFromTable(@"closeGetupAlarmSuccessful", @"hint", nil);
-            failed = NSLocalizedStringFromTable(@"closeGetupAlarmFailed", @"hint", nil);
-        }
-        
-        NSArray *arr = [alarm.clock componentsSeparatedByString:@":"];
-        if (arr.count >= 2) {
-            NSString *hour = arr[0];
-            NSString *minute = arr[1];
-            successful = [NSString stringWithFormat:successful, hour, minute];
-        }
-
-        [buttonRefresh setEnabled:NO];
-        [self showActiviting];
-        
-        [self.deviceManager.device modifyAlarm:alarm parameter:@{DevicePlayTTSWhenOperationSuccessful:successful, DevicePlayTTSWhenOperationFailed:failed} completionBlock:^(YYTXDeviceReturnCode code) {
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                
-                if (YYTXOperationSuccessful == code) {
-                    [self removeEffectView];
-                    [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
-                } else if (YYTXTransferFailed == code) {
-                    [self removeEffectView];
-                    [Toast showWithText:failed];
-                } else if (YYTXDeviceIsAbsent == code) {
-                    
-                    [self showTitle:[NSString stringWithFormat:NSLocalizedStringFromTable(@"iphoneDisconnectedTo %@", @"hint", nil), self.deviceManager.device.userData.generalData.nickName] hint:NSLocalizedStringFromTable(@"hintForDeviceDisconnect", @"hint", nil)];
-                } else if (YYTXOperationIsTooFrequent == code) {
-                    [self removeEffectView];
-                    
-                } else if (YYTXOperationFailed == code) {
-                    [self removeEffectView];
-                    [self performSelector:@selector(getAlarms) withObject:nil];
-                } else {
-                    
-                    [self removeEffectView];
-                    [Toast showWithText:failed];
-                }
-                
-                [buttonRefresh setEnabled:YES];
-            });
-        }];
-    } else if (indexPath.row < (getupAlarmNumber+customAlarmNumber)) {
-        AlarmClass *alarm = [_customAlarmArray objectAtIndex:indexPath.row-getupAlarmNumber];
-        NSString *successful;
-        NSString *failed;
-        if (open) {
-            alarm.is_valid = 1;
-
-            successful = NSLocalizedStringFromTable(@"openCustomAlarmSuccessful", @"hint", nil);
-            failed = NSLocalizedStringFromTable(@"openCustomAlarmFailed", @"hint", nil);
-        } else {
-            alarm.is_valid = 0;
-            successful = NSLocalizedStringFromTable(@"closeCustomAlarmSuccessful", @"hint", nil);
-            failed = NSLocalizedStringFromTable(@"closeCustomAlarmFailed", @"hint", nil);
-        }
-        
-        NSArray *arr = [alarm.clock componentsSeparatedByString:@":"];
-        if (arr.count >= 2) {
-            NSString *hour = arr[0];
-            NSString *minute = arr[1];
-            successful = [NSString stringWithFormat:successful, hour, minute];
-        }
-        
-        [buttonRefresh setEnabled:NO];
-        [self showActiviting];
-        
-        [self.deviceManager.device modifyAlarm:alarm parameter:@{DevicePlayTTSWhenOperationSuccessful:successful, DevicePlayTTSWhenOperationFailed:failed} completionBlock:^(YYTXDeviceReturnCode code) {
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                
-                if (YYTXOperationSuccessful == code) {
-                    [self removeEffectView];
-                    [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
-                } else if (YYTXTransferFailed == code) {
-                    [self removeEffectView];
-                    [Toast showWithText:failed];
-                } else if (YYTXDeviceIsAbsent == code) {
-                    
-                    [self showTitle:[NSString stringWithFormat:NSLocalizedStringFromTable(@"iphoneDisconnectedTo %@", @"hint", nil), self.deviceManager.device.userData.generalData.nickName] hint:NSLocalizedStringFromTable(@"hintForDeviceDisconnect", @"hint", nil)];
-                } else if (YYTXOperationIsTooFrequent == code) {
-                    [self removeEffectView];
-                    
-                } else if (YYTXOperationFailed == code) {
-                    [self removeEffectView];
-                    [self performSelector:@selector(getAlarms) withObject:nil];
-                } else {
-                    
-                    [self removeEffectView];
-                    [Toast showWithText:failed];
-                }
-                
-                [buttonRefresh setEnabled:YES];
-            });
-        }];
-    } else if (indexPath.row < (getupAlarmNumber+customAlarmNumber+remindNumber)) {
-        RemindClass *remind = [_remindArray objectAtIndex:(indexPath.row-(getupAlarmNumber+customAlarmNumber))];
-        NSString *successful;
-        NSString *failed;
-        if (open) {
-            remind.is_valid = 1;
-            successful = NSLocalizedStringFromTable(@"openRemindSuccessful", @"hint", nil);
-            failed = NSLocalizedStringFromTable(@"openRemindFailed", @"hint", nil);
-        } else {
-            remind.is_valid = 0;
-            successful = NSLocalizedStringFromTable(@"closeRemindSuccessful", @"hint", nil);
-            failed = NSLocalizedStringFromTable(@"closeRemindFailed", @"hint", nil);
-        }
-
-        [buttonRefresh setEnabled:NO];
-        [self showActiviting];
-        
-        [self.deviceManager.device modifyRemind:remind parameter:@{DevicePlayTTSWhenOperationSuccessful:successful, DevicePlayTTSWhenOperationFailed:failed} completionBlock:^(YYTXDeviceReturnCode code) {
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                
-                if (YYTXOperationSuccessful == code) {
-                    [self removeEffectView];
-                    
-                    [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
-                } else if (YYTXTransferFailed == code) {
-                    [self removeEffectView];
-                    [Toast showWithText:failed];
-                } else if (YYTXDeviceIsAbsent == code) {
-                    
-                    [self showTitle:[NSString stringWithFormat:NSLocalizedStringFromTable(@"iphoneDisconnectedTo %@", @"hint", nil), self.deviceManager.device.userData.generalData.nickName] hint:NSLocalizedStringFromTable(@"hintForDeviceDisconnect", @"hint", nil)];
-                } else if (YYTXOperationIsTooFrequent == code) {
-                    [self removeEffectView];
-                    
-                } else if (YYTXOperationFailed == code) {
-                    [self removeEffectView];
-                    [self performSelector:@selector(getAlarms) withObject:nil];
-                } else {
-                    [self removeEffectView];
-                    [Toast showWithText:failed];
-                }
-                
-                [buttonRefresh setEnabled:YES];
-            });
-        }];
-    }
-}
-#endif
 - (void)enableBarButtonAdd {
-
     dispatch_async(dispatch_get_main_queue(), ^{
         [_barButtonAdd setEnabled:YES];
     });
@@ -864,11 +329,11 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
 
 #pragma 添加闹铃
 
+/** 添加闹铃 */
 - (void)addAlarm {
-    
     dispatch_async(dispatch_get_main_queue(), ^{
         [_barButtonAdd setEnabled:NO];
-        [NSTimer scheduledTimerWithTimeInterval:1.0f target:self selector:@selector(enableBarButtonAdd) userInfo:nil repeats:NO];
+        [NSTimer scheduledTimerWithTimeInterval:1.0f target:self selector:@selector(enableBarButtonAdd) userInfo:nil repeats:NO]; // 1秒后再enable闹铃添加按钮
     });
     
     AddingAlarmViewController *addingAlarmVC = [[AddingAlarmViewController alloc] init];
@@ -876,13 +341,11 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
     if (nil != addingAlarmVC) {
         [self.navigationController pushViewController:addingAlarmVC animated:YES];
     }
-    
 }
 
 #pragma 闹铃数据源
 
 - (void)clearAlarms {
-    
     @synchronized(self) {
         [self.deviceManager.device.userData.alarmList removeAllObjects];
         [self.deviceManager.device.userData.remindList removeAllObjects];
@@ -891,61 +354,47 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
 }
 
 - (void)enableButtonRefresh {
-
     [buttonRefresh setEnabled:YES];
 }
 
+/** 从设备端获取闹铃 */
 - (void)getAlarms {
-    
-    NSLog(@"%s 1", __func__);
-
     dispatch_async(dispatch_get_main_queue(), ^{
         [buttonRefresh setEnabled:NO];
         [self showActiviting];
-        [footer setState:MJRefreshStateRefreshing];
         [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(enableButtonRefresh) userInfo:nil repeats:NO];
     });
     
-    [self clearAlarms];
+    [self clearAlarms]; // 先清除已获取的闹铃列表
 
-    [self.deviceManager.device getAlarm:^(YYTXDeviceReturnCode code) {
-
+    [self.deviceManager.device getAlarm:^(YYTXDeviceReturnCode code) { // 获取起床闹铃和自定义闹铃
         if (YYTXOperationSuccessful == code) {
-            
-            [self.deviceManager.device getRemind:^(YYTXDeviceReturnCode code) {
-                
+            [self.deviceManager.device getRemind:^(YYTXDeviceReturnCode code) { // 获取备忘信息
                 if (YYTXOperationSuccessful == code) {
-                    
-                    [self.deviceManager.device getBirthday:^(YYTXDeviceReturnCode code) {
-                        
+                    [self.deviceManager.device getBirthday:^(YYTXDeviceReturnCode code) { // 获取生日闹铃
                         dispatch_async(dispatch_get_main_queue(), ^{
-                            
-                            NSLog(@"%s 5 %d", __func__, code);
-                            
                             if (YYTXOperationSuccessful == code) {
-
+                                /* 所有的闹铃都获取成功 */
                                 [self removeEffectView];
-                                [self.tableView.header setState:MJRefreshStateIdle];
-                                
+
                                 [_getupAlarmArray removeAllObjects];
                                 [_customAlarmArray removeAllObjects];
                                 for (AlarmClass *alarm in self.deviceManager.device.userData.alarmList) {
                                     if ([alarm.title isEqualToString:NSLocalizedStringFromTable(@"getup", @"hint", nil)]) {
-                                        [_getupAlarmArray addObject:alarm];
+                                        [_getupAlarmArray addObject:alarm]; // 更新起床闹铃列表
                                     } else {
-                                        [_customAlarmArray addObject:alarm];
+                                        [_customAlarmArray addObject:alarm]; // 更新自定义闹铃
                                     }
                                 }
-                                _remindArray = [self.deviceManager.device.userData.remindList mutableCopy];
-                                _birthdayArray = [self.deviceManager.device.userData.birthdayList mutableCopy];
+                                _remindArray = [self.deviceManager.device.userData.remindList mutableCopy]; // 更新备忘信息
+                                _birthdayArray = [self.deviceManager.device.userData.birthdayList mutableCopy]; // 更新生日闹铃
                                 
-                                [self.tableView reloadData];
+                                [self.tableView reloadData]; // 刷新闹铃列表视图
                             } else {
+                                /* 获取生日闹铃失败 */
                                 if (YYTXTransferFailed == code) {
-                                    
                                     [self showTitle:NSLocalizedStringFromTable(@"gettingAlarmFailed", @"hint", nil) hint:NSLocalizedStringFromTable(@"hintForTransferFailed", @"hint", nil)];
                                 } else if (YYTXDeviceIsAbsent == code) {
-                                    
                                     [self showTitle:[NSString stringWithFormat:NSLocalizedStringFromTable(@"iphoneDisconnectedTo %@", @"hint", nil), self.deviceManager.device.userData.generalData.nickName] hint:NSLocalizedStringFromTable(@"hintForDeviceDisconnect", @"hint", nil)];
                                 } else if (YYTXOperationIsTooFrequent == code) {
                                     [self removeEffectView];
@@ -963,17 +412,11 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
                         });
                     }];
                 } else {
+                    /* 获取备忘信息失败 */
                     dispatch_async(dispatch_get_main_queue(), ^{
-                        
-                        [self.tableView.header setState:MJRefreshStateIdle];
-                        
-                        NSLog(@"%s 4 %d", __func__, code);
-                        
                         if (YYTXTransferFailed == code) {
-                            
                             [self showTitle:NSLocalizedStringFromTable(@"gettingAlarmFailed", @"hint", nil) hint:NSLocalizedStringFromTable(@"hintForTransferFailed", @"hint", nil)];
                         } else if (YYTXDeviceIsAbsent == code) {
-                            
                             [self showTitle:[NSString stringWithFormat:NSLocalizedStringFromTable(@"iphoneDisconnectedTo %@", @"hint", nil), self.deviceManager.device.userData.generalData.nickName] hint:NSLocalizedStringFromTable(@"hintForDeviceDisconnect", @"hint", nil)];
                         } else {
                             [self removeEffectView];
@@ -989,18 +432,11 @@ NSString *const NSIndexPathValue = @"NSIndexPathValue";
                 }
             }];
         } else {
-            
+            /* 获取起床闹铃和自定义闹铃不成功 */
             dispatch_async(dispatch_get_main_queue(), ^{
-                
-                [self.tableView.header setState:MJRefreshStateIdle];
-            
-                NSLog(@"%s 3 %d", __func__, code);
-
                 if (YYTXTransferFailed == code) {
-                
                     [self showTitle:NSLocalizedStringFromTable(@"gettingAlarmFailed", @"hint", nil) hint:NSLocalizedStringFromTable(@"hintForTransferFailed", @"hint", nil)];
                 } else if (YYTXDeviceIsAbsent == code) {
-                
                     [self showTitle:[NSString stringWithFormat:NSLocalizedStringFromTable(@"iphoneDisconnectedTo %@", @"hint", nil), self.deviceManager.device.userData.generalData.nickName] hint:NSLocalizedStringFromTable(@"hintForDeviceDisconnect", @"hint", nil)];
                 } else {
                     [self removeEffectView];

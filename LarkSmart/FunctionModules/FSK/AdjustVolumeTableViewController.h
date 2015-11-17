@@ -9,6 +9,7 @@
 #import "UICustomTableViewController.h"
 
 @interface AdjustVolumeTableViewController : UICustomTableViewController
+/** 是否需要重新发送FSK声波 */
 @property (nonatomic, assign) BOOL needFSKConfig;
 
 @end

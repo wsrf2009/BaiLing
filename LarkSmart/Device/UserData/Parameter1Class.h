@@ -20,7 +20,10 @@
 
 - (NSInteger)getTimeAccrodingToTimeTitle:(NSString *)title;
 - (NSString *)getTimeTitleAccrodingToTime:(NSInteger)time;
+
+/** 解析其它参数设置，如播放时长、整点和半点报时 */
 - (BOOL)parseParameter1:(NSDictionary *)parameter1Item;
+
 - (NSDictionary *)modify;
 
 @end

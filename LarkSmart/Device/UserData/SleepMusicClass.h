@@ -18,7 +18,10 @@
 @property (nonatomic, retain) NSArray *timeList;
 
 - (NSString *)getMinuteLableAccrodingToSecond:(NSUInteger)second;
+
+/** 解析睡前音乐 */
 - (BOOL)parseSleepMusic:(NSDictionary *)sleepMusicItem;
+
 - (NSDictionary *)modify;
 
 @end

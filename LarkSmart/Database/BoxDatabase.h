@@ -44,25 +44,76 @@
 #endif
 @interface BoxDatabase : NSObject
 
+/** 是否是第一次打开APP */
 + (BOOL)isFirstOpenTheApp;
+
+/** 
+ 插入当前打开APP时的时间
+ @param date 打开APP时的时间：yyyy-MM-dd HH:mm:ss zzz
+ */
 + (BOOL)insertOpenAppRecord:(NSString *)date;
+
+/** 保存SSID和密码 */
 + (BOOL)addSSID:(NSString *)ssid withPassword:(NSString *) password;
+
+/** 
+ 获取保存的SSID的密码
+ @return 如果没有该SSID的记录，则返回nil
+ */
 + (NSString *)getPasswordWithSSID:(NSString *)ssid;
+
+/** 
+ 更新url，如buy url，喜马拉雅帮助的url等 
+ @param url 新的url
+ @name url的名字，buy_url、help_url、product_url、xmly_help_url、weixin_url
+ */
 + (BOOL)updateUrl:(NSString *)url withName:(NSString *)name;
+
+/** 
+ 获取对应的url
+ @param name url的名字，buy_url、help_url、product_url、xmly_help_url、weixin_url
+ @return 返回对应name的url
+ */
 + (NSString *)getUrlWithName:(NSString *)name;
-#if 0
-+ (BOOL)addName:(NSString *)name time:(NSString *)time question:(NSString *)question answer:(NSString *)answer help:(NSString *)helper;
-+ (NSMutableArray *)getItemFromQuestionAnswer;
-#endif
+
+/** 将从服务器获取的设备信息添加到数据库，当前没有用到 */
 + (BOOL)addProductId:(NSString *)pId title:(NSString *)title description:(NSString *)description icon:(NSString *)icon url:(NSString *)url guideImage:(NSString *)guideImage lastUpdateTime:(NSString *)lastUpdateTime guideType:(NSInteger)guideType;
+
+/** 从数据库获取保存的产品信息 */
 + (NSMutableArray *)getItemsFromProducsInfo;
 
+/** 获取APP的openId */
 + (NSString *)openId;
+
+/** 更新APP的openId */
 + (BOOL)updateOpenId:(NSString *)openId;
+
 #if TEST
+/** 
+ 保存udp的扫描结果，当初做udp扫描测试时用到
+ @param time 当前的时间
+ @param result udp扫描的结果，哪些设备扫描到了1，哪些没扫描到0
+ */
 + (BOOL)insertUdpScanResultWithScanTime:(NSString *)time scanResult:(NSMutableArray *)result;
+
+/**
+ 保存tcp的扫描结果，当初做tcp扫描测试时用到
+ @param time 当前的时间
+ @param result udp扫描的结果，哪些设备扫描到了1，哪些没扫描到0
+ */
 + (BOOL)insertTcpScanResultWithScanTime:(NSString *)time scanResult:(NSMutableArray *)result;
 #endif
+
+/** 
+ 在进入喜马拉雅界面时是否要自动弹出喜马拉雅帮助框 
+ @return YES 要弹出
+ @return NO 不弹出
+ */
 + (BOOL)autoPopHimalayaHelper;
+
+/** 
+ 修改进入喜马拉雅界面时，是否还要自动弹出帮助界面
+ @param autoPop YES，还要自动弹出；NO，不再自动弹出
+ */
 + (BOOL)changeHimalayaPopHelperState:(BOOL)autoPop;
 @end

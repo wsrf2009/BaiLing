@@ -45,6 +45,7 @@ NSString const *jsonItemUserDataUndisturbed = @"undisturbed";
     return self;
 }
 
+/** 解析从设备端接收到的Result Item */
 - (BOOL)parseResultItem:(NSDictionary *)resultItem {
     if (nil == resultItem) {
         return NO;
@@ -52,53 +53,63 @@ NSString const *jsonItemUserDataUndisturbed = @"undisturbed";
     
     NSDictionary *generalItem = [resultItem objectForKey:JSONITEM_USERDATA_GENERAL];
     if (nil != generalItem) {
+        /* 收到的是General数据 */
         [_deviceInfo parseDeviceInfo:generalItem];
         return [_generalData parseGeneral:generalItem];
     }
     
     NSDictionary *deviceInfoItem = [resultItem objectForKey:JSONITEM_USERDATA_DEVICE_INFO];
     if (nil != deviceInfoItem) {
-        _deviceInfo.isValid = YES;
+        /* 收到的是设备信息数据 */
+        _deviceInfo.isValid = YES; // 表示已经收到有效的设备信息，在进入到设备信息显示界面时，不必再重新获取设备信息
         return [_deviceInfo parseDeviceInfo:deviceInfoItem];
     }
     
     NSArray *alarmsItem = [resultItem objectForKey:JSONITEM_USERDATA_ALARM];
     if (nil != alarmsItem) {
+        /* 收到的是闹铃数据 */
         return [AlarmClass parseAlarms:alarmsItem alarmList:_alarmList];
     }
     
     NSArray *birthdaysItem = [resultItem objectForKey:JSONITEM_USERDATA_BIRTHDAY];
     if (nil != birthdaysItem) {
+        /* 收到的是生日提醒 */
         return [BirthdayClass parseBirthdays:birthdaysItem birthdayList:_birthdayList];
     }
     
     NSArray *remindsItem = [resultItem objectForKey:JSONITEM_USERDATA_REMIND];
     if (nil != remindsItem) {
+        /* 收到的是备忘提醒 */
         return [RemindClass parseReminds:remindsItem remindList:_remindList];
     }
     
     NSDictionary *sleepMusicItem = [resultItem objectForKey:JSONITEM_USERDATA_ALBUM];
     if (nil != sleepMusicItem) {
+        /* 收到的是睡前音乐 */
         return [_sleepMusic parseSleepMusic:sleepMusicItem];
     }
     
     NSDictionary *getupSetItem = [resultItem objectForKey:JSONITEM_USERDATA_GETUPSET];
     if (nil != getupSetItem) {
+        /* 收到的是起床通用设置 */
         return [_getupSet parseGetupSet:getupSetItem];
     }
     
     NSDictionary *wakeupItem = [resultItem objectForKey:JSONITEM_USERDATA_WAKEUP];
     if (nil != wakeupItem) {
+        /* 收到的是唤醒设置 */
         return [_wakeup parseWakeup:wakeupItem];
     }
     
     NSDictionary *undisturbedControlItem = [resultItem objectForKey:jsonItemUserDataUndisturbed];
     if (nil != undisturbedControlItem) {
+        /* 收到的是勿扰设置 */
         return [_undisturbedControl parseUndisturbedControl:undisturbedControlItem];
     }
     
     NSDictionary *parameter1Item = [resultItem objectForKey:JSONITEM_USERDATA_PARAMETER1];
     if (nil != parameter1Item) {
+        /* 收到的是其它参数设置 */
         return [_parameter1 parseParameter1:parameter1Item];
     }
     

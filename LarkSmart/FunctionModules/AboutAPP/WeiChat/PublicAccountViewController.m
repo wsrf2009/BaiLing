@@ -31,7 +31,7 @@
     
     [self.navigationItem setTitle:NSLocalizedStringFromTable(@"weiChatAccount", @"hint", nil)];
     
-    NSString *url = [BoxDatabase getUrlWithName:DT_ITEM_WEIXINURL];
+    NSString *url = [BoxDatabase getUrlWithName:DT_ITEM_WEIXINURL]; // 从数据库获取微信公众号的url
     _finalUrl = url;
 }
 
@@ -56,6 +56,8 @@
     
     [_webview loadRequest:request];
 }
+
+#pragma UIWebViewDelegate
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
     
@@ -94,6 +96,7 @@
     }
 }
 
+/** 点击了后退按钮 */
 - (void)backButtonClick {
     
     NSLog(@"%s", __func__);
@@ -105,6 +108,7 @@
     }
 }
 
+/** 活动指示 */
 - (void)setActivityIndState:(NSNumber *)state {
     
     if ([state boolValue]) {

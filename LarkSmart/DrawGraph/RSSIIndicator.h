@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 
 @interface RSSIIndicator : UIView
+
+/** WIFI的信号强度 */
 @property (nonatomic, assign) UInt8 rssi;
 
 @end

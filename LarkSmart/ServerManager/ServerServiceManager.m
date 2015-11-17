@@ -66,6 +66,7 @@ NSString *const DirRegist = @"v1/regist";
     return self;
 }
 
+/** 根据paramsItem，method，target生成json数据 */
 - (NSData *)createHttpRequestObject:(id)paramsItem method:(NSString *)method action:(SEL)action target:(id)target {
     
     if (nil == paramsItem) {
@@ -90,6 +91,7 @@ NSString *const DirRegist = @"v1/regist";
 
 #pragma 从服务器获取新的url
 
+/** 生成从服务器更新url的参数，appid，sign，openid，configid */
 - (NSDictionary *)createQueryParams {
     NSString *appVersion = [SystemToolClass appVersion];
     NSString *configId = [appVersion stringByReplacingOccurrencesOfString:@"." withString:@""];
@@ -99,9 +101,7 @@ NSString *const DirRegist = @"v1/regist";
     return @{@"appid":@APPID, @"sign":@SIGN, @"openid":_openId, @"configid":configId};
 }
 
-/*
- * 异步GET请求新的 buyurl，helpurl， producturl
- */
+/** 异步GET请求新的 buyurl，helpurl，producturl，并自动更新到数据库 */
 - (void)updateUrls {
     
     NSLog(@"%s", __func__);
@@ -115,6 +115,7 @@ NSString *const DirRegist = @"v1/regist";
             
             QueryClass *query = [QueryClass parseQuery:data];
             
+            /* 将新的url更新到数据库 */
             if (nil != query) {
                 if (nil != query.urlBuy) {
                     [BoxDatabase updateUrl:query.urlBuy withName:DT_ITEM_BUYURL];
@@ -144,13 +145,11 @@ NSString *const DirRegist = @"v1/regist";
 
 #pragma 从服务器请求数据
 
+/** 创建从服务器请求数据的参数，sign，appid，openid，id */
 - (NSDictionary *)createRequestParams {
     return @{@"sign":@SIGN, @"appid":@APPID, @"openid":_openId, @"id":@ID};
 }
 
-/*
- * 根据目录ID从服务器请求盖目录的子目录, 同步POST或异步POST
- */
 - (void)requestSubCategorysWithCateogryId:(NSString *)cId requestMode:(YYTXHttpRequestMode)mode requestFinish:(void (^)(NSMutableArray *subCategorys, YYTXHttpRequestReturnCode code))finishBlock {
     NSDictionary *categoryIdItem = [audioCategory getAudioCategoryWithID:cId];
     NSData *data = [self createHttpRequestObject:categoryIdItem method:ITEMMETHOD_VALUE_GETAUDIOCATEGORY action:nil target:nil];
@@ -162,17 +161,20 @@ NSString *const DirRegist = @"v1/regist";
         [httpRequest syncPostRequestForURL:[_ServerAddress stringByAppendingPathComponent:DirAdapter] dictionaryParams:[self createRequestParams] requestParams:[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] finishBlock:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
             
             if (nil != data) {
+                /* 收到有效的数据 */
                 NSLog(@"%s %@", __func__, [NSString stringWithUTF8String:data.bytes]);
                 
                 NSMutableArray *categoryList = [audioCategory analyzeAudioCategoryData:data];
                 
                 if (nil != categoryList) {
+                    /* 收到了有效的音乐列表 */
                     finishBlock(categoryList, YYTXHttpRequestSuccessful);
                 } else {
                     finishBlock(categoryList, YYTXHttpRequestUnknownError);
                 }
             } else {
                 
+                /* 接收错误 */
                 NSLog(@"%s response:%@ connectionError:%@", __func__, response, connectionError);
                 
                 if (NSURLErrorTimedOut == connectionError.code) {
@@ -186,17 +188,19 @@ NSString *const DirRegist = @"v1/regist";
         [httpRequest asyncPostRequestForURL:[_ServerAddress stringByAppendingPathComponent:DirAdapter] dictionaryParams:[self createRequestParams] requestParams:[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] finishBlock:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
             
             if (nil != data) {
+                /* 接收到有效的数据 */
                 NSLog(@"%s %@", __func__, [NSString stringWithUTF8String:data.bytes]);
                 
                 NSMutableArray *categoryList = [audioCategory analyzeAudioCategoryData:data];
                 
                 if (nil != categoryList) {
+                    /* 收到有效的音乐列表 */
                     finishBlock(categoryList, YYTXHttpRequestSuccessful);
                 } else {
                     finishBlock(categoryList, YYTXHttpRequestUnknownError);
                 }
             } else {
-                
+                /* 接收错误 */
                 NSLog(@"%s response:%@ connectionError:%@", __func__, response, connectionError);
                 
                 if (NSURLErrorTimedOut == connectionError.code) {
@@ -211,9 +215,7 @@ NSString *const DirRegist = @"v1/regist";
     }
 }
 
-/*
- * 根据目录ID从服务器请求播放列表, 同步POST或异步POST
- */
+/** 根据目录ID从服务器请求播放列表, 同步POST或异步POST */
 - (void)requestAudioListWithCategoryId:(NSString *)Id pageNo:(NSUInteger)page itemsPerpage:(NSUInteger)number requestMode:(YYTXHttpRequestMode)mode requestFinish:(void (^)(NSMutableArray *subCategorys, YYTXHttpRequestReturnCode code))finishBlock {
     NSDictionary *audioListItem = [audioList getAudioListWithCategoryId:Id pageNo:page itemsPerpage:number];
     NSData *data = [self createHttpRequestObject:audioListItem method:ITEMMETHOD_VALUE_GETAUDIOLIST action:nil target:nil];
@@ -222,6 +224,7 @@ NSString *const DirRegist = @"v1/regist";
         [httpRequest syncPostRequestForURL:[_ServerAddress stringByAppendingPathComponent:DirAdapter] dictionaryParams:[self createRequestParams] requestParams:[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] finishBlock:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
             
             if (nil != data) {
+                /* 收到有效的数据 */
                 NSLog(@"%s %@", __func__, [NSString stringWithUTF8String:data.bytes]);
                 
                 NSMutableArray *audioArray = [audioList parseAudioList:data];
@@ -246,6 +249,7 @@ NSString *const DirRegist = @"v1/regist";
         [httpRequest asyncPostRequestForURL:[_ServerAddress stringByAppendingPathComponent:DirAdapter] dictionaryParams:[self createRequestParams] requestParams:[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] finishBlock:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
             
             if (nil != data) {
+                /* 收到有效的数据 */
                 NSLog(@"%s %@", __func__, [NSString stringWithUTF8String:data.bytes]);
                 
                 NSMutableArray *audioArray = [audioList parseAudioList:data];
@@ -271,9 +275,7 @@ NSString *const DirRegist = @"v1/regist";
     }
 }
 
-/*
- * 异步请求最新的产品信息
- */
+/** 异步请求最新的产品信息 */
 - (void)requestProductInfo {
     NSDictionary *getProductItem = [ProductInfo getAllTheProductsInfo];
     NSData *data = [self createHttpRequestObject:getProductItem method:ITEMMETHOD_VALUE_GETPRODUCTINFO action:nil target:nil];
@@ -281,10 +283,10 @@ NSString *const DirRegist = @"v1/regist";
     [httpRequest asyncPostRequestForURL:[_ServerAddress stringByAppendingPathComponent:DirAdapter] dictionaryParams:[self createRequestParams] requestParams:[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] finishBlock:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
         
         if (nil != data) {
-            
+            /* 收到有效的数据 */
             NSLog(@"%s %@", __func__, [NSString stringWithUTF8String:data.bytes]);
             
-            [ProductInfo parseProductInfo:data];
+            [ProductInfo parseProductInfo:data]; // 解析收到的数据
         } else {
             
             NSLog(@"%s response:%@ connectionError:%@", __func__, response, connectionError);
@@ -294,13 +296,12 @@ NSString *const DirRegist = @"v1/regist";
     }];
 }
 
+/** 创建由宇音天下后台服务器解析数据的参数 */
 - (NSDictionary *)createAnalysisParamsWithdeviceOpenId:(NSString *)openId {
     return @{@"sign":@SIGN, @"appid":@APPID, @"openid":_openId, @"id":@ID, @"yunbaoopenid":openId};
 }
 
-/*
- * 请求后台对百度返回的进行语义分析
- */
+/** 请求后台对百度返回的进行语义分析 */
 - (void)requestAnalysis:(NSData *)data deviceOpenId:(NSString *)openId requestFinish:(void (^)(NSDictionary *result))finishBlock {
     NSDictionary *dic = [SemanticAnalysis sendJsonItem:data];
     NSData *reqData = [self createHttpRequestObject:dic method:METHODVALUE_SEMANTICANALYSIS action:nil target:nil];
@@ -308,7 +309,7 @@ NSString *const DirRegist = @"v1/regist";
     [httpRequest syncPostRequestForURL:[_ServerAddress stringByAppendingPathComponent:DirAdapter] dictionaryParams:[self createAnalysisParamsWithdeviceOpenId:openId] requestParams:[[NSString alloc] initWithData:reqData encoding:NSUTF8StringEncoding] finishBlock:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
         
         if (nil != data) {
-            
+            /* 收到有效的数据 */
             NSLog(@"%s %@", __func__, [NSString stringWithUTF8String:data.bytes]);
             
             NSDictionary *root = [ServerServiceManager getRootObjectFromData:data];
@@ -330,7 +331,7 @@ NSString *const DirRegist = @"v1/regist";
     }];
 }
 
-/* 提交用户反馈 */
+/** 以Post的方式向服务器提交用户反馈 */
 - (void)postUserFeedback:(NSDictionary *)feedback requestFinish:(void (^)(NSString *message))finishBlock {
     NSMutableDictionary *dic = [UserFeedback createWithFeedback:feedback];
     NSData *feedbackData = [self createHttpRequestObject:dic method:methodValueSubmitUserFeedback action:nil target:nil];
@@ -345,10 +346,10 @@ NSString *const DirRegist = @"v1/regist";
 
 }
 
-#pragma 在服务器激活、登陆、登出设备
+#pragma 在服务器激活、登陆、登出APP
 
+/** 创建向服务器认证APP的参数，action，appid，sign，deviceid，version */
 + (NSDictionary *)createAPPAuthenticationParams:(NSString *)action {
-    
     if (nil == action) {
         return nil;
     } else if (action.length <= 0) {
@@ -373,9 +374,7 @@ NSString *const DirRegist = @"v1/regist";
     return @{@"action":action, @"appid":@APPID, @"sign":@SIGN, @"deviceid":uuid, @"version":appVersion};
 }
 
-/*
- * 同步POST的方式在服务器激活本APP
- */
+/** 同步POST的方式在服务器激活APP */
 - (void)active {
     NSLog(@"%s", __func__);
     [httpRequest syncPostRequestForURL:[_ServerAddress stringByAppendingPathComponent:DirRegist] dictionaryParams:[ServerServiceManager createAPPAuthenticationParams:@APP_ACTIVE] requestParams:nil finishBlock:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
@@ -402,10 +401,9 @@ NSString *const DirRegist = @"v1/regist";
     }];
 }
 
-/*
- * 同步POST的方式在服务器登陆本APP
- */
+/** 以同步POST的方式在服务器登陆APP */
 - (void)login {
+    
     NSLog(@"%s", __func__);
     
     [httpRequest syncPostRequestForURL:[_ServerAddress stringByAppendingPathComponent:DirRegist] dictionaryParams:[ServerServiceManager createAPPAuthenticationParams:@APP_LOGIN] requestParams:nil finishBlock:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
@@ -418,12 +416,11 @@ NSString *const DirRegist = @"v1/regist";
                 /* 注册不成功则需要先激活 */
                 [self active];
             } else {
-                /* 获取成功，则将心的openid更新进数据库 */
+                /* 获取成功，则将新的openid更新进数据库 */
                 _openId = openId;
                 [BoxDatabase updateOpenId:_openId];
             }
         } else {
-            
             NSLog(@"%s response:%@ connectionError:%@", __func__, response, connectionError);
             NSLog(@"%s %ld", __func__, (long)connectionError.code);
             NSLog(@"%s %@", __func__, connectionError.localizedDescription);
@@ -438,15 +435,14 @@ NSString *const DirRegist = @"v1/regist";
     }];
 }
 
+/** 从服务器端登出APP */
 - (void)logout {
     [httpRequest asyncPostRequestForURL:[_ServerAddress stringByAppendingPathComponent:DirRegist] dictionaryParams:[ServerServiceManager createAPPAuthenticationParams:@APP_LOGOUT] requestParams:nil finishBlock:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
-        
-        
     }];
 }
 
+/** 将NSData转为NSDictionary */
 + (NSDictionary *)getRootObjectFromData:(NSData *)data {
-
     if (nil == data) {
         return nil;
     }

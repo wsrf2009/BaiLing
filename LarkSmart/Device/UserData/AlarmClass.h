@@ -56,6 +56,7 @@
 + (NSArray *)modifyAlarm:(AlarmClass *)alarm;
 + (NSArray *)deleteAlarmWithAlarmId:(NSInteger)alarmId;
 
+/** 解析起床闹铃和自定义闹铃，将解析到的闹铃存放于list中 */
 + (BOOL)parseAlarms:(NSArray *)alarmsItem alarmList:(NSMutableArray *)list;
 
 @end

@@ -11,7 +11,10 @@
 
 @interface UdpSessionManager : NSObject
 
+/** 以paramsItem、method创建Json格式的UDP广播包 */
 - (void)createUdpJsonRequestObject:(id)paramsItem method:(NSString *)method action:(SEL)action target:(id)target;
+
+/** 获取要发送的UDP数据 */
 - (NSData *)getUdpData;
 
 @end

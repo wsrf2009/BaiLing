@@ -53,6 +53,7 @@ NSString *preSSID;
     [[NSNotificationCenter defaultCenter] removeObserver:self name:kReachabilityChangedNotification object:nil];
 }
 
+/** 网络连接性已改变 */
 - (void)reachabilityChanged:(NSNotification *)note {
     Reachability* curReach = [note object];
     
@@ -66,20 +67,22 @@ NSString *preSSID;
     //对连接改变做出响应的处理动作。
     NetworkStatus status = [reach currentReachabilityStatus];
     if (ReachableViaWiFi != status) {
-        
+        /* 当前手机没有使用WIFI */
         preSSID = nil;
         if ([_delegate respondsToSelector:@selector(wifiDisconnected)]) {
-            [_delegate wifiDisconnected];
+            [_delegate wifiDisconnected]; // WIFI已断开
         }
     } else {
         NSString *curSSID = [NetworkMonitor currentWifiSSID];
         
         if (nil != preSSID) {
             if ([preSSID isEqual:curSSID]) {
+                /* 和之前连的WIFI一样 */
                 return;
             }
         }
         
+        /* 和之前连的WIFI不一样则反馈给上一级，告知已跳网 */
         if ([_delegate respondsToSelector:@selector(connectedToSSID:)]) {
             [_delegate connectedToSSID:curSSID];
         }

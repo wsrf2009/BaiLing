@@ -63,7 +63,7 @@
     [udpServer close];
 }
 
-/* 创建udp客户端 */
+/** 创建udp客户端 */
 - (void)getUdpClient {
     NSError *error = nil;
     
@@ -103,7 +103,7 @@
     }
 }
 
-/* 用已创建的udp服务器发送数据，使用默认的超时 */
+/** 用已创建的udp服务器发送数据，使用默认的超时 */
 - (void)sendData:(NSData *)data toHost:(NSString *)host Port:(int)port Tag:(int)tag {
     
     if ([udpServer isClosed]) {
@@ -114,19 +114,19 @@
     [udpServer sendData:data toHost:host port:port withTimeout:20 tag:tag];
 }
 
-/* 用已创建的udp服务器发送数据，使用自定义的超时 */
+/** 用已创建的udp服务器发送数据，使用自定义的超时 */
 - (void)serverSendData:(NSData *)data toHost:(NSString *)host Port:(int)port Timeout:(int)time Tag:(int)tag {
     
     [udpServer sendData:data toHost:host port:port withTimeout:time tag:tag];
 }
 
-/* 用已创建的udp客户端发送数据，使用默认的超时 */
+/** 用已创建的udp客户端发送数据，使用默认的超时 */
 - (void)clientSendData:(NSData *)data toHost:(NSString *)host Port:(int)port Tag:(int)tag {
     
     [udpClient sendData:data toHost:host port:port withTimeout:20 tag:tag];
 }
 
-/* 用已创建的udp客户端发送数据，使用自定义的超时 */
+/** 用已创建的udp客户端发送数据，使用自定义的超时 */
 - (void)clientSendData:(NSData *)data toHost:(NSString *)host Port:(int)port Timeout:(int)time Tag:(int)tag {
     
     [udpClient sendData:data toHost:host port:port withTimeout:time tag:tag];

@@ -18,6 +18,7 @@ char pinyinFirstLetter(unsigned short hanzi);
 //返回参数中所有汉字的首字母，遇到其他字符，则用 # 替换
 + (NSString *)firstLetters:(NSString *)chineseString;
 
+/** 获取中文chineseString的拼音，如：拼音，pin yin */
 + (NSString *)pinYin:(NSString *)chineseString;
 
 @end

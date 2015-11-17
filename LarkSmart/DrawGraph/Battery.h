@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @interface Battery : UIView
+/** 电池电量 */
 @property (nonatomic, assign) CGFloat power;
 
 @end

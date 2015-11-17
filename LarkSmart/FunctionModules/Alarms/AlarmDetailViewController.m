@@ -24,8 +24,9 @@
 
 @end
 
-@implementation UIButton (AlarmCycleSelected)
+@implementation UIButton (AlarmCycleSelected) // UIButton扩展
 
+/** 自定义的改变按钮的状态 */
 - (void)changeStatus:(BOOL)isSelected {
     
     if (isSelected) {
@@ -60,6 +61,7 @@
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (nil != self) {
+        /* 一次性闹铃 */
         _btnOneOff = [[UIButton alloc] init];
         [_btnOneOff setTitle:NSLocalizedStringFromTable(@"oneOff", @"hint", nil) forState:UIControlStateNormal];
         [_btnOneOff.titleLabel setFont:[UIFont systemFontOfSize:14.0f]];
@@ -70,6 +72,7 @@
         [_btnOneOff addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
         _btnOneOff.translatesAutoresizingMaskIntoConstraints = NO;
         
+        /* 每天 */
         _btnEverday = [[UIButton alloc] init];
         [_btnEverday setTitle:NSLocalizedStringFromTable(@"everyday", @"hint", nil) forState:UIControlStateNormal];
         [_btnEverday.titleLabel setFont:[UIFont systemFontOfSize:14.0f]];
@@ -80,6 +83,7 @@
         [_btnEverday addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
         _btnEverday.translatesAutoresizingMaskIntoConstraints = NO;
         
+        /* 周一 */
         _btnMonday = [[UIButton alloc] init];
         [_btnMonday setTitle:NSLocalizedStringFromTable(@"monday", @"hint", nil) forState:UIControlStateNormal];
         [_btnMonday.titleLabel setFont:[UIFont systemFontOfSize:14.0f]];
@@ -90,6 +94,7 @@
         [_btnMonday addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
         _btnMonday.translatesAutoresizingMaskIntoConstraints = NO;
         
+        /* 周二 */
         _btnTuesday = [[UIButton alloc] init];
         [_btnTuesday setTitle:NSLocalizedStringFromTable(@"tuesday", @"hint", nil) forState:UIControlStateNormal];
         [_btnTuesday.titleLabel setFont:[UIFont systemFontOfSize:14.0f]];
@@ -100,6 +105,7 @@
         [_btnTuesday addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
         _btnTuesday.translatesAutoresizingMaskIntoConstraints = NO;
         
+        /* 周三 */
         _btnWednesday = [[UIButton alloc] init];
         [_btnWednesday setTitle:NSLocalizedStringFromTable(@"wednesday", @"hint", nil) forState:UIControlStateNormal];
         [_btnWednesday.titleLabel setFont:[UIFont systemFontOfSize:14.0f]];
@@ -110,6 +116,7 @@
         [_btnWednesday addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
         _btnWednesday.translatesAutoresizingMaskIntoConstraints = NO;
         
+        /* 周四 */
         _btnThursday = [[UIButton alloc] init];
         [_btnThursday setTitle:NSLocalizedStringFromTable(@"thursday", @"hint", nil) forState:UIControlStateNormal];
         [_btnThursday.titleLabel setFont:[UIFont systemFontOfSize:14.0f]];
@@ -120,6 +127,7 @@
         [_btnThursday addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
         _btnThursday.translatesAutoresizingMaskIntoConstraints = NO;
         
+        /* 周五 */
         _btnFriday = [[UIButton alloc] init];
         [_btnFriday setTitle:NSLocalizedStringFromTable(@"friday", @"hint", nil) forState:UIControlStateNormal];
         [_btnFriday.titleLabel setFont:[UIFont systemFontOfSize:14.0f]];
@@ -130,6 +138,7 @@
         [_btnFriday addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
         _btnFriday.translatesAutoresizingMaskIntoConstraints = NO;
         
+        /* 周六 */
         _btnSaturday = [[UIButton alloc] init];
         [_btnSaturday setTitle:NSLocalizedStringFromTable(@"saturday", @"hint", nil) forState:UIControlStateNormal];
         [_btnSaturday.titleLabel setFont:[UIFont systemFontOfSize:14.0f]];
@@ -140,6 +149,7 @@
         [_btnSaturday addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
         _btnSaturday.translatesAutoresizingMaskIntoConstraints = NO;
         
+        /* 周日 */
         _btnSunday = [[UIButton alloc] init];
         [_btnSunday setTitle:NSLocalizedStringFromTable(@"sunday", @"hint", nil) forState:UIControlStateNormal];
         [_btnSunday.titleLabel setFont:[UIFont systemFontOfSize:14.0f]];
@@ -277,6 +287,7 @@
 
 - (void)buttonClick:(UIButton *)button {
     if (button == _btnOneOff) {
+        /* 一次性 */
         if (FRE_MODE_ONEOFF != _fre_mode) {
             
             _fre_mode = FRE_MODE_ONEOFF;
@@ -284,6 +295,7 @@
             _fre_mode = FRE_MODE_EVERYDAY;
         }
     } else if (button == _btnEverday) {
+        /* 每天 */
         if (FRE_MODE_EVERYDAY != _fre_mode) {
             _fre_mode = FRE_MODE_EVERYDAY;
             _frequency &= ~(FREQUENCY_MONDAY|FREQUENCY_TUESDAY|FREQUENCY_WEDNESDAY|FREQUENCY_THURSDAY|FREQUENCY_FRIDAY|FREQUENCY_SATURDAY|FREQUENCY_SUNDAY);
@@ -294,6 +306,7 @@
             _frequency |= FREQUENCY_MONDAY|FREQUENCY_TUESDAY|FREQUENCY_WEDNESDAY|FREQUENCY_THURSDAY|FREQUENCY_FRIDAY;
         }
     } else {
+        /* 一周中某天 */
         _fre_mode = FRE_MODE_WEEKLY;
         if (button == _btnMonday) {
             if (_frequency & FREQUENCY_MONDAY) {
@@ -396,12 +409,13 @@
     self.toolbarItems = [[NSArray alloc] initWithObjects:space, buttonSave, space, nil];
     
     if (_isGetupAlarm) {
-
+        /* 起床闹铃 */
         [self.navigationItem setTitle:NSLocalizedStringFromTable(@"getupAlarm", @"hint", nil)];
         
 //        [_labelTitleMaxLength setHidden:YES];
         [_labelTitleLength setHidden:YES];
     } else {
+        /* 自定义闹铃 */
         [self.navigationItem setTitle:NSLocalizedStringFromTable(@"customAlarm", @"hint", nil)];
         
         [_labelTitleLength setHidden:NO];
@@ -412,9 +426,11 @@
     
     [self hideEmptySeparators:self.tableView];
     
+    /* 隐藏separator */
     UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:4]];
     [cell setSeparatorInset:UIEdgeInsetsMake(0, self.tableView.frame.size.width, 0, 0)];
     
+    /* 起床闹铃通用设置按钮的边框 */
     _btnAlarmSet.layer.cornerRadius = 10.0f;
     _btnAlarmSet.layer.borderColor = [UIColor grayColor].CGColor;
     _btnAlarmSet.layer.borderWidth = 0.8f;
@@ -429,7 +445,7 @@
     self.deviceManager.delegate = self;
     
     if (self.deviceManager.device.isAbsent) {
-        
+        /* 与设备的连接已断开 */
         [self initEffectViewWithTitle:[NSString stringWithFormat:NSLocalizedStringFromTable(@"iphoneDisconnectedTo %@", @"hint", nil), self.deviceManager.device.userData.generalData.nickName] hint:NSLocalizedStringFromTable(@"hintForDeviceDisconnect", @"hint", nil)];
     } else {
 
@@ -492,14 +508,15 @@
     if (3 == indexPath.section) {
         
         if (0 == indexPath.row) {
+            /* 闹铃的周期性 */
             AlarmClycleView *alarmCycleView = [[AlarmClycleView alloc] initWithFrame:CGRectMake(0, 0, 290.0f, 170.0f)];
 
             alarmCycleView.fre_mode = _alarm.fre_mode;
             alarmCycleView.frequency = _alarm.frequency;
             [alarmCycleView updateUI];
             
-            JGActionSheetSection *s0 = [JGActionSheetSection sectionWithTitle:NSLocalizedStringFromTable(@"alarmCycle", @"hint", nil) message:nil contentView:alarmCycleView];
-            JGActionSheetSection *s1 = [JGActionSheetSection sectionWithTitle:nil message:nil buttonTitles:@[NSLocalizedStringFromTable(@"ok", @"hint", nil)] buttonStyle:JGActionSheetButtonStyleDefault];
+            JGActionSheetSection *s0 = [JGActionSheetSection sectionWithTitle:NSLocalizedStringFromTable(@"alarmCycle", @"hint", nil) message:nil contentView:alarmCycleView]; // 初始化section
+            JGActionSheetSection *s1 = [JGActionSheetSection sectionWithTitle:nil message:nil buttonTitles:@[NSLocalizedStringFromTable(@"ok", @"hint", nil)] buttonStyle:JGActionSheetButtonStyleDefault]; // 初始化sheet
             [s1 setButtonStyle:JGActionSheetButtonStyleDefault forButtonAtIndex:0];
             
             JGActionSheet *sheet = [JGActionSheet actionSheetWithSections:@[s0, s1]];
@@ -507,22 +524,21 @@
             sheet.insets = UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f);
             
             if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-                
+                /* iPad设备中显示的位置 */
                 CGPoint p = (CGPoint){-5.0f, CGRectGetMidY(_labelAlarmCycle.bounds)};
-                
                 p = [self.navigationController.view convertPoint:p fromView:_labelAlarmCycle];
-                
                 [sheet showFromPoint:p inView:self.navigationController.view arrowDirection:JGActionSheetArrowDirectionRight animated:YES];
             }
             else {
+                /* iPhone */
                 [sheet showInView:self.navigationController.view animated:YES];
             }
             
-            [sheet setOutsidePressBlock:^(JGActionSheet *sheet) {
+            [sheet setOutsidePressBlock:^(JGActionSheet *sheet) { // 点击了sheet之外的区域
                 [sheet dismissAnimated:YES];
             }];
             
-            [sheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
+            [sheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) { // 点击了sheet中的某个section
 
                 [sheet dismissAnimated:YES];
                 
@@ -536,6 +552,7 @@
                 }
             }];
         } else if (1 == indexPath.row) {
+            /* 闹铃的响铃日期 */
             UIDatePicker *datePicker = [[UIDatePicker alloc] init];
             datePicker.frame = CGRectMake(0, 0, 290.0f, 170.0f);
             [datePicker setDatePickerMode:UIDatePickerModeDate];
@@ -544,30 +561,29 @@
                 [datePicker setDate:date];
             }
             
-            JGActionSheetSection *s0 = [JGActionSheetSection sectionWithTitle:NSLocalizedStringFromTable(@"fireDate", @"hint", nil) message:nil contentView:datePicker];
-            JGActionSheetSection *s1 = [JGActionSheetSection sectionWithTitle:nil message:nil buttonTitles:@[NSLocalizedStringFromTable(@"ok", @"hint", nil)] buttonStyle:JGActionSheetButtonStyleDefault];
+            JGActionSheetSection *s0 = [JGActionSheetSection sectionWithTitle:NSLocalizedStringFromTable(@"fireDate", @"hint", nil) message:nil contentView:datePicker]; // 初始化section
+            JGActionSheetSection *s1 = [JGActionSheetSection sectionWithTitle:nil message:nil buttonTitles:@[NSLocalizedStringFromTable(@"ok", @"hint", nil)] buttonStyle:JGActionSheetButtonStyleDefault]; // 初始化sheet
             
             JGActionSheet *sheet = [JGActionSheet actionSheetWithSections:@[s0, s1]];
             sheet.delegate = self;
             sheet.insets = UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f);
             
             if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-                
+                /* iPad中的现实位置 */
                 CGPoint p = (CGPoint){-5.0f, CGRectGetMidY(_labelDate.bounds)};
-                
                 p = [self.navigationController.view convertPoint:p fromView:_labelDate];
-                
                 [sheet showFromPoint:p inView:self.navigationController.view arrowDirection:JGActionSheetArrowDirectionRight animated:YES];
             }
             else {
+                /* iPhone */
                 [sheet showInView:self.navigationController.view animated:YES];
             }
             
-            [sheet setOutsidePressBlock:^(JGActionSheet *sheet) {
+            [sheet setOutsidePressBlock:^(JGActionSheet *sheet) { // 点击了sheet之外的区域
                 [sheet dismissAnimated:YES];
             }];
             
-            [sheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
+            [sheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) { // 点击了sheet中的某个section
                 
                 NSLog(@"%s sec:%ld row:%ld", __func__, (long)indexPath.section, (long)indexPath.row);
                 
@@ -584,9 +600,10 @@
     }
 }
 
+/** 闹铃标题长度检查 */
 - (BOOL)titleLengthCheck {
     NSInteger length = _textViewAlarmTitle.text.length;
-    NSString *str = [NSString stringWithFormat:@"%d/%d", length, MAXCUSTOMIZEALARMTITLELENGTH];
+    NSString *str = [NSString stringWithFormat:@"%@/%@", @(length), @MAXCUSTOMIZEALARMTITLELENGTH];
     NSRange range = [str rangeOfString:@"/"];
     NSLog(@"%s range:%@", __func__, NSStringFromRange(range));
     NSRange range1 = NSMakeRange(0, range.location);
@@ -612,6 +629,7 @@
     return statusCode;
 }
 
+/** 检查用户提供的各种参数是否有效 */
 - (BOOL)inputParametersIsValid {
     _alarm.title = _textViewAlarmTitle.text;
     
@@ -619,9 +637,9 @@
     if (![self titleLengthCheck]) {
         
         if (_alarm.title.length <= 0) {
-            [self showMessage:NSLocalizedStringFromTable(@"theAlarmTitleIsEmpty", @"hint", nil) messageType:0];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"theAlarmTitleIsEmpty", @"hint", nil)];
         } else {
-            [self showMessage:NSLocalizedStringFromTable(@"alarmTitleIsTooLong", @"hint", nil) messageType:0];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"alarmTitleIsTooLong", @"hint", nil)];
         }
         
         [_textViewAlarmTitle becomeFirstResponder];
@@ -637,27 +655,31 @@
     if (str.length <= 0) {
         
         [_textViewAlarmTitle becomeFirstResponder];
-        [self showMessage:NSLocalizedStringFromTable(@"theAlarmTitleInvalid", @"hint", nil) messageType:0];
+        [QXToast showMessage:NSLocalizedStringFromTable(@"theAlarmTitleInvalid", @"hint", nil)];
         return NO;
     } else {
         
         _alarm.title = str;
     }
     
+    /* 选择的为一次性闹铃 */
     if (FRE_MODE_ONEOFF == _alarm.fre_mode) {
+        /* 用户选择的时间 */
         NSString *alarmDate = _alarm.date;
         NSString *alarmTime = [_alarm.clock substringToIndex:5];
+        /* 当前的时间 */
         NSString *curDate = [[NSDate date] getDateString];
         NSString *curTime = [[[NSDate date] getTimeString] substringToIndex:5];
         
         NSComparisonResult resultDateCompare = [alarmDate compare:curDate];
-        if (NSOrderedAscending == resultDateCompare) {
-            [self showMessage:NSLocalizedStringFromTable(@"invalidAlarmTime", @"hint", nil) messageType:0];
+        if (NSOrderedAscending == resultDateCompare) { // 选择的日期已过期
+            [QXToast showMessage:NSLocalizedStringFromTable(@"invalidAlarmTime", @"hint", nil)];
             return NO;
         } else if (NSOrderedSame == resultDateCompare) {
+            /* 选择的日期为今天 */
             NSComparisonResult resultTimeCompare = [alarmTime compare:curTime];
-            if (NSOrderedDescending != resultTimeCompare) {
-                [self showMessage:NSLocalizedStringFromTable(@"invalidAlarmTime", @"hint", nil) messageType:0];
+            if (NSOrderedDescending != resultTimeCompare) { // 选择的时间已过去
+                [QXToast showMessage:NSLocalizedStringFromTable(@"invalidAlarmTime", @"hint", nil)];
                 return NO;
             }
         }
@@ -666,6 +688,7 @@
     return YES;
 }
 
+/** 闹铃开关按钮被点击 */
 - (IBAction)buttonOpenAlarmClick:(id)sender {
     NSString *open = NSLocalizedStringFromTable(@"open", @"hint", nil);
     NSString *close = NSLocalizedStringFromTable(@"close", @"hint", nil);
@@ -674,15 +697,16 @@
     NSString *buttonOkTitle;
     
     if ([_alarm is_valid]) {
-        
+        /* 闹铃已被开启 */
         message = NSLocalizedStringFromTable(@"closeThisAlarm?", @"hint", nil);
         buttonOkTitle = close;
     } else {
-        
+        /* 闹铃已被关闭 */
         message = NSLocalizedStringFromTable(@"openThisAlarm?", @"hint", nil);
         buttonOkTitle = open;
     }
     
+    /* 弹出对话窗 */
     if ([SystemToolClass systemVersionIsNotLessThan:@"8.0"]) {
         /* IOS8.0及以后 */
         UIAlertController *alertController = [UIAlertController alertControllerWithTitle:[SystemToolClass appName] message:message preferredStyle:UIAlertControllerStyleAlert];
@@ -715,6 +739,7 @@
     }
 }
 
+/** 删除闹铃按钮被点击 */
 - (IBAction)buttonDeleteAlarmClick:(id)sender {
     NSString *message = NSLocalizedStringFromTable(@"deleteThisAlarm?", @"hint", nil);
     NSString *buttonCancelTitle = NSLocalizedStringFromTable(@"cancel", @"hint", nil);
@@ -779,6 +804,7 @@
     
     [_textViewAlarmTitle setText:_alarm.title];
 
+    /* 闹铃日期 */
     NSDate *date = [_alarm.clock convertToNSDateFromTimeString];
     [_datePicker setDatePickerMode:UIDatePickerModeTime];
     if (nil != date) {
@@ -786,9 +812,11 @@
     }
     
     if (FRE_MODE_ONEOFF == _alarm.fre_mode && !_displayAlarmDate) {
+        /* 一次性闹铃，需要显示日期选择选项 */
         _displayAlarmDate = YES;
         [self.tableView insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:1 inSection:3]] withRowAnimation:UITableViewRowAnimationTop];
     } else if (FRE_MODE_ONEOFF != _alarm.fre_mode && _displayAlarmDate) {
+        /* 非一次性闹铃，隐藏日期选择选项 */
         _displayAlarmDate = NO;
         [self.tableView deleteRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:1 inSection:3]] withRowAnimation:UITableViewRowAnimationTop];
     }
@@ -799,6 +827,7 @@
     NSLog(@"%s %@", __func__, [AlarmClass getAlarmCycle:_alarm]);
 }
 
+/** 跳转到闹铃通用设置界面 */
 - (void)gotoSetView {
     
     AlarmSetViewController *alarmSetVC = [self.storyboard instantiateViewControllerWithIdentifier:@"AlarmSetViewController"];
@@ -816,7 +845,7 @@
         /* 检查是否以包含空格 */
         NSRange range1 = [textView.text rangeOfString:@" "];
         if (NSNotFound != range1.location) {
-            [self showMessage:NSLocalizedStringFromTable(@"invalidCharacterOrFormatForAlarmTitle", @"hint", nil) messageType:0];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"invalidCharacterOrFormatForAlarmTitle", @"hint", nil)];
             textView.text = [textView.text stringByReplacingOccurrencesOfString:@" " withString:@""];
             [self titleLengthCheck];
             return;
@@ -841,7 +870,7 @@
         /* 检查是否包含回车符 */
         NSRange range2 = [textView.text rangeOfString:@"\n"];
         if (NSNotFound != range2.location) {
-            [self showMessage:NSLocalizedStringFromTable(@"invalidCharacterOrFormatForAlarmTitle", @"hint", nil) messageType:0];
+            [QXToast showMessage:NSLocalizedStringFromTable(@"invalidCharacterOrFormatForAlarmTitle", @"hint", nil)];
             textView.text = [textView.text stringByReplacingOccurrencesOfString:@"\n" withString:@""];
             [self titleLengthCheck];
             return;
@@ -864,40 +893,40 @@
 
 #pragma 闹铃数据源
 
+/** 闹铃开关 */
 - (void)openAlarm:(BOOL)open {
     NSString *successful;
     NSString *failed;
     
-    if (![self inputParametersIsValid]) {
+    if (![self inputParametersIsValid]) { // 检查用户选择的参数是否有效
         return;
     }
     
     if (_isGetupAlarm) {
-        if (open) {
-            
+        /* 起床闹铃 */
+        if (open) { // 打开闹铃？
             successful = NSLocalizedStringFromTable(@"openGetupAlarmSuccessful", @"hint", nil);
             failed = NSLocalizedStringFromTable(@"openGetupAlarmFailed", @"hint", nil);
             _alarm.is_valid = YES;
         } else {
-            
             successful = NSLocalizedStringFromTable(@"closeGetupAlarmSuccessful", @"hint", nil);
             failed = NSLocalizedStringFromTable(@"closeGetupAlarmFailed", @"hint", nil);
             _alarm.is_valid = NO;
         }
     } else {
-        if (open) {
-            
+        /* 自定义闹铃 */
+        if (open) { // 打开闹铃？
             successful = NSLocalizedStringFromTable(@"openCustomAlarmSuccessful", @"hint", nil);
             failed = NSLocalizedStringFromTable(@"openCustomAlarmFailed", @"hint", nil);
             _alarm.is_valid = YES;
         } else {
-            
             successful = NSLocalizedStringFromTable(@"closeCustomAlarmSuccessful", @"hint", nil);
             failed = NSLocalizedStringFromTable(@"closeCustomAlarmFailed", @"hint", nil);
             _alarm.is_valid = NO;
         }
     }
     
+    /* 生成操作成功时终端设备的TTS提示 */
     NSArray *arr = [_alarm.clock componentsSeparatedByString:@":"];
     if (arr.count >= 2) {
         NSString *hour = arr[0];
@@ -907,6 +936,7 @@
     
     [self showActiviting];
     
+    /* 向设备发送数据修改闹铃 */
     [self.deviceManager.device modifyAlarm:_alarm parameter:@{DevicePlayTTSWhenOperationSuccessful:successful, DevicePlayTTSWhenOperationFailed:failed} completionBlock:^(YYTXDeviceReturnCode code) {
         
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -917,6 +947,7 @@
     }];
 }
 
+/** 修改闹铃 */
 - (void)modifyAlarm {
     
     NSLog(@"%s alarm:%@", __func__, _alarm);
@@ -927,6 +958,7 @@
 
     [self showBusying:NSLocalizedStringFromTable(@"saving", @"hint", nil)];
     
+    /* 生成操作成功和失败时设备端播放的TTS提示 */
     NSString *successfulHint;
     NSString *failedHint;
     NSString *successful;
@@ -949,29 +981,33 @@
     }
     
     if ([_alarm.title isEqualToString:@ALARMTYPE_GETUP]) {
+        /* 起床闹铃 */
         if (FRE_MODE_ONEOFF == _alarm.fre_mode) {
+            /* 一次性闹铃 */
             successfulHint = NSLocalizedStringFromTable(@"modifyOneOffGetupAlarmSuccessful", @"hint", nil);
-            
             successful = [NSString stringWithFormat:successfulHint, year, month, day, hour, minute];
         } else {
+            /* 非一次性闹铃 */
             successfulHint = NSLocalizedStringFromTable(@"modifyGetupAlarmSuccessful", @"hint", nil);
-            
             successful = [NSString stringWithFormat:successfulHint, hour, minute];
         }
         failedHint = NSLocalizedStringFromTable(@"modifyGetupAlarmFailed", @"hint", nil);
     } else {
+        /* 自定义闹铃 */
         if (FRE_MODE_ONEOFF == _alarm.fre_mode) {
+            /* 一次性闹铃 */
             successfulHint = NSLocalizedStringFromTable(@"modifyOneOffCustomAlarmSuccessful", @"hint", nil);
             
             successful = [NSString stringWithFormat:successfulHint, year, month, day, hour, minute];
         } else {
+            /* 非一次性闹铃 */
             successfulHint = NSLocalizedStringFromTable(@"modifyCustomAlarmSuccessful", @"hint", nil);
-            
             successful = [NSString stringWithFormat:successfulHint, hour, minute];
         }
         failedHint = NSLocalizedStringFromTable(@"modifyCustomAlarmFailed", @"hint", nil);
     }
     
+    /* 将新的闹铃数据发送到设备 */
     [self.deviceManager.device modifyAlarm:_alarm parameter:@{DevicePlayTTSWhenOperationSuccessful:successful, DevicePlayTTSWhenOperationFailed:failedHint}  completionBlock:^(YYTXDeviceReturnCode code) {
 
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -982,6 +1018,7 @@
     }];
 }
 
+/** 删除闹铃 */
 - (void)deleteAlarm {
     NSString *successful = NSLocalizedStringFromTable(@"deleteSuccessful", @"hint", nil);
     NSString *failed = NSLocalizedStringFromTable(@"deleteFailed", @"hint", nil);
@@ -998,6 +1035,7 @@
     }];
 }
 
+/** 添加到闹铃 */
 - (void)addAlarm:(void (^)(void))popVC {
     
     NSLog(@"%s alarm:%@", __func__, _alarm);
@@ -1008,6 +1046,7 @@
 
     [self showBusying:NSLocalizedStringFromTable(@"saving", @"hint", nil)];
     
+    /* 生成操作成功和失败时设备端播放的TTS提示 */
     NSString *successfulHint;
     NSString *failedHint;
     NSString *successful;
@@ -1030,23 +1069,27 @@
     }
     
     if ([_alarm.title isEqualToString:@ALARMTYPE_GETUP]) {
+        /* 起床闹铃 */
         if (FRE_MODE_ONEOFF == _alarm.fre_mode) {
+            /* 一次性 */
             successfulHint = NSLocalizedStringFromTable(@"insertOneOffGetupAlarmSuccessful", @"hint", nil);
-            
             successful = [NSString stringWithFormat:successfulHint, year, month, day, hour, minute];
             
         } else {
+            /* 非一次性 */
             successfulHint = NSLocalizedStringFromTable(@"insertGetupAlarmSuccessful", @"hint", nil);
             
             successful = [NSString stringWithFormat:successfulHint, hour, minute];
         }
        failedHint = NSLocalizedStringFromTable(@"insertGetupAlarmFailed", @"hint", nil);
     } else {
+        /* 自定义闹铃 */
         if (FRE_MODE_ONEOFF == _alarm.fre_mode) {
+            /* 一次性 */
             successfulHint = NSLocalizedStringFromTable(@"insertOneOffCustomAlarmSuccessful", @"hint", nil);
-            
             successful = [NSString stringWithFormat:successfulHint, year, month, day, hour, minute];
         } else {
+            /* 非一次性 */
             successfulHint = NSLocalizedStringFromTable(@"insertCustomAlarmSuccessful", @"hint", nil);
             
             successful = [NSString stringWithFormat:successfulHint, hour, minute];

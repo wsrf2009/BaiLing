@@ -58,17 +58,17 @@
         return;
     }
     
-    dispatch_semaphore_wait(semForCreateSession, DISPATCH_TIME_FOREVER);
+    dispatch_semaphore_wait(semForCreateSession, DISPATCH_TIME_FOREVER); // 获取信号量，是否可以创建会话
     
-    NSDictionary *root = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInteger:sessionID], JSONITEM_ID, method, JSONITEM_METHOD, paramsItem, JSONITEM_PARAMS, nil];
+    NSDictionary *root = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInteger:sessionID], JSONITEM_ID, method, JSONITEM_METHOD, paramsItem, JSONITEM_PARAMS, nil]; // 将ID、method、params整合到一个NSDictionary中
     NSError *err;
-    if ([NSJSONSerialization isValidJSONObject:root]) {
-        NSData *data = [NSJSONSerialization dataWithJSONObject:root options:NSJSONWritingPrettyPrinted error:&err];
+    if ([NSJSONSerialization isValidJSONObject:root]) { // root是否是有效的JSON格式
+        NSData *data = [NSJSONSerialization dataWithJSONObject:root options:NSJSONWritingPrettyPrinted error:&err]; // NSDictionary专为NSData
         if (nil != data) {
             UdpSession *session = [[UdpSession alloc] initWithID:sessionID++ target:target action:action data:data userInfo:nil];
             
             [udpSessionList addObject:session];
-            dispatch_semaphore_signal(semForUdpData);
+            dispatch_semaphore_signal(semForUdpData); // 有数据需要发送
         }
     }
     

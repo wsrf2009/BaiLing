@@ -48,6 +48,7 @@
     [super didReceiveMemoryWarning];
 }
 
+/** 返回到主菜单 */
 - (void)returnToMainMenu {
     for (UIViewController *controller in self.navigationController.viewControllers) {
         if ([controller isKindOfClass:[MainMenuViewController class]]) {
@@ -89,7 +90,7 @@
         return nil;
     }
     
-    [cell.image sd_setImageWithURL:[NSURL URLWithString:category.icon] placeholderImage:[UIImage imageNamed:@"default_small.png"]];
+    [cell.image sd_setImageWithURL:[NSURL URLWithString:category.icon] placeholderImage:[UIImage imageNamed:@"default_small.png"]]; // 从网络获取节目的icon
     [cell.text setText:category.title];
     cell.categoryID = category.categoryId;
     cell.hasSub = category.hassub;
@@ -109,6 +110,7 @@
     CategoryViewCell *cell = (CategoryViewCell *)[tableView cellForRowAtIndexPath:indexPath];
     
     if (cell.hasSub) {
+        /* 其下还有子类 */
         ListViewController *subCategoryVC = [self.storyboard instantiateViewControllerWithIdentifier:@"ListViewController"];
         subCategoryVC.deviceManager = self.deviceManager;
         subCategoryVC.parentCategoryID = cell.categoryID;
@@ -118,6 +120,7 @@
         }
         
     } else {
+        /* 无子类则进入到节目列表 */
         ContentViewController *contentVC = [self.storyboard instantiateViewControllerWithIdentifier:@"ContentViewController"];
         contentVC.deviceManager = self.deviceManager;
         contentVC.parentCategoryID = cell.categoryID;
@@ -129,6 +132,7 @@
     }
 }
 
+/** 获取节目子类 */
 - (void)getCategory {
 
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -144,9 +148,9 @@
             dispatch_async(dispatch_get_main_queue(), ^{
 
                 [self removeEffectView];
-                secondCategory = subCategorys;
+                secondCategory = subCategorys; // 节目子类
                 
-                [self.tableView reloadData];
+                [self.tableView reloadData]; // 刷新界面
             });
         } else if (YYTXHttpRequestTimeout == code) {
             dispatch_async(dispatch_get_main_queue(), ^{

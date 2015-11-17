@@ -31,20 +31,23 @@
     
     [_searchBarProvince setHidden:YES];
     
+    /* 获取所有省的列表 */
     _provinces = [NSMutableArray array];
     for (NSDictionary *province in [ChinaCityClass cityArray]) {
         [province enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
             
-            [_provinces addObject:key];
+            [_provinces addObject:key]; // 每一个城市列表的key就是所在省市的名称
         }];
     }
     NSLog(@"%s _pro:%@", __func__, [_provinces componentsJoinedByString:@","]);
     
+    /* 给每个省加上拼音 */
     NSMutableArray *mutableArray = [NSMutableArray array];
     for (NSString *province in _provinces) {
         [mutableArray addObject:@{province:[[HTFirstLetter pinYin:province] uppercaseString]}];
     }
     
+    /* 按照拼音对省进行排序 */
     NSArray *orderedProvinces = [mutableArray sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
         NSDictionary *dic1 = obj1;
         NSDictionary *dic2 = obj2;
@@ -58,6 +61,7 @@
     
     _groupedProvinces = [NSMutableArray array];
     
+    /* 对排列好的省市列表按照首字母进行分组 */
     NSString *groupTitle;
     NSMutableArray *arr;
     for (NSDictionary *province in orderedProvinces) {
@@ -70,7 +74,7 @@
             groupTitle = firstLetter;
             arr = [NSMutableArray array];
             [_groupedProvinces addObject:arr];
-            [arr addObject:groupTitle];
+            [arr addObject:groupTitle]; // 每一组的第一个元素就是首字母
             [arr addObject:province.allKeys[0]];
         } else {
             if ([groupTitle isEqualToString:firstLetter]) {
@@ -79,7 +83,7 @@
                 groupTitle = firstLetter;
                 arr = [NSMutableArray array];
                 [_groupedProvinces addObject:arr];
-                [arr addObject:groupTitle];
+                [arr addObject:groupTitle]; // 每一组的第一个元素就是首字母
                 [arr addObject:province.allKeys[0]];
             }
         }
@@ -109,7 +113,7 @@
     if (_showSearchResults) {
         return 1;
     } else {
-        return _groupedProvinces.count;
+        return _groupedProvinces.count; // 省市的组个数
     }
 }
 
@@ -118,6 +122,7 @@
     if (_showSearchResults) {
         return _searchResults.count;
     } else {
+        /* 每组中省市的个数 */
         NSArray *arr = [_groupedProvinces objectAtIndex:section];
         return arr.count-1;
     }
@@ -154,7 +159,7 @@
         return nil;
     } else {
         for (NSArray *group in _groupedProvinces) {
-            [arr addObject:[group objectAtIndex:0]];
+            [arr addObject:[group objectAtIndex:0]]; // 获取每个组的首字母
         }
     
         return arr;
@@ -168,9 +173,10 @@
         cell.labelTitle.text = [_searchResults objectAtIndex:indexPath.row];
     } else {
         NSArray *group = [_groupedProvinces objectAtIndex:indexPath.section];
-        cell.labelTitle.text = [group objectAtIndex:indexPath.row+1];
+        cell.labelTitle.text = [group objectAtIndex:indexPath.row+1]; // 找到对应的省市的名字
     }
     
+    /* 是否为已选中的省市 */
     NSRange range = [_selectedProvince rangeOfString:cell.labelTitle.text];
     if (range.length > 0) {
         [cell setAccessoryType:UITableViewCellAccessoryCheckmark];
@@ -185,6 +191,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     if (nil != _selectedPath) {
+        /* 取消之前已选中的 */
         UITableViewCell *cell = [tableView cellForRowAtIndexPath:_selectedPath];
         [cell setAccessoryType:UITableViewCellAccessoryNone];
     }
@@ -192,6 +199,7 @@
     CityTableViewCell *cell = (CityTableViewCell *)[tableView cellForRowAtIndexPath:indexPath];
     [cell setAccessoryType:UITableViewCellAccessoryCheckmark];
     
+    /* 设置当前已选中的 */
     _selectedProvince = cell.labelTitle.text;
     _selectedCitys = [NSMutableArray arrayWithArray:[ChinaCityClass getCitysWithProvince:_selectedProvince]];
     

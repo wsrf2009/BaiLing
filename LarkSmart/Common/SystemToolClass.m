@@ -13,9 +13,7 @@
 
 @implementation SystemToolClass
 
-/*
- * 获得设备型号
- */
+/** 获得设备型号 */
 + (NSString *)getCurrentDeviceModel {
     struct utsname systemInfo;
     uname(&systemInfo);
@@ -116,7 +114,6 @@
 }
 
 + (NSString *)deviceName {
-
     return [[UIDevice currentDevice] name];
 }
 

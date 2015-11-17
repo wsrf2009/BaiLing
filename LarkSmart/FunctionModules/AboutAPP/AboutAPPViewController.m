@@ -29,8 +29,8 @@
 
     [self.navigationController setToolbarHidden:YES];
     
-    NSString *appVersion = [SystemToolClass appVersion];
-    NSString *appBuild = [SystemToolClass appBuildVersion];
+    NSString *appVersion = [SystemToolClass appVersion]; // APP版本号
+    NSString *appBuild = [SystemToolClass appBuildVersion]; // APP Build
     [_labelAppVersion setText:[NSString stringWithFormat:@"v%@ b%@", appVersion, appBuild]];
 }
 
@@ -48,6 +48,7 @@
 
     if (0 == indexPath.section) {
         if (1 == indexPath.row) {
+            /* 百灵帮助 */
             HelperViewController *helperVC = [[UIStoryboard storyboardWithName:@"QuestionHelper" bundle:nil] instantiateViewControllerWithIdentifier:@"HelperViewController"];
             helperVC.deviceManager = self.deviceManager;
             if (nil != helperVC) {
@@ -55,6 +56,7 @@
             }
             
         } else if (2 == indexPath.row) {
+            /* 微信公众号 */
             PublicAccountViewController *publicAccountVC = [[UIStoryboard storyboardWithName:@"WeiChat" bundle:nil] instantiateViewControllerWithIdentifier:@"PublicAccountViewController"];
             publicAccountVC.deviceManager = self.deviceManager;
             if (nil != publicAccountVC) {
@@ -62,6 +64,7 @@
             }
         
         } else if (3 == indexPath.row) {
+            /* 意见反馈 */
             SuggestionViewController *suggestionVC = [[UIStoryboard storyboardWithName:@"Feedback" bundle:nil] instantiateViewControllerWithIdentifier:@"SuggestionViewController"];
             suggestionVC.deviceManager = self.deviceManager;
             if (nil != suggestionVC) {

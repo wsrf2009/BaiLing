@@ -108,6 +108,7 @@
                 product.guideType = 0;
             }
             
+            /* 将解析到的产品信息写入到数据库 */
             [BoxDatabase addProductId:product.productId title:product.title description:product.descri icon:product.icon url:product.url guideImage:product.guideImage lastUpdateTime:product.lastUpdateTime guideType:product.guideType];
         }
     }

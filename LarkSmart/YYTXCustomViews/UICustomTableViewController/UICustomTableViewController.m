@@ -38,10 +38,10 @@
     
     NSLog(@"%s self:%@ nav:%@", __func__, self, self.navigationController);
     
+    /* 当前视图消失前，要移除其上的所有添加的用于提示状态的视图 */
     if (nil != _effectview) {
         [self removeEffectView];
     }
-    
     if (nil != _maskView) {
         [_maskView removeFromSuperview];
     }
@@ -62,16 +62,19 @@
     [tableView setTableFooterView:[[UIView alloc] initWithFrame:CGRectZero]];
 }
 
+/** 状态条高度 */
 - (CGFloat)heightForStatustBar {
     
     return [[UIApplication sharedApplication] statusBarFrame].size.height;
 }
 
+/** 导航条高度 */
 - (CGFloat)heightForNavigationBarHeight {
     
     return self.navigationController.navigationBar.frame.size.height;
 }
 
+/** 初始化effectview */
 - (void)initEffectView {
     
     if (nil != _effectview) {
@@ -90,6 +93,7 @@
     [self.navigationController.view addSubview:_effectview];
 }
 
+/** 移除effectview */
 - (void)removeEffectView {
 
     if ([_activityInd isAnimating]) {
@@ -242,101 +246,6 @@
     [_maskView addSubview:contentView];
     
     [self.navigationController.view addSubview:_maskView];
-}
-
-- (void)showMessage:(NSString *)message messageType:(NSInteger)type {
-    
-    [self removeEffectView];
-    
-    NSLog(@"%s message:%@ type:%d", __func__, message, type);
-    
-#define leadingSpaceToSuperView 20
-#define trailingSpaceToSuperView 20
-#define topSpaceToSuperView 10
-#define bottomSpaceToSuperView 10
-    
-    CGFloat maxContentViewWidth = self.navigationController.view.frame.size.width;
-    CGFloat maxContentViewHeight = 100.0f;
-    UIFont *messageFont = [UIFont systemFontOfSize:15.0f];
-    UIColor *messageColor = [UIColor whiteColor];
-    CGFloat maxMessageWidth = maxContentViewWidth-leadingSpaceToSuperView-trailingSpaceToSuperView;
-    CGFloat maxMessageheight = maxContentViewHeight-topSpaceToSuperView-bottomSpaceToSuperView;
-    CGSize maxSize = (CGSize){maxMessageWidth, maxMessageheight};
-    
-    CGRect messageRect;
-    if ([SystemToolClass systemVersionIsNotLessThan:@"7.0"]) {
-        messageRect = [message boundingRectWithSize:maxSize options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:messageFont} context:nil];
-        
-        NSLog(@"%s megRect:%@", __func__, NSStringFromCGRect(messageRect));
-    } else {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-        messageRect.size = [message sizeWithFont:messageFont constrainedToSize:maxSize];
-#pragma clang diagnostic pop
-    }
-    
-    NSLog(@"%s messageRect:%@", __func__, NSStringFromCGRect(messageRect));
-    
-    messageRect.origin = (CGPoint){0, 0};
-    
-    CGRect contentViewRect = messageRect;
-    contentViewRect.size.height += (topSpaceToSuperView+bottomSpaceToSuperView);
-    contentViewRect.size.width = maxContentViewWidth;
-    contentViewRect.origin.y = [self heightForStatustBar]+[self heightForNavigationBarHeight]-contentViewRect.size.height;
-    contentViewRect.origin.x = (self.navigationController.view.frame.size.width-contentViewRect.size.width)/2;
-    
-    UIView *contentView = [[UIView alloc] init];
-    [contentView setFrame:contentViewRect];
-    [contentView setBackgroundColor:[UIColor colorWithWhite:.0f alpha:0.7]];
-    [contentView setAlpha:.0f];
-    
-    UILabel *labelMessage = [[UILabel alloc] init];
-    [labelMessage setFont:messageFont];
-    [labelMessage setTextColor:messageColor];
-    [labelMessage setNumberOfLines:0];
-    [labelMessage setLineBreakMode:NSLineBreakByTruncatingTail];
-    [labelMessage setText:message];
-    [labelMessage setOpaque:YES];
-    labelMessage.translatesAutoresizingMaskIntoConstraints = NO;
-    
-    [contentView addSubview:labelMessage];
-    
-    [contentView addConstraint:[NSLayoutConstraint constraintWithItem:labelMessage attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0]];
-    [contentView addConstraint:[NSLayoutConstraint constraintWithItem:labelMessage attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeCenterY multiplier:1.0 constant:0]];
-    [contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(>=leadingSpaceToSuperView)-[labelMessage]-(>=trailingSpaceToSuperView)-|" options:0 metrics:@{@"leadingSpaceToSuperView":@leadingSpaceToSuperView, @"trailingSpaceToSuperView":@trailingSpaceToSuperView} views:NSDictionaryOfVariableBindings(labelMessage)]];
-    [contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(>=topSpaceToSuperView)-[labelMessage]-(>=bottomSpaceToSuperView)-|" options:0 metrics:@{@"topSpaceToSuperView":@topSpaceToSuperView, @"bottomSpaceToSuperView":@bottomSpaceToSuperView} views:NSDictionaryOfVariableBindings(labelMessage)]];
-    
-    [self.navigationController.view insertSubview:contentView belowSubview:self.navigationController.navigationBar];
-    
-    CGAffineTransform translate = CGAffineTransformMakeTranslation(0.0f, contentViewRect.size.height);
-
-    if ([SystemToolClass systemVersionIsNotLessThan:@"7.0"]) {
-        [UIView animateWithDuration:.5f delay:0 usingSpringWithDamping:0.8f initialSpringVelocity:0.2f options:UIViewAnimationOptionBeginFromCurrentState animations:^{
-            
-            contentView.transform = translate;
-            [contentView setAlpha:1.0f];
-        } completion:^(BOOL finished) {
-
-            [UIView animateWithDuration:.5f delay:3.0 usingSpringWithDamping:1.0f initialSpringVelocity:.0f options:UIViewAnimationOptionBeginFromCurrentState animations:^{
-                    
-                contentView.transform = CGAffineTransformIdentity;
-                [contentView setAlpha:.0f];
-            } completion:nil];
-        }];
-    } else {
-        [UIView animateWithDuration:.5f animations:^{
-            
-            contentView.transform = translate;
-            [contentView setAlpha:1.0f];
-        } completion:^(BOOL finished) {
-            
-            [UIView animateWithDuration:.5f delay:3.0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
-                
-                contentView.transform = CGAffineTransformIdentity;
-                [contentView setAlpha:.0f];
-            } completion:nil];
-        }];
-    }
 }
 
 @end

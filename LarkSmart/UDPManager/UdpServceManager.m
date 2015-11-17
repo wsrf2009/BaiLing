@@ -124,7 +124,7 @@
     }
 #endif
     NSDictionary *udpItem = [UdpDataClass searchDevice];
-    [_sessionManager createUdpJsonRequestObject:udpItem method:ITEMVALUE_METHOD_UDP_SEARCH action:nil target:self];
+    [_sessionManager createUdpJsonRequestObject:udpItem method:ITEMVALUE_METHOD_UDP_SEARCH action:nil target:self]; // 将要广播的UDP包添加到会话队列中
 }
 
 - (void)sendUdpBroadcast {
@@ -132,13 +132,13 @@
     while (![[NSThread currentThread] isCancelled]) {
         
         if (run) {
-            NSData *data = [_sessionManager getUdpData];
+            NSData *data = [_sessionManager getUdpData]; // 会话队列中获取要发送的会话
             
             NSLog(@"%s %s", __func__, data.bytes);
             
-            NSData *pack = [broadcastData addType:YYTXFrameDataTypeJson andlengthFordata:data];
+            NSData *pack = [broadcastData addType:YYTXFrameDataTypeJson andlengthFordata:data]; // 给JSON数据加上数据类型和数据长度的包头
             
-            [udpServer sendData:pack toHost:@"255.255.255.255" Port:8089 Tag:1];
+            [udpServer sendData:pack toHost:@"255.255.255.255" Port:8089 Tag:1]; // 将数据包广播出去
         }
     }
 }
@@ -148,6 +148,7 @@
         [timer invalidate];
     }
     
+    /* 广播UDP包的定时器 */
     timer = [NSTimer scheduledTimerWithTimeInterval:interval target:self selector:@selector(transferSearchDeviceBroadcast) userInfo:nil repeats:YES];
     [timer fire];
 }
@@ -183,12 +184,13 @@
 //    channel.state = dataFrame.state;
     
     if (DataStateReceivedFinish == channel.data.state) {
+        /* 该通道的数据接收完成 */
+        channel.data.state = DataStateReceivingHead; // 开启下一个接收循环
         
-        channel.data.state = DataStateReceivingHead;
-        
-        BOOL ret = [channel.udpData parseUdp:channel.data.body];
+        BOOL ret = [channel.udpData parseUdp:channel.data.body]; // 解析收到的UDP包
         if (ret) {
             if ([_delegate respondsToSelector:@selector(foundHost:port:)]) {
+                /* 告知DevicesManager，发现新的设备 */
                 [_delegate foundHost:channel.udpData.ip port:channel.udpData.port];
             }
         }
@@ -197,7 +199,7 @@
             [_deviceMacArray addObject:channel.udpData.deviceid];
         }
 #endif
-        [channel.data.body setLength:0];
+        [channel.data.body setLength:0]; // 开启下一个接收循环
     }
 }
 

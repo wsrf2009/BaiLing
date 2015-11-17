@@ -13,6 +13,8 @@
 @interface AudioList : NSObject
 
 - (NSDictionary *)getAudioListWithCategoryId:(NSString *)cId pageNo:(NSUInteger)page itemsPerpage:(NSUInteger)number;
+
+/** 解析音乐列表 */
 - (NSMutableArray *)parseAudioList:(NSData *)data;
 
 @end

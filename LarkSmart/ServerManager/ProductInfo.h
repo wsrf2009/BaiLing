@@ -24,6 +24,8 @@
 @property (nonatomic, assign) NSInteger guideType;
 
 + (NSDictionary *)getAllTheProductsInfo;
+
+/** 解析产品信息 */
 + (void)parseProductInfo:(NSData *)data;
 
 @end

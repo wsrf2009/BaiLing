@@ -36,9 +36,13 @@ typedef NS_ENUM(NSInteger, YYTXMediaExportingState) {
 
 @interface LocalMusicTask : NSObject
 @property (nonatomic, retain) id<YYTXMediaExportDelegate> delegate;
+/** 手机上发现的音乐条目 */
 @property (nonatomic, retain) NSMutableArray *musicItems;
 
+/** 清空musicItems */
 - (void)clearMediaList;
+
+/** 重新扫描手机上的音乐 */
 - (void)regainMedias;
 
 @end

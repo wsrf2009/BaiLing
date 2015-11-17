@@ -18,9 +18,16 @@
 @property (nonatomic, retain) id <UdpServceDelegate> delegate;
 
 - (instancetype)initWithDelegate:(id)delegate;
+
+/** 以较高的频率广播UDP包、大约1秒1次 */
 - (void)broadcastInHighFreq;
+
+/** 暂停广播UDP包 */
 - (void)pauseBroadcast;
+
 - (void)destroyBroadcast;
+
+/** 以较高的频率广播UDP包 */
 - (void)broadcastInLowFreq;
 
 @end

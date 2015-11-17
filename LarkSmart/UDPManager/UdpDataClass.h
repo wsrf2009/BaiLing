@@ -17,7 +17,10 @@
 @property (nonatomic, retain) NSString *version;
 @property (nonatomic, retain) NSString *productid;
 
+/** 创建UDP广播包 */
 + (NSDictionary *)searchDevice;
+
+/** 解析设备端返回的UDP包 */
 - (BOOL)parseUdp:(NSData *)data;
 
 @end

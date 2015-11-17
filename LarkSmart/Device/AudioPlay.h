@@ -45,22 +45,76 @@ typedef enum {
 @property (nonatomic, assign) NSInteger curVolume;
 @property (nonatomic, assign) NSInteger maxVolume;
 
+/** 
+ 播放一个网络资源
+ @param url 资源的网络地址
+ */
 - (NSArray *)playAudioWithUrl:(NSString *)url;
+
+/** 
+ 播放设备中预存的文件
+ @param fPath 文件的路径，如@"太阳公公"、@"懒猪起床"
+ */
 - (NSArray *)playAudioWithFilePath:(NSString *)fPath;
+
+/** 
+ 播放设备中预存文件的ID
+ @param fId 文件的ID，如@"10302"、@"10301"
+ */
 - (NSArray *)playAudioWithFileId:(NSString *)fId;
+
+/** 
+ 创建optionplay中操作成功时设备要播放的内容 
+ @param string 要播放的内容
+ @param type string的类型
+ */
 - (NSDictionary *)whenOperationSuccessfulPlay:(NSString *)string playType:(YYTXDevicePlayType)type;
+
+/** 
+ 创建optionplay中操作失败时设备要播放的内容 
+ @param string 要播放的内容
+ @param type string的类型
+ */
 - (NSDictionary *)whenOperationFailedPlay:(NSString *)string playType:(YYTXDevicePlayType)type;
+
+/** 
+ optionplay中操作成功和操作失败时播放什么样的TTS文本 
+ @param failed，操作失败时播放的TTS文本
+ @param successful，操作成功时播放的TTS文本
+ */
 - (NSArray *)playTtsWhenFailed:(NSString *)failed playTtsWhenSuccessful:(NSString *)successful;
+
+/** 让硬件设备停止播放 */
 - (NSNull *)stop;
+
+/** 让硬件设备暂停播放 */
 - (NSNull *)pause;
+
+/** 让硬件设备恢复播放 */
 - (NSNull *)resume;
+
+/** 播放前一首 */
 - (NSNull *)previous;
+
+/** 播放下一曲 */
 - (NSNull *)next;
+
+/** 获取设备的音量，硬件设备还不支持，尚不可用 */
 - (NSNull *)getVolume;
+
+/** 设置设备的音量，硬件设备还不支持，尚不可用 */
 - (NSNumber *)setVolume:(NSInteger)volume;
+
+/** 减小设备的音量 */
 - (NSNull *)setVolumeDown;
+
+/** 增加设备的音量 */
 - (NSNull *)setVolumeUp;
+
+/** 从paramItem中获取播放的内容 */
 - (NSString *)getPlayContent:(NSDictionary *)paramItem;
+
+/** 从resultItem中解析出设备返回的音量值 */
 - (BOOL)parseVolume:(NSDictionary *)resultItem;
 
 @end

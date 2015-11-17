@@ -27,11 +27,13 @@
     NSUInteger len = data.length;
     Byte *package = alloca(8+len);
     
+    /* 数据长度 */
     package[7] = len & 0xFF;
     package[6] = (len>>8) & 0xFF;
     package[5] = (len>>16) & 0xFF;
     package[4] = (len>>24) & 0xFF;
     
+    /* 数据类型 */
     package[3] = type & 0xFF;
     package[2] = (type>>8) & 0xFF;
     package[1] = (type>>16) & 0xFF;
@@ -39,15 +41,16 @@
     
     memcpy(package+8, data.bytes, len);
     
+    // 封装为包含类型和长度的新数据包
     NSData *blockData = [[NSData alloc] initWithBytes:package length:len+8];
     
     return blockData;
 }
 
 - (void) dataDecapsulate:(Byte *)data dataType:(UInt32 *)type dataLength:(UInt32 *)len {
-    *type = BigEndian_BytesToInt32(data);
+    *type = BigEndian_BytesToInt32(data); // 数据类型
     data += 4;
-    *len = BigEndian_BytesToInt32(data);
+    *len = BigEndian_BytesToInt32(data); // 数据长度
     
 //    NSLog(@"%s [0] = %02X", __func__, data[0]);
 //    NSLog(@"%s [1] = %02X", __func__, data[1]);
@@ -69,7 +72,7 @@
 //    NSLog(@"%s length:%lu", __func__, (unsigned long)arrLength);
     
     switch (_state) {
-        case DataStateReceivingHead:
+        case DataStateReceivingHead: // 正在接收数据包头
             needLen = YYTXFrameHeadSize-_head.length;
             factLen = (reveLen > needLen) ? needLen : reveLen;
             if (factLen > 0) {
@@ -82,10 +85,10 @@
                 UInt32 length;
                 _state = DataStateReceivingBody; // 准备接收数据包的内容
                 
-                [self dataDecapsulate:(Byte *)_head.bytes dataType:&type dataLength:&length];
+                [self dataDecapsulate:(Byte *)_head.bytes dataType:&type dataLength:&length]; // 解封装
 
-                _type = type;
-                _length = length;
+                _type = type; // 获得数据的类型
+                _length = length; // 获得数据的长度
                 
                 [_head setLength:0];
                 
@@ -109,7 +112,7 @@
                 return;
             }
             
-        case DataStateReceivingBody:
+        case DataStateReceivingBody: // 接收数据包本体
             needLen = _length-_body.length;
             factLen = (reveLen > needLen) ? needLen : reveLen;
             if (factLen > 0) {

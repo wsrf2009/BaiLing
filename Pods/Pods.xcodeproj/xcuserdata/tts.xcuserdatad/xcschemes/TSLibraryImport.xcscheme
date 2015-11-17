@@ -14,7 +14,7 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = 'primary'
-               BlueprintIdentifier = 'F9A666C12546656C84C795E8'
+               BlueprintIdentifier = '51ADEA7086D0458CBE8E346B'
                BlueprintName = 'TSLibraryImport'
                ReferencedContainer = 'container:Pods.xcodeproj'
                BuildableName = 'libTSLibraryImport.a'>

@@ -11,61 +11,58 @@
 
 @interface SystemToolClass : NSObject
 
-/** 获得设备型号 */
+/** 获取设备型号，如@"iPhone 4S (A1387/A1431)" */
 + (NSString *)getCurrentDeviceModel;
 
-/*
- *  返回手机别名，用户自定义的名字
- */
+/** 获取手机别名，用户自定义的名字 */
 + (NSString *)deviceName;
-/*
- * 返回当前手机操作系统的版本号
- */
+
+/** 获取当前手机操作系统的版本号，如IOS 8.0 */
 + (NSString *)IOSVersion;
 
+/** 
+ 判断系统是否低于某一版本号
+ @param version 给定的系统版本号，例如@"8.0"
+ @return 如果系统版本高于给定的版本，YES；否则，NO
+ */
 + (BOOL)systemVersionIsNotLessThan:(NSString *)version;
 
+/** 获取APP的名字，如@"百灵智能" */
 + (NSString *)appName;
 
-/*
- * 返回APP当前的版本号
- */
+/** 获取APP当前的版本号，如@"01.00" */
 + (NSString *)appVersion;
 
+/** 获取APP Build */
 + (NSString *)appBuildVersion;
 
-/*
- * 获取APP的唯一识别号，在重新安装后，该号会更改
+/** 
+ 获取APP的唯一识别号
+ @note 在重新安装APP后，该号会更改
  */
 + (NSString*)uuid;
-/*
- * 获取手机的IP地址
- */
+
+/** 获取手机的IP地址 */
 + (NSString *)IPAddress;
 
-/*
- * 获取Http 服务器的端口号
- */
+/** 获取Http 服务器的端口号 */
 + (NSString *)httpServerPort;
 
-/*
- * 获取当前正在显示的视图控制器
- */
+/** 获取当前正在显示的视图控制器 */
 + (UIViewController *)appRootViewController;
 
-/*
- * 获取状态条的高度
- */
+/** 获取状态条的高度 */
 + (CGFloat)statustBarHeight;
 
-/*
- * 获取导航条的高度
- */
+/** 获取导航条的高度 */
 + (CGFloat)navigationBarHeight;
 
+/** 获取屏幕的宽度 */
 + (CGFloat)screenWidth;
 
+/** 获取屏幕的高度 */
 + (CGFloat)screenHeigth;
+
 /** 获取屏幕的scale */
 + (CGFloat)screenScale;
 

@@ -53,7 +53,7 @@
     
     audioQueuePlayer = [[AudioQueuePlayer alloc] initWithData:_data delegate:self];
 
-    [self performSelectorInBackground:@selector(play) withObject:nil];
+    [self performSelectorInBackground:@selector(play) withObject:nil]; // 进入该界面自动发送FSK
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -61,6 +61,7 @@
     
     [self.navigationController setToolbarHidden:YES];
 
+    /* 在“未提示”和“音量调整”界面是否点击了“重新发送按钮” */
     if (_noHintTVC.needFSKConfig) {
         [self play];
     } else if (_adjustVolumeTVC.needFSKConfig) {
@@ -73,11 +74,11 @@
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
-    
+    /* 离开该界面的时候 */
     if (nil != audioQueuePlayer) {
         [_timer invalidate];
         _leftTime = -1;
-        [audioQueuePlayer stop];
+        [audioQueuePlayer stop]; // 停止发送FSK声波
     }
 }
 
@@ -89,15 +90,13 @@
     UIApplication *app = [UIApplication sharedApplication];
     if ([app.delegate respondsToSelector:@selector(window)]) {
         return [app.delegate window];
-    }
-    else {
+    } else {
         return [app keyWindow];
     }
 }
 
 - (void)startAnimation {
-
-    [_imageView startAnimating];
+    [_imageView startAnimating]; // 图片动画开始，开始旋转
 }
 
 - (void)timerFire {
@@ -105,8 +104,9 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         
         if (_leftTime>=0) {
-            [_label setText:[NSString stringWithFormat:@"%ld", (long)_leftTime]];
+            [_label setText:[NSString stringWithFormat:@"%ld", (long)_leftTime]]; // 更新图片中央的倒计时
         } else {
+            /* 倒计时结束 */
             [_timer invalidate];
             [_VEView removeFromSuperview];
         }
@@ -118,6 +118,7 @@
 - (void)play {
     
     if (nil == _VEView) {
+        /* _VEView初始化 */
         if ([SystemToolClass systemVersionIsNotLessThan:@"8.0"]) {
             _VEView = [[UIVisualEffectView alloc] initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleExtraLight]];
         } else {
@@ -127,6 +128,7 @@
         
         _VEView.frame = self.view.bounds;
         
+        /* _imageView初始化 */
         _imageView = [[UIImageView alloc] init];
         NSMutableArray * animateArray = [[NSMutableArray alloc] initWithCapacity:24];
         [animateArray addObject:[UIImage imageNamed:@"scaning_01.png"]];
@@ -164,6 +166,7 @@
         [_VEView addSubview:_imageView];
         [_VEView addSubview:_label];
         
+        /* 视图布局 */
         [_VEView addConstraint:[NSLayoutConstraint constraintWithItem:_imageView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:150.0f]];
         [_VEView addConstraint:[NSLayoutConstraint constraintWithItem:_imageView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:150.0f]];
         [_VEView addConstraint:[NSLayoutConstraint constraintWithItem:_imageView attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:_VEView attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0]];
@@ -179,14 +182,15 @@
         [self.view addSubview:_VEView];
         
         _timer = [NSTimer scheduledTimerWithTimeInterval:1.0f target:self selector:@selector(timerFire) userInfo:nil repeats:YES];
-        [_timer fire];
+        [_timer fire]; // 开始倒数计时
     });
     
     [self startAnimation];
 
-    [audioQueuePlayer play];
+    [audioQueuePlayer play]; // 发送FSK声波
 }
 
+/** 进入设备扫描界面 */
 - (IBAction)buttonClickRescan:(id)sender {
     
     if (self.isAnimating) {
@@ -200,6 +204,7 @@
     }
 }
 
+/** 进入音量调整界面 */
 - (IBAction)buttonClickAdjustVolume:(id)sender {
     
     if (self.isAnimating) {
@@ -212,6 +217,7 @@
     }
 }
 
+/** 进入SSID和password输入界面 */
 - (IBAction)buttonClickWrongPassword:(id)sender {
 
     if (self.isAnimating) {
@@ -225,6 +231,7 @@
     }
 }
 
+/** 重新发送界面 */
 - (IBAction)buttonClickConfigFailed:(id)sender {
     
     if (self.isAnimating) {
@@ -234,6 +241,7 @@
     [self.navigationController popViewControllerAnimated:YES];
 }
 
+/** “未提示”界面 */
 - (IBAction)buttonClickNoHint:(id)sender {
     
     if (self.isAnimating) {

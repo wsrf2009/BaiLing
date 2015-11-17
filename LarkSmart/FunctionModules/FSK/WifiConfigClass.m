@@ -10,7 +10,7 @@
 #import "FSKWavGenAPI.h"
 
 @implementation WifiConfigClass
-
+#if 0
 + (NSData *)copyBytes:(Byte *)data
           dataLength:(NSUInteger)len
           copyNumber:(NSUInteger)times {
@@ -35,11 +35,11 @@
     NSLog(@"gbkString:%@", gbkString);
     return [gbkString dataUsingEncoding:gbkEncode];
 }
-
+#endif
 + (NSData *)generateFSKDataWithSSID:(NSString *)ssid password:(NSString *)password {
     NSString *content = [NSString stringWithFormat:@"%@%@", ssid, password];
 //    NSData *gbkData = [self stringToGbkData:content];
-    NSData *gbkData = [content dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *gbkData = [content dataUsingEncoding:NSUTF8StringEncoding]; // NSString转为NSData
 
     char *wavBytes;
     int wavBytesLength;

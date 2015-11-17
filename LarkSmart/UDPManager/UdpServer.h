@@ -18,8 +18,14 @@
 @property (nonatomic, retain) id <UdpServerDelegate> delegate;
 
 - (instancetype)initWithDelegate:(id)delegate;
+
+/** 启动UDP服务 */
 - (void)start;
+
+/** 停止UDP服务 */
 - (void)stop;
+
+/** 用已创建的udp服务器发送数据，使用默认的超时 */
 - (void)sendData:(NSData *)data toHost:(NSString *)host Port:(int)port Tag:(int)tag;
 
 @end

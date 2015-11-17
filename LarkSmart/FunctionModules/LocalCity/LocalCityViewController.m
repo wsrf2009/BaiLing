@@ -58,7 +58,7 @@
     UIBarButtonItem *save = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedStringFromTable(@"save", @"hint", nil) style:UIBarButtonItemStyleDone target:self action:@selector(modifyLocalCitySet)];
     self.toolbarItems = @[space, save, space];
 
-    [self getLocalCitySet];
+    [self getLocalCitySet]; // 从设备端获取本地城市设置
     
     [self.navigationItem setTitle:NSLocalizedStringFromTable(@"localCitySet", @"hint", nil)];
     
@@ -101,6 +101,7 @@
     [self.navigationController setToolbarHidden:NO animated:YES];
 
     if (nil != _cityListVC) {
+        /* 更新当前选中的城市 */
         _currentCity.text = _cityListVC.selectedCity;
     }
     
@@ -108,16 +109,16 @@
         
         NSRange range = [_currentProvince.text rangeOfString:_provinceListVC.selectedProvince];
         if (range.length <= 0) {
-            
+            /* 新选择的省份与之前选择的省份不符 */
             _currentProvince.text = _provinceListVC.selectedProvince;
-            _selectedCitys = _provinceListVC.selectedCitys;
-            _currentCity.text = _selectedCitys[0];
+            _selectedCitys = _provinceListVC.selectedCitys; // 更新为新的城市列表
+            _currentCity.text = _selectedCitys[0]; // 默认选中省会城市
             
             if (nil == _cityListVC) {
                 _cityListVC = [[UIStoryboard storyboardWithName:@"LocalCity" bundle:nil] instantiateViewControllerWithIdentifier:@"CityListViewController"];
             }
-            _cityListVC.selectedCitys = _selectedCitys;
-            _cityListVC.selectedCity = _selectedCitys[0];
+            _cityListVC.selectedCitys = _selectedCitys; // 对新的城市进行排序
+            _cityListVC.selectedCity = _selectedCitys[0]; // 默认选中省会城市
 
             NSLog(@"%s %@", __func__, [_selectedCitys componentsJoinedByString:@","]);
         }
@@ -133,25 +134,29 @@
     [super didReceiveMemoryWarning];
 }
 
+/** 手动设置本地城市 */
 - (void)manualSetEnable:(BOOL)yesOrNo {
-
     if (yesOrNo && !_displayProvinceCity) {
+        /* 显示省份和城市 */
         _displayProvinceCity = YES;
         [self.tableView insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:1], [NSIndexPath indexPathForRow:1 inSection:1]] withRowAnimation:UITableViewRowAnimationAutomatic];
     } else if (!yesOrNo && _displayProvinceCity){
+        /* 隐藏省份和城市 */
         _displayProvinceCity = NO;
         [self.tableView deleteRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:1], [NSIndexPath indexPathForRow:1 inSection:1]] withRowAnimation:UITableViewRowAnimationAutomatic];
     }
 
 }
 
+/** 根据配置更新UI */
 - (void)updateUI {
-
     if (USERSET_AUTOMATICPOSITIONING == self.deviceManager.device.userData.generalData.userSet) {
-            [self setCellCheckMark:0 section:0];
-            [self setCellUncheckMark:1 section:0];
+        /* 自动设置本地城市 */
+        [self setCellCheckMark:0 section:0];
+        [self setCellUncheckMark:1 section:0];
         [self manualSetEnable:NO];
     } else if (USERSET_MANUALSET == self.deviceManager.device.userData.generalData.userSet) {
+        /** 手动设置 */
         [self setCellCheckMark:1 section:0];
         [self setCellUncheckMark:0 section:0];
         [self manualSetEnable:YES];
@@ -169,10 +174,12 @@
 
 #pragma mark - Table view data source
 
+/** 选中某行 */
 - (void)setCellCheckMark:(NSUInteger)row section:(NSUInteger)section {
     [[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:row inSection:section]] setAccessoryType:UITableViewCellAccessoryCheckmark];
 }
 
+/** 取消选中某行 */
 - (void)setCellUncheckMark:(NSUInteger)row section:(NSUInteger)section {
     [[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:row inSection:section]] setAccessoryType:UITableViewCellAccessoryNone];
 }
@@ -200,15 +207,15 @@
     
     if (0 == indexPath.section) {
         if (0 == indexPath.row) {
-            
-            self.deviceManager.device.userData.generalData.userSet = USERSET_AUTOMATICPOSITIONING;
+            self.deviceManager.device.userData.generalData.userSet = USERSET_AUTOMATICPOSITIONING; // 选中自动设置
         } else if (1 == indexPath.row) {
-            self.deviceManager.device.userData.generalData.userSet = USERSET_MANUALSET;
+            self.deviceManager.device.userData.generalData.userSet = USERSET_MANUALSET; // 选中手动设置
         }
         
         [self updateUI];
     } else if (1 == indexPath.section) {
         if (0 == indexPath.row) {
+            /* 进入到省份选择视图 */
             if (nil == _provinceListVC) {
                 _provinceListVC = [[UIStoryboard storyboardWithName:@"LocalCity" bundle:nil] instantiateViewControllerWithIdentifier:@"ProvinceListViewController"];
             }
@@ -216,8 +223,8 @@
             if (nil != _provinceListVC) {
                 [self.navigationController pushViewController:_provinceListVC animated:YES];
             }
-            
         } else if (1 == indexPath.row) {
+            /* 进入到城市选择视图 */
             if (nil == _cityListVC) {
                 _cityListVC = [[UIStoryboard storyboardWithName:@"LocalCity" bundle:nil] instantiateViewControllerWithIdentifier:@"CityListViewController"];
             }
@@ -239,6 +246,7 @@
 
 #pragma 本地城市数据源
 
+/** 从设备端获取本地城市设置 */
 - (void)getLocalCitySet {
     
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -269,6 +277,7 @@
     }];
 }
 
+/** 修改本地城市设置 */
 - (void)modifyLocalCitySet {
     
     self.deviceManager.device.userData.generalData.province = _currentProvince.text;

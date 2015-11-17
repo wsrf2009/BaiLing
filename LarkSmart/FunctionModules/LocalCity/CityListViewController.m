@@ -52,9 +52,10 @@
     
     NSMutableArray *mutableArray = [NSMutableArray array];
     for (NSString *city in selectedCitys) {
-        [mutableArray addObject:@{city:[[HTFirstLetter pinYin:city] uppercaseString]}];
+        [mutableArray addObject:@{city:[[HTFirstLetter pinYin:city] uppercaseString]}]; // 给城市列表的每个元素加上拼音的元素
     }
     
+    /* 对城市列表按拼音进行排序 */
     NSArray *orderedCitys = [mutableArray sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
         NSDictionary *dic1 = obj1;
         NSDictionary *dic2 = obj2;
@@ -65,6 +66,7 @@
     }];
     NSLog(@"%s _ord:%@", __func__, [orderedCitys componentsJoinedByString:@","]);
     
+    /* 对排序后的城市列表按首字母进行分类 */
     _groupedCitys = [NSMutableArray array];
     NSString *groupTitle;
     NSMutableArray *arr;
@@ -78,8 +80,8 @@
             groupTitle = firstLetter;
             arr = [NSMutableArray array];
             [_groupedCitys addObject:arr];
-            [arr addObject:groupTitle];
-            [arr addObject:city.allKeys[0]];
+            [arr addObject:groupTitle]; // 第一个元素为首字母
+            [arr addObject:city.allKeys[0]]; // 首字母后跟的才是城市列表
         } else {
             if ([groupTitle isEqualToString:firstLetter]) {
                 [arr addObject:city.allKeys[0]];
@@ -108,7 +110,7 @@
     if (_showSearchResults) {
         return 1;
     } else {
-        return _groupedCitys.count;
+        return _groupedCitys.count; // 首字母的数量
     }
 }
 
@@ -116,6 +118,7 @@
     if (_showSearchResults) {
         return _searchResults.count;
     } else {
+        /* 该首字母下城市列表的数量 */
         NSArray *arr = [_groupedCitys objectAtIndex:section];
     
         return arr.count-1;
@@ -153,7 +156,7 @@
         NSMutableArray *arr = [NSMutableArray array];
     
         for (NSArray *group in _groupedCitys) {
-            [arr addObject:[group objectAtIndex:0]];
+            [arr addObject:[group objectAtIndex:0]]; // 首字母组成的列表
         }
     
         return arr;
@@ -166,10 +169,11 @@
     if (_showSearchResults) {
         cell.labelTitle.text = [_searchResults objectAtIndex:indexPath.row];
     } else {
-        NSArray *group = [_groupedCitys objectAtIndex:indexPath.section];
-        cell.labelTitle.text = [group objectAtIndex:indexPath.row+1];
+        NSArray *group = [_groupedCitys objectAtIndex:indexPath.section]; // 找到对应的拼音分组
+        cell.labelTitle.text = [group objectAtIndex:indexPath.row+1]; // 找到对应的城市
     }
     
+    /* 判断是否为当前选中的城市 */
     NSRange range = [_selectedCity rangeOfString:cell.labelTitle.text];
     if (range.length > 0) {
         [cell setAccessoryType:UITableViewCellAccessoryCheckmark];
@@ -184,10 +188,12 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     if (nil != _selectedPath) {
+        /* 取消之前选中的城市 */
         UITableViewCell *cell = [tableView cellForRowAtIndexPath:_selectedPath];
         [cell setAccessoryType:UITableViewCellAccessoryNone];
     }
     
+    /* 设置当前选中的城市 */
     CityTableViewCell *cell = (CityTableViewCell *)[tableView cellForRowAtIndexPath:indexPath];
     [cell setAccessoryType:UITableViewCellAccessoryCheckmark];
     

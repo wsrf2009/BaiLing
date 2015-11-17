@@ -23,6 +23,7 @@
 + (NSArray *)modifyRemind:(RemindClass *)remind;
 + (NSArray *)deleteRemindWithRemindId:(NSInteger)remindId;
 
+/** 解析备忘信息，将结果存放于list中 */
 + (BOOL)parseReminds:(NSArray *)remindsItem remindList:(NSMutableArray *)list;
 
 @end

@@ -31,7 +31,10 @@ typedef enum {
 
 - (instancetype)initWithHost:(NSString *)host port:(NSInteger)port delegate:(id)delegate;
 - (void)writeData:(NSData *)data;
+
+/** 从缓冲区读取数据的包头 */
 - (void)readDataHead;
+
 - (void)disable;
 - (void)disconnect;
 - (BOOL)isValid;

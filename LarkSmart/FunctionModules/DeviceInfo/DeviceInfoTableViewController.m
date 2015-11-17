@@ -41,6 +41,7 @@
     [self.navigationItem setTitle:NSLocalizedStringFromTable(@"deviceInfo", @"hint", nil)];
     
     if (nil == _device.deviceIconUrl) {
+        /* 如果设备的icon url为空，则从数据库中获取出对应产品ID的icon url */
         NSMutableArray *productsInfo = [BoxDatabase getItemsFromProducsInfo];
         for (NSDictionary *product in productsInfo) {
             
@@ -51,6 +52,7 @@
     }
     
     if (!_device.userData.deviceInfo.isValid) {
+        /* 如果还没有有效的设备信息，则须从设备获取 */
         [self getDeviceInfo];
     } else {
         [self updateUI];
@@ -77,7 +79,8 @@
         
         [self showActiviting];
     });
-        
+    
+    /* 获取设备信息 */
     [_device heartBeat:^(YYTXDeviceReturnCode code) {
 
         dispatch_async(dispatch_get_main_queue(), ^{

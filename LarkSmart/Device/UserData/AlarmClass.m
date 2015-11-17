@@ -65,7 +65,7 @@
 + (NSString *)getAlarmCycle:(AlarmClass *)alarm {
     NSString *cycle;
     
-    NSLog(@"%s mode:%02lX fre:%02X", __func__, (long)alarm.fre_mode, alarm.frequency);
+    NSLog(@"%s mode:%@ fre:%@", __func__, @(alarm.fre_mode), @(alarm.frequency));
     
     if (FRE_MODE_ONEOFF == alarm.fre_mode) {
         cycle = NSLocalizedStringFromTable(@"oneOff", @"hint", nil);

@@ -9,17 +9,26 @@
 #import <Foundation/Foundation.h>
 
 typedef enum  {
-    YYTXSessionReceiveFailed, // 接收数据有误
-    YYTXSessionReceivedOthers, // 接收到其他数据，如 EventInd
-    YYTXSessionFinish // 该会话收到相应的应答
+    /** 接收数据有误 */
+    YYTXSessionReceiveFailed,
+    /** 接收到其他数据，如 EventInd */
+    YYTXSessionReceivedOthers,
+    /** 该会话收到相应的应答 */
+    YYTXSessionFinish
 } YYTXSessionStatus;
 
 typedef enum {
+    /** 设备已不在当前局域网 */
     YYTXDeviceIsAbsent = 1000,
+    /** 传输数据失败 */
     YYTXTransferFailed,
+    /** 操作设备不成功 */
     YYTXOperationFailed,
+    /** 设备操作成功 */
     YYTXOperationSuccessful,
+    /** 传入参数错误 */
     YYTXParameterError,
+    /** 操作太频繁 */
     YYTXOperationIsTooFrequent
 } YYTXDeviceReturnCode;
 

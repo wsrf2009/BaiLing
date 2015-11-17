@@ -12,6 +12,11 @@
 
 @interface SemanticAnalysis : NSObject
 
+/** 
+ 创建交由后台服务器解析的数据包 
+ @param data 从百度返回的语意解析结果
+ @return 生成的交由宇音天下后台服务器解析的数据包
+ */
 + (NSDictionary *)sendJsonItem:(NSData *)data;
 
 @end

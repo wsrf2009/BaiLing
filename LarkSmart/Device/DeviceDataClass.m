@@ -63,6 +63,7 @@ NSString *const DevicePlayFileWhenOperationFailed = @"DevicePlayFileWhenOperatio
         
         _tcpSessionList = [[NSMutableArray alloc] init];
         
+        /* 在主线程中初始化定时器 */
         dispatch_async(dispatch_get_main_queue(), ^{
             _heartBeatTimer = [NSTimer scheduledTimerWithTimeInterval:HEARTBEAT_INTERVAL target:self selector:@selector(heartBeat) userInfo:nil repeats:YES];
             [_heartBeatTimer setFireDate:[NSDate distantFuture]];
@@ -87,18 +88,18 @@ NSString *const DevicePlayFileWhenOperationFailed = @"DevicePlayFileWhenOperatio
 
 #pragma TCP Connection 代理
 
+/** 设备的tcp sockect已连接上 */
 - (void)connected {
     
     NSLog(@"%s %@ %@", __func__, _host, _userData.generalData.nickName);
     
     _isAbsent = NO;
     
+    /* 设备连接上后，自动去获取设备General数据 */
     [self getGeneral:^(YYTXDeviceReturnCode code) {
-            
         if (YYTXOperationSuccessful == code) {
-
+            /* 获取General成功，告知上层（DeviceManager）已发现一个设备，同时启动心跳定时器 */
             [_delegate devicePresent:self];
-            
             [_heartBeatTimer setFireDate:[NSDate dateWithTimeIntervalSinceNow:HEARTBEAT_INTERVAL]]; // 启动检测TCP连接的心跳定时器
         } else {
             
@@ -109,38 +110,41 @@ NSString *const DevicePlayFileWhenOperationFailed = @"DevicePlayFileWhenOperatio
     }];
 }
 
+/** 设备的tcp socket 连接已端开 */
 - (void)disconnected {
     
     NSLog(@"%s %@ %@", __func__, _host, _userData.generalData.nickName);
     
-    [_heartBeatTimer setFireDate:[NSDate distantFuture]];
-    
-    [self sessionTransferFailed];
+    [_heartBeatTimer setFireDate:[NSDate distantFuture]]; // 心跳定时器暂停
+    [self sessionTransferFailed]; // 终止当前正在通讯的会话，并返回错误
 }
 
+/** 从设备端接收到数据 */
 - (void)receivedData:(NSData *)data {
     
     NSLog(@"%s", __func__);
     
     YYTXSessionStatus status = [self parseData:data];
     if (YYTXSessionFinish == status) {
-        
+        /* 接收到Result数据断，这属于正常的大多数情况 */
         [_timerForTransfer setFireDate:[NSDate distantFuture]];
         
-        dispatch_semaphore_signal(_semaphoreForWriteFinish);
+        dispatch_semaphore_signal(_semaphoreForWriteFinish); // 表示当前会话已完成，可以开始下一个回话
         
         [_heartBeatTimer setFireDate:[NSDate dateWithTimeIntervalSinceNow:HEARTBEAT_INTERVAL]]; // 启动检测TCP连接的心跳定时器
         
     } else if (YYTXSessionReceiveFailed == status) {
         /* 数据包有误，被弃用 */
     } else if (YYTXSessionReceivedOthers == status) {
-
+        /* 接收到param 数据，比如收到设备端的事件通知event */
         [_delegate dataUpdate:self]; // 设备有数据更新
         
+        /* 因为事件通知是设备自主发的，占用正常会话的读取头的操作，所以还需补上 */
         [_tcpConn readDataHead];
     }
 }
 
+/** tcp socket传输失败 */
 - (void)transferFailed {
     
     NSLog(@"%s %@ %@ %d", __func__, _host, _userData.generalData.nickName, _curSession.ID);
@@ -150,15 +154,17 @@ NSString *const DevicePlayFileWhenOperationFailed = @"DevicePlayFileWhenOperatio
 
 #pragma device 方法
 
+/** 移除该设备 */
 - (void)removed {
     
     NSLog(@"%s", __func__);
 
     [self disable];
     
-    [_delegate deviceRemoved:self];
+    [_delegate deviceRemoved:self]; // 通知devicesmanager，该设备已不可用
 }
 
+/** 将自身disable */
 - (void)disable {
     
     NSLog(@"%s", __func__);
@@ -171,6 +177,7 @@ NSString *const DevicePlayFileWhenOperationFailed = @"DevicePlayFileWhenOperatio
     [self sessionTransferFailed];
 }
 
+/** 释放资源，停止计时器、停止线程 */
 - (void)destroy {
 
     _isAbsent = YES;
@@ -192,9 +199,8 @@ NSString *const DevicePlayFileWhenOperationFailed = @"DevicePlayFileWhenOperatio
     }
 }
 
+/** 将会话列表中的所有会话结束并返回 */
 - (void)cancelTask {
-    
-    /* 将会话列表中的所有会话结束并返回 */
     NSMutableArray *arr = [NSMutableArray arrayWithArray:_tcpSessionList];
     for (TcpSession *session in arr) {
         if (nil != session.returnBlock) {
@@ -222,44 +228,52 @@ NSString *const DevicePlayFileWhenOperationFailed = @"DevicePlayFileWhenOperatio
 
 - (void)writeData {
     
-    while (![[NSThread currentThread] isCancelled]) {
+    while (![[NSThread currentThread] isCancelled]) { // 确保当前的线程还可用
         
         NSData *data = [self getData];
         
         if (nil != data) {
-            
+            /* 获取到要发送的数据 */
             if ((nil != _heartBeatTimer) && [_heartBeatTimer isValid]) {
+                /* 暂停心跳计时 */
                 [_heartBeatTimer setFireDate:[NSDate distantFuture]];
             }
             
             if ((nil != _tcpConn) && [_tcpConn isValid]) {
+                /* 发送数据 */
                 [_tcpConn writeData:data];
             }
             
             if ((nil != _timerForTransfer) && [_timerForTransfer isValid]) {
+                /* 开启发送数据超时计时器 */
                 [_timerForTransfer setFireDate:[NSDate dateWithTimeIntervalSinceNow:TRANSFER_INTERVAL]];
             }
             
-            dispatch_semaphore_wait(_semaphoreForWriteFinish, DISPATCH_TIME_FOREVER);
+            dispatch_semaphore_wait(_semaphoreForWriteFinish, DISPATCH_TIME_FOREVER); // 阻塞在此等待该会话发送完成，然后才可开启下一次的会话
         }
     }
 }
 
+/* 该会话超时，在规定的时间内没有收到设备端的响应 */
 - (void)transferTimeout {
 
     NSLog(@"%s ip:%@ id:%d", __func__, [SystemToolClass IPAddress], _curSession.ID);
     
-    _isAbsent = YES;
+    _isAbsent = YES; // 认为tcp的连接一段开，设备不在当前网络
     
     [_timerForTransfer setFireDate:[NSDate distantFuture]];
     
-    [self sessionTransferFailed];
+    [self sessionTransferFailed]; // 将当前正在进行的会话返回，防止UI卡死
     
-    [_tcpConn disconnect];
+    [_tcpConn disconnect]; // 手动断开tcp socket，触发tcp的重连
 }
 
 #pragma Session Manager
 
+/** 
+ 将需要发送的Json格式的数据加入到会话列表中 
+ @param block 设备响应该Json数据时的回调
+ */
 - (void)addToSessionQueue:(id)param method:(NSString *)method returnBlock:(void (^)(YYTXDeviceReturnCode code))block {
     NSError *err;
     
@@ -279,18 +293,18 @@ NSString *const DevicePlayFileWhenOperationFailed = @"DevicePlayFileWhenOperatio
         return;
     }
 #endif
-    NSDictionary *root = [_jsonObject createRootObjectWithIdValue:_sessionID methodValue:method paramsValue:param];
-    if ([NSJSONSerialization isValidJSONObject:root]) {
-        NSData *data = [NSJSONSerialization dataWithJSONObject:root options:NSJSONWritingPrettyPrinted error:&err];
+    NSDictionary *root = [_jsonObject createRootObjectWithIdValue:_sessionID methodValue:method paramsValue:param]; // 将method和param创建合并为一个包含有ID字段的有效Json数据包
+    if ([NSJSONSerialization isValidJSONObject:root]) { // root是否为有效的Json数据
+        NSData *data = [NSJSONSerialization dataWithJSONObject:root options:NSJSONWritingPrettyPrinted error:&err]; // 将NSDictionary转为NSData
         if (nil != data) {
             if (!_isAbsent) {
                 dispatch_async(_queueForAddSession, ^{
                     
-                    TcpSession *session = [[TcpSession alloc] initWithId:_sessionID++ data:data returnBlock:block];
+                    TcpSession *session = [[TcpSession alloc] initWithId:_sessionID++ data:data returnBlock:block]; // 创建新的会话
                     
-                    [_tcpSessionList addObject:session];
+                    [_tcpSessionList addObject:session]; // 加入到会话列表
                     
-                    dispatch_semaphore_signal(_semaphoreForHasData);
+                    dispatch_semaphore_signal(_semaphoreForHasData); // 发送信号量，有数据需要发送
                     
                     NSLog(@"%s %@ %@ 2 count:%lu", __func__, _host, _userData.generalData.nickName, (unsigned long)_tcpSessionList.count);
                 });
@@ -302,6 +316,7 @@ NSString *const DevicePlayFileWhenOperationFailed = @"DevicePlayFileWhenOperatio
                 }
             }
         } else {
+            /* 参数有误 */
             NSLog(@"%s %@ %@ %@", __func__, _host, _userData.generalData.nickName, err);
             if (nil != block) {
                 block(YYTXParameterError);
@@ -315,6 +330,7 @@ NSString *const DevicePlayFileWhenOperationFailed = @"DevicePlayFileWhenOperatio
     }
 }
 
+/** 该方法与上一个方法类似，但是只是用来发送百度语音解析的语意 */
 - (void)addAnalysisResultToSessionQueue:(NSDictionary *)result returnBlock:(void (^)(YYTXDeviceReturnCode code))block {
     NSError *err;
 
@@ -361,15 +377,17 @@ NSString *const DevicePlayFileWhenOperationFailed = @"DevicePlayFileWhenOperatio
     }
 }
 
+/** 从会话列表中获取要发送的数据 */
 - (NSData *)getData {
     
     NSLog(@"%s %@ %@ 1", __func__, _host, _userData.generalData.nickName);
 
-    dispatch_semaphore_wait(_semaphoreForHasData, DISPATCH_TIME_FOREVER);
+    dispatch_semaphore_wait(_semaphoreForHasData, DISPATCH_TIME_FOREVER); // 等待信号量，是否有数据，没有数据就会在次阻塞
     
     NSLog(@"%s %@ %@ 2 count:%lu", __func__, _host, _userData.generalData.nickName, (unsigned long)_tcpSessionList.count);
     
     if (_tcpSessionList.count >= 1) {
+        /* 将会话列表最上边的会话提取出来置为当前正在进行的会话，并返回该会话要发送的数据 */
         _curSession = _tcpSessionList[0];
         [_tcpSessionList removeObject:_curSession];
         
@@ -379,6 +397,7 @@ NSString *const DevicePlayFileWhenOperationFailed = @"DevicePlayFileWhenOperatio
     }
 }
 
+/** 当前的会话置为失败 */
 - (void)sessionTransferFailed {
     
     NSLog(@"%s", __func__);
@@ -392,7 +411,7 @@ NSString *const DevicePlayFileWhenOperationFailed = @"DevicePlayFileWhenOperatio
         
         _curSession = nil;
         
-        dispatch_semaphore_signal(_semaphoreForWriteFinish);
+        dispatch_semaphore_signal(_semaphoreForWriteFinish); // 该会话结束
     }
 }
 
@@ -411,19 +430,24 @@ NSString *const DevicePlayFileWhenOperationFailed = @"DevicePlayFileWhenOperatio
         return NO;
     }
 
+    /* 从设备端收到有Param Item的数据，当前的可能只有是收到了设备的事件通知EVENT */
     NSDictionary *eventItem = [paramItem objectForKey:JSONITEM_EVENT];
     if (nil != eventItem) {
-        if (_isSelect) {
+        if (_isSelect) { // 当前的设备是否已被选为正在操控的设备，即在设备列表界面执行了点击连接操作
             EventIndClass *event = [EventIndClass parseEventIndJsonItem:eventItem];
             NSLog(@"%s status:%@", __func__, event.status);
             if ([event.status isEqualToString:ITEMVALUE_EVENTIND_STATUS_START] && nil != event.query) {
+                /* 设备开始播放的通知 */
                 [[NSNotificationCenter defaultCenter] postNotificationName:DeviceEventPlayerStart object:self userInfo:@{JSONITEM_EVENTIND_QUERY:event.query}];
 //                [BoxDatabase addName:_userData.generalData.nickName time:event.time question:event.query answer:event.replay help:event.help];
             } else if ([event.status isEqualToString:ITEMVALUE_EVENTIND_STATUS_STOP] && nil != event.query) {
+                /* 设备播放停止的通知 */
                 [[NSNotificationCenter defaultCenter] postNotificationName:DeviceEventPlayerStop object:self userInfo:@{JSONITEM_EVENTIND_QUERY:event.query}];
             } else if ([event.status isEqualToString:ITEMVALUE_EVENTIND_STATUS_PAUSE] && nil != event.query) {
+                /* 设备播放暂停的通知 */
                 [[NSNotificationCenter defaultCenter] postNotificationName:DeviceEventPlayerPause object:self userInfo:@{JSONITEM_EVENTIND_QUERY:event.query}];
             } else if ([event.status isEqualToString:ITEMVALUE_EVENTIND_STATUS_RESUME] && nil != event.query) {
+                /* 设备播放恢复的通知 */
                 [[NSNotificationCenter defaultCenter] postNotificationName:DeviceEventPlayerResume object:self userInfo:@{JSONITEM_EVENTIND_QUERY:event.query}];
             }
             retState = YES;
@@ -435,6 +459,7 @@ NSString *const DevicePlayFileWhenOperationFailed = @"DevicePlayFileWhenOperatio
     return retState;
 }
 
+/** 解析从设备端收到的数据 */
 - (YYTXSessionStatus)parseData:(NSData *)data {
     UInt16 rID;
     NSError *err;
@@ -445,6 +470,7 @@ NSString *const DevicePlayFileWhenOperationFailed = @"DevicePlayFileWhenOperatio
     
     NSLog(@"%s %@ %@ %@", __func__, [[NSString alloc] initWithBytes:data.bytes length:data.length encoding:NSUTF8StringEncoding], _host, _userData.generalData.nickName);
     
+    /* 将json格式的NSData转为NSDictionary */
     NSDictionary *root = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&err];
     if (nil == root) {
         NSLog(@"%s %@", __func__, err);
@@ -453,41 +479,49 @@ NSString *const DevicePlayFileWhenOperationFailed = @"DevicePlayFileWhenOperatio
     
     NSString *methodItem = [_jsonObject getMethodValueFromRootObject:root];
     if (nil != methodItem) {
-        
+        /* 发现有Method Item */
         NSDictionary *paramItem = [_jsonObject getParamsValueFromRootObject:root];
         if (nil == paramItem) {
+            /* 但是没有Param Item，认为是错误数据 */
             return YYTXSessionReceiveFailed;
         }
 
+        /* 解析收到的Param Item */
         if ([self parseParamItem:paramItem]) {
+            /* 这里返回其它类型的数据，表示收到了不同于应答的数据 */
             return YYTXSessionReceivedOthers;
         } else {
             return YYTXSessionReceiveFailed;
         }
     }
     
+    /* 获得应答的会话ID */
     NSNumber *idItem = [_jsonObject getIdValueFromRootObject:root];
     if (nil == idItem) {
         return YYTXSessionReceiveFailed;
     }
     
+    /* 应答是否包涵错误 Error Item */
     NSDictionary *errorItem = [_jsonObject getErrorValueFromRootObject:root];
+    /* 获取Result Item */
     id resultItem = [_jsonObject getResultValueFromRootObject:root];
     
     rID = [idItem integerValue];
     if (rID == _curSession.ID) {
-        
+         /* 若为当前正在进行的会话 */
         if (nil != errorItem) {
-            
+            /* 收到的是Error Item */
             NSLog(@"%s errCode:%ld errMessage:%@", __func__, (long)[_jsonObject getCodeValueFromErrorObject:errorItem].integerValue, [_jsonObject getMessageValueFromErrorObject:errorItem]);
             
             if (nil != _curSession.returnBlock) {
                 _curSession.returnBlock(YYTXOperationFailed);
             }
         } else if (nil != resultItem) {
+            /* 收到的是Result Item */
             if ([resultItem isKindOfClass:[NSNumber class]]) {
-                
+                /* NSNumber格式的Result */
             } else if ([resultItem isKindOfClass:[NSDictionary class]]) {
+                /* Json格式的Result */
                 NSDictionary *result = resultItem;
                 BOOL ret = [_userData parseResultItem:result];
                 if (!ret) {
@@ -504,6 +538,7 @@ NSString *const DevicePlayFileWhenOperationFailed = @"DevicePlayFileWhenOperatio
             }
         }
     } else {
+        /* 若不是当前正在进行的会话，则认为接收错误 */
         goto back;
     }
     
@@ -516,6 +551,7 @@ back:
     return YYTXSessionReceiveFailed;
 }
 
+/** 创建optionplay字段 */
 - (NSArray *)createOptionPlayObjectWithParams:(NSDictionary *)params {
     if (nil == params) {
         return nil;
@@ -524,6 +560,7 @@ back:
     NSDictionary *successfulObject;
     NSDictionary *failedObject;
     
+    /* 操作成功时 */
     NSString *successful = [params objectForKey:DevicePlayTTSWhenOperationSuccessful];
     if (nil == successful) {
         successful = [params objectForKey:DevicePlayFileWhenOperationSuccessful];
@@ -534,7 +571,7 @@ back:
         successfulObject = [_audioPlay whenOperationSuccessfulPlay:successful playType:YYTXDevicePlayTypeTTS];
     }
     
-    
+    /* 操作失败时 */
     NSString *failed = [params objectForKey:DevicePlayTTSWhenOperationFailed];
     if (nil == failed) {
         failed = [params objectForKey:DevicePlayFileWhenOperationFailed];
@@ -564,12 +601,14 @@ back:
 
 #pragma 用户数据(userdata)方法
 
+/** 获取设备的General数据 */
 - (void)getGeneral:(void (^)(YYTXDeviceReturnCode code))block {
     
     NSArray *getUserData = [_userData getGeneral];
     [self addToSessionQueue:[NSDictionary dictionaryWithObject:getUserData forKey:JSONITEM_DATA] method:ITEMVALUE_USERDATA_GETUSERDATA returnBlock:block];
 }
 
+/** 修改设备的General数据 */
 - (void)modifyGeneral:(NSDictionary *)params completionBlock:(void (^)(YYTXDeviceReturnCode code))block {
 
     NSDictionary *setUserData = [_userData modifyGeneral];
@@ -582,6 +621,7 @@ back:
     }
 }
 
+/** 获取设备信息 */
 - (void)getDeviceInfo:(void (^)(YYTXDeviceReturnCode code))block {
 
     NSArray *getUserData = [_userData getDeviceInfo];
@@ -590,12 +630,14 @@ back:
 
 #pragma 唤醒控制方法
 
+/** 获取设备的唤醒控制的配置 */
 - (void)getWakeup:(void (^)(YYTXDeviceReturnCode code))block {
 
     NSArray *getUserData = [_userData getWakeup];
     [self addToSessionQueue:[NSDictionary dictionaryWithObject:getUserData forKey:JSONITEM_DATA] method:ITEMVALUE_USERDATA_GETUSERDATA returnBlock:block];
 }
 
+/** 修改设备的唤醒控制的配置 */
 - (void)modifyWakeup:(NSDictionary *)params completionBlock:(void (^)(YYTXDeviceReturnCode code))block {
 
     NSDictionary *setUserData = [_userData modifyWakeup];
@@ -610,12 +652,14 @@ back:
 
 #pragma 夜间控制方法
 
+/** 获取设备的勿扰控制的配置 */
 - (void)getUndisturbedControl:(void (^)(YYTXDeviceReturnCode))block {
     
     NSArray *getUserData = [_userData getUndisturbedControl];
     [self addToSessionQueue:[NSDictionary dictionaryWithObject:getUserData forKey:JSONITEM_DATA] method:ITEMVALUE_USERDATA_GETUSERDATA returnBlock:block];
 }
 
+/** 修改设备的勿扰控制的配置 */
 - (void)modifyUndisturbedControl:(NSDictionary *)params completionBlock:(void (^)(YYTXDeviceReturnCode))block {
     
     NSDictionary *setUserData = [_userData modifyUndisturbedControl];
@@ -629,12 +673,14 @@ back:
 
 #pragma Parameter1 方法
 
+/** 获取设备的其他参数设置 */
 - (void)getParameter1:(void (^)(YYTXDeviceReturnCode code))block {
     NSArray *getUserData = [_userData getParameter1];
     
     [self addToSessionQueue:[NSDictionary dictionaryWithObject:getUserData forKey:JSONITEM_DATA] method:ITEMVALUE_USERDATA_GETUSERDATA returnBlock:block];
 }
 
+/** 修改设备的其他参数设置 */
 - (void)modifyParameter1:(NSDictionary *)params completionBlock:(void (^)(YYTXDeviceReturnCode code))block {
     NSDictionary *setUserData = [_userData modifyParameter1];
     NSArray *optionPlay = [self createOptionPlayObjectWithParams:params];
@@ -647,12 +693,14 @@ back:
 
 #pragma 睡前音乐方法
 
+/** 获取设备的睡前音乐设置 */
 - (void)getSleepMusic:(void (^)(YYTXDeviceReturnCode code))block {
 
     NSArray *getUserData = [_userData getSleepMusic];
     [self addToSessionQueue:[NSDictionary dictionaryWithObject:getUserData forKey:JSONITEM_DATA] method:ITEMVALUE_USERDATA_GETUSERDATA returnBlock:block];
 }
 
+/** 修改设备的睡前音乐设置 */
 - (void)modifySleepMusicSuccessful:(NSDictionary *)params completionBlock:(void (^)(YYTXDeviceReturnCode code))block {
 
     NSDictionary *setUserData = [_userData modifySleepMusic];
@@ -666,12 +714,14 @@ back:
 
 #pragma 闹铃方法
 
+/** 获取闹铃列表，起床闹铃和自定义闹铃 */
 - (void)getAlarm:(void (^)(YYTXDeviceReturnCode code))block {
 
     NSArray *getUserData = [_userData getAlarm];
     [self addToSessionQueue:[NSDictionary dictionaryWithObject:getUserData forKey:JSONITEM_DATA] method:ITEMVALUE_USERDATA_GETUSERDATA returnBlock:block];
 }
 
+/** 修改闹铃 */
 - (void)modifyAlarm:(AlarmClass *)alarm parameter:(NSDictionary *)params completionBlock:(void (^)(YYTXDeviceReturnCode code))block {
 
     if (nil == alarm) {
@@ -690,6 +740,7 @@ back:
     
 }
 
+/** 添加闹铃 */
 - (void)addAlarm:(AlarmClass *)alarm params:(NSDictionary *)params completionBlock:(void (^)(YYTXDeviceReturnCode code))block {
 
     if (nil == alarm) {
@@ -707,6 +758,7 @@ back:
     }
 }
 
+/** 删除闹铃 */
 - (void)deleteAlarm:(NSInteger)alarmId params:(NSDictionary *)params completionBlock:(void (^)(YYTXDeviceReturnCode code))block {
 
     NSDictionary *deleteUserData = [_userData deleteAlarmWithAlarmId:alarmId];
@@ -720,12 +772,14 @@ back:
 
 #pragma 备忘方法
 
+/** 获取备忘信息 */
 - (void)getRemind:(void (^)(YYTXDeviceReturnCode code))block {
 
     NSArray *getUserData = [_userData getRemind];
     [self addToSessionQueue:[NSDictionary dictionaryWithObject:getUserData forKey:JSONITEM_DATA] method:ITEMVALUE_USERDATA_GETUSERDATA returnBlock:block];
 }
 
+/** 修改备忘信息 */
 - (void)modifyRemind:(RemindClass *)remind parameter:(NSDictionary *)params completionBlock:(void (^)(YYTXDeviceReturnCode code))block {
 
     if (nil == remind) {
@@ -743,6 +797,7 @@ back:
     }
 }
 
+/** 添加备忘信息 */
 - (void)addRemind:(RemindClass *)remind parameter:(NSDictionary *)params completionBlock:(void (^)(YYTXDeviceReturnCode code))block {
 
     if (nil == remind) {
@@ -760,6 +815,7 @@ back:
     }
 }
 
+/** 删除备忘信息 */
 - (void)deleteRemind:(NSUInteger)remindId params:(NSDictionary *)params completionBlock:(void (^)(YYTXDeviceReturnCode code))block {
 
     NSDictionary *deleteUserData = [_userData deleteRemindWithRemindId:remindId];
@@ -773,12 +829,14 @@ back:
 
 #pragma 生日方法
 
+/** 获取生日信息 */
 - (void)getBirthday:(void (^)(YYTXDeviceReturnCode code))block {
 
     NSArray *getUserData = [_userData getBirthday];
     [self addToSessionQueue:[NSDictionary dictionaryWithObject:getUserData forKey:JSONITEM_DATA] method:ITEMVALUE_USERDATA_GETUSERDATA returnBlock:block];
 }
 
+/** 修改生日信息 */
 - (void)modifyBirthday:(BirthdayClass *)birthday parameter:(NSDictionary *)params completionBlock:(void (^)(YYTXDeviceReturnCode code))block {
 
     if (nil == birthday) {
@@ -796,6 +854,7 @@ back:
     }
 }
 
+/** 添加生日信息 */
 - (void)addBirthday:(BirthdayClass *)birthday parameter:(NSDictionary *)params completionBlock:(void (^)(YYTXDeviceReturnCode code))block {
 
     if (nil == birthday) {
@@ -813,6 +872,7 @@ back:
     }
 }
 
+/** 删除生日信息 */
 - (void)deleteBirthday:(NSInteger)birthdayId params:(NSDictionary *)params completionBlock:(void (^)(YYTXDeviceReturnCode code))block {
 
     NSDictionary *deleteUserData = [_userData deleteBirthdayWithBirthdayId:birthdayId];
@@ -826,12 +886,14 @@ back:
 
 #pragma 起床闹铃通用设置方法
 
+/** 获取起床闹铃通用设置 */
 - (void)getGetupSet:(void (^)(YYTXDeviceReturnCode code))block {
 
     NSArray *getUserData = [_userData getGetupSet];
     [self addToSessionQueue:[NSDictionary dictionaryWithObject:getUserData forKey:JSONITEM_DATA] method:ITEMVALUE_USERDATA_GETUSERDATA returnBlock:block];
 }
 
+/** 修改起床闹铃通用设置 */
 - (void)modifyGetupSet:(NSDictionary *)params completionBlock:(void (^)(YYTXDeviceReturnCode code))block {
 
     NSDictionary *setUserData = [_userData modifyGetupSet];
@@ -845,6 +907,7 @@ back:
 
 #pragma 播放音频(AudioPlay)方法
 
+/** 播放设备预存文件－－－ID */
 - (void)playFileId:(NSString *)fId completionBlock:(void (^)(YYTXDeviceReturnCode code))block {
     
     if (nil == fId) {
@@ -857,6 +920,7 @@ back:
     [self addToSessionQueue:[NSDictionary dictionaryWithObjectsAndKeys:playList, JSONITEM_AUDIOPLAY_PLAYLIST, nil] method:ITEMMETHOD_VALUE_MEDIAPLAY returnBlock:block];
 }
 
+/** 播放预存文件－－－文件名 */
 - (void)playFilePath:(NSString *)fPath completionBlock:(void (^)(YYTXDeviceReturnCode code))block {
     
     if (nil == fPath) {
@@ -869,7 +933,8 @@ back:
     [self addToSessionQueue:[NSDictionary dictionaryWithObjectsAndKeys:playList, JSONITEM_AUDIOPLAY_PLAYLIST, nil] method:ITEMMETHOD_VALUE_MEDIAPLAY returnBlock:block];
 }
 
-- (void)playFileTitle:(NSString *)tite phoneID:(NSString *)phoneId url:(NSString *)url completionBlock:(void (^)(YYTXDeviceReturnCode code))block {
+/** 播放网络资源 */
+- (void)playFileTitle:(NSString *)tite url:(NSString *)url completionBlock:(void (^)(YYTXDeviceReturnCode code))block {
     
     if (nil == url) {
         if (NULL != block) {
@@ -882,6 +947,7 @@ back:
     [self addToSessionQueue:[NSDictionary dictionaryWithObjectsAndKeys:playList, JSONITEM_AUDIOPLAY_PLAYLIST, mediaInfo, JSONITEM_EVENTIND_MEDIAINFO, nil] method:ITEMMETHOD_VALUE_MEDIAPLAY returnBlock:block];
 }
 
+/** 给设备发送百度语音解析的结果 */
 - (void)sendAnalysisData:(NSDictionary *)result completionBlock:(void (^)(YYTXDeviceReturnCode code))block {
     
     if (nil == result) {
@@ -893,54 +959,63 @@ back:
     [self addAnalysisResultToSessionQueue:result returnBlock:block];
 }
 
+/** 停止播放 */
 - (void)stopPlay:(void (^)(YYTXDeviceReturnCode code))block {
 
     NSNull *stopItem = [_audioPlay stop];
     [self addToSessionQueue:stopItem method:ITEMMETHOD_VALUE_MEDIASTOP returnBlock:block];
 }
 
+/** 暂停播放 */
 - (void)pausePlay:(void (^)(YYTXDeviceReturnCode code))block {
 
     NSNull *pauseItem = [_audioPlay pause];
     [self addToSessionQueue:pauseItem method:ITEMMETHOD_VALUE_MEDIAPAUSE returnBlock:block];
 }
 
+/** 恢复播放 */
 - (void)resumePlay:(void (^)(YYTXDeviceReturnCode code))block {
 
     NSNull *resumeItem = [_audioPlay resume];
     [self addToSessionQueue:resumeItem method:ITEMMETHOD_VALUE_MEDIARESUME returnBlock:block];
 }
 
+/** 播放前一曲 */
 - (void)playPrevious:(void (^)(YYTXDeviceReturnCode code))block {
     
     NSNull *previousItem = [_audioPlay previous];
     [self addToSessionQueue:previousItem method:ITEMMETHOD_VALUE_MEDIAPREVIOUS returnBlock:block];
 }
 
+/** 播放下一曲 */
 - (void)playNext:(void (^)(YYTXDeviceReturnCode code))block {
     
     NSNull *nextItem = [_audioPlay next];
     [self addToSessionQueue:nextItem method:ITEMMETHOD_VALUE_MEDIANEXT returnBlock:block];
 }
 
+/** 获取设备的音量 */
 - (void)getVolume:(void (^)(YYTXDeviceReturnCode code))block {
 
     NSNull *getVolumeItem = [_audioPlay getVolume];
     [self addToSessionQueue:getVolumeItem method:ITEMMETHOD_VALUE_GETVOLUME returnBlock:block];
 }
 
+/** 设置设备的音量 */
 - (void)setVolume:(NSInteger)volume completionBlock:(void (^)(YYTXDeviceReturnCode code))block {
     
     NSNumber *setVolumeItem = [_audioPlay setVolume:volume];
     [self addToSessionQueue:setVolumeItem method:ITEMMETHOD_VALUE_SETVOLUME returnBlock:block];
 }
 
+/** 减小设备的音量 */
 - (void)setVolumeDown:(void (^)(YYTXDeviceReturnCode code))block {
     
     NSNull *setVolumeDownItem = [_audioPlay setVolumeDown];
     [self addToSessionQueue:setVolumeDownItem method:ITEMMETHOD_VALUE_SETVOLUMEDOWN returnBlock:block];
 }
 
+/** 增加设备的音量 */
 - (void)setVolumeUp:(void (^)(YYTXDeviceReturnCode code))block {
     
     NSNull *setVolumeUpItem = [_audioPlay setVolumeUp];
@@ -949,6 +1024,7 @@ back:
 
 #pragma Heartbeat
 
+/** 发送心跳包 */
 - (void)heartBeat:(void (^)(YYTXDeviceReturnCode code))block {
     
     NSDictionary *heartBeatItem = @{JSONITEM_DATA:[_userData getDeviceInfo]};

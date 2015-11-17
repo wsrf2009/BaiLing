@@ -28,7 +28,9 @@
 
 @property (nonatomic, retain) NSArray *arrayName;
 
+/** 解析唤醒控制 */
 - (BOOL)parseWakeup:(NSDictionary *)wakeupItem;
+
 - (NSDictionary *)modify;
 
 @end

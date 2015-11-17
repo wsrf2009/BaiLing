@@ -10,8 +10,11 @@
 
 @interface ChinaCityClass : NSObject
 
+/** 获得中国所有按省份分类的城市列表 */
 + (NSArray *)cityArray;
 //+ (NSArray *)provinceArray;
+
+/** 获得某一省name的所有城市列表 */
 + (NSArray *)getCitysWithProvince:(NSString *)name;
 
 @end

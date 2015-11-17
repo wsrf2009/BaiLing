@@ -13,12 +13,10 @@
 @implementation AudioCategory
 
 - (NSDictionary *)getAudioCategoryWithID:(NSString *)Id {
-
     return [CategoryClass getCategoryWithCategoryId:Id];
 }
 
 - (NSMutableArray *)analyzeAudioCategoryData:(NSData *)data {
-    
     if (nil == data) {
         return nil;
     }
@@ -41,9 +39,10 @@
     }
     
     NSMutableArray *category = [[NSMutableArray alloc] init];
+    
+    /* 首先将音乐类自身添加进category，如果该音乐类有子类，则继续将子类添加进去 */
     CategoryClass *rootCategory = [CategoryClass parseCategory:rootCategoryItem];
     [category addObject:rootCategory];
-    
     if (rootCategory.hassub) {
         NSArray *subCategoryItems = [resultItem objectForKey:JSONITEM_CATEGORY_SUBCATEGORY];
         if (nil == subCategoryItems) {

@@ -10,6 +10,7 @@
 
 @interface WifiConfigClass : NSObject
 
+/** 将SSID和密码生成FSK声波数据 */
 + (NSData *)generateFSKDataWithSSID:(NSString *)ssid password:(NSString *)password;
 
 @end

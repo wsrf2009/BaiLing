@@ -35,10 +35,10 @@ NSString const *convertFormat = @"mov";
     if (nil != self) {
         _queueForSerialImport = dispatch_queue_create("serial queue for exporting songs", DISPATCH_QUEUE_SERIAL);
         _semaphoreForLibraryImport = dispatch_semaphore_create(3);
-        _musicDirAbsolute = [WebRootDir stringByAppendingPathComponent:(NSString *)songsRelativeDir];
+        _musicDirAbsolute = [WebRootDir stringByAppendingPathComponent:(NSString *)songsRelativeDir]; // 手机音乐所在的绝对路径
         BOOL isDir = NO;
         NSFileManager *fileManager = [NSFileManager defaultManager];
-        BOOL existed = [fileManager fileExistsAtPath:_musicDirAbsolute isDirectory:&isDir];
+        BOOL existed = [fileManager fileExistsAtPath:_musicDirAbsolute isDirectory:&isDir]; // 手机音乐的路径是否已存在
         if ( !(isDir == YES && existed == YES) ) {
             // 没有songs目录则创建
             [fileManager createDirectoryAtPath:_musicDirAbsolute withIntermediateDirectories:YES attributes:nil error:nil];
@@ -46,7 +46,7 @@ NSString const *convertFormat = @"mov";
         
         _musicItems = [NSMutableArray array];
         
-        [self performSelectorInBackground:@selector(refreshMediaList) withObject:nil];
+        [self performSelectorInBackground:@selector(refreshMediaList) withObject:nil]; // 默认自动扫描手机上的音乐
     }
     
     return self;
@@ -63,24 +63,25 @@ NSString const *convertFormat = @"mov";
 
 - (void)addMediaItem:(MPMediaItem *)mediaItem ToSongList:(NSMutableArray *)mutableArray {
     
-    NSString *songTitle = [mediaItem valueForProperty: MPMediaItemPropertyTitle];
-    NSURL *urlA =[mediaItem valueForProperty:MPMediaItemPropertyAssetURL];
+    NSString *songTitle = [mediaItem valueForProperty: MPMediaItemPropertyTitle]; // 歌曲名
+    NSURL *urlA =[mediaItem valueForProperty:MPMediaItemPropertyAssetURL]; // 歌曲所在的位置
     
     NSString *ext = urlA.pathExtension;
     if ([ext isEqualToString:(NSString *)songFormat]) {
-        
+        /* 为MP3格式 */
         NSLog (@"%@/%@", urlA, songTitle);
         
         BOOL isExist = NO;
         
         for (YYTXMediaItem *item in mutableArray) {
-            if ([item.audio.title isEqualToString:songTitle]) {
+            if ([item.audio.title isEqualToString:songTitle]) { // 歌曲列表中是否已存在同名的
                 isExist = YES;
                 break;
             }
         }
         
         if (!isExist) {
+            /* 将在ipod－library中搜索到的音乐加入到歌曲列表中 */
             YYTXMediaItem *item = [[YYTXMediaItem alloc] init];
             item.audio = [[AudioClass alloc] init];
             item.audio.duration = [[mediaItem valueForProperty:MPMediaItemPropertyPlaybackDuration] integerValue];
@@ -88,8 +89,8 @@ NSString const *convertFormat = @"mov";
             item.audio.url = [self createUrlWithFileName:[songTitle stringByAppendingPathExtension:ext]];
             item.isSelected = NO;
             item.assetUrl = urlA;
-            item.file = [_musicDirAbsolute stringByAppendingPathComponent:[songTitle stringByAppendingPathExtension:ext]];
-            item.state = YYTXMediaExportingStateUnknown;
+            item.file = [_musicDirAbsolute stringByAppendingPathComponent:[songTitle stringByAppendingPathExtension:ext]]; // 歌曲文件的绝对路径
+            item.state = YYTXMediaExportingStateUnknown; // 初始状态
             
             [mutableArray addObject:item];
             
@@ -115,16 +116,17 @@ NSString const *convertFormat = @"mov";
     }
 }
 
+/** 在歌曲存放路径下搜索 */
 - (void)searchSongsInLocalDir {
     
     NSDirectoryEnumerator *directoryEnumerator = [[NSFileManager defaultManager] enumeratorAtPath:_musicDirAbsolute];
     
     NSString *fileName;
     
-    while(fileName = [directoryEnumerator nextObject]) {
+    while(fileName = [directoryEnumerator nextObject]) { // 枚举目录中的歌曲文件
         
         if([[fileName pathExtension] isEqualToString:(NSString *)songFormat]) {
-            
+            /* 为MP3格式，添加到歌曲列表 */
             YYTXMediaItem *item = [[YYTXMediaItem alloc] init];
             item.audio = [[AudioClass alloc] init];
             item.audio.title = [fileName stringByDeletingPathExtension];
@@ -133,11 +135,12 @@ NSString const *convertFormat = @"mov";
             item.file = [_musicDirAbsolute stringByAppendingPathComponent:fileName];
             item.assetUrl = nil;
             item.audio.duration = (NSInteger)[[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL fileURLWithPath:item.file] error:nil].duration;
-            item.state = YYTXMediaExportingStateCompleted;
+            item.state = YYTXMediaExportingStateCompleted; // 初始状态
             
             [_musicItems addObject:item];
             
         } else {
+            /* MP3格式以外的，直接删除 */
             [[NSFileManager defaultManager] removeItemAtPath:[_musicDirAbsolute stringByAppendingPathComponent:fileName] error:nil];
         }
     }
@@ -150,20 +153,20 @@ NSString const *convertFormat = @"mov";
         YYTXMediaItem *item1 = obj1;
         YYTXMediaItem *item2 = obj2;
         if (nil == item1.pinYin) {
-            item1.pinYin = [[HTFirstLetter pinYin:item1.audio.title] uppercaseString];
+            item1.pinYin = [[HTFirstLetter pinYin:item1.audio.title] uppercaseString]; // 为每一首歌加上拼音
         }
         
         if (nil == item2.pinYin) {
-            item2.pinYin = [[HTFirstLetter pinYin:item2.audio.title] uppercaseString];
+            item2.pinYin = [[HTFirstLetter pinYin:item2.audio.title] uppercaseString]; // 全部大写
         }
         
-        return  [item1.pinYin localizedCompare:item2.pinYin];
+        return  [item1.pinYin localizedCompare:item2.pinYin]; // 排序
         
     }];
     NSLog(@"%s _ord:%@", __func__, [orderedSongs componentsJoinedByString:@","]);
     
     [_musicItems removeAllObjects];
-    
+    /* 对排序后的歌曲按首字母分组 */
     NSString *groupTitle;
     NSMutableArray *arr;
     for (YYTXMediaItem *item in orderedSongs) {
@@ -171,7 +174,7 @@ NSString const *convertFormat = @"mov";
         NSString *firstLetter;
         [item.pinYin getCharacters:&letter range:NSMakeRange(0, 1)];
         
-        if(isalpha(letter)) {
+        if(isalpha(letter)) { // 字母？
             firstLetter = [item.pinYin substringToIndex:1];
         } else {
             firstLetter = @"#";
@@ -183,7 +186,7 @@ NSString const *convertFormat = @"mov";
             groupTitle = firstLetter;
             arr = [NSMutableArray array];
             [_musicItems addObject:arr];
-            [arr addObject:groupTitle];
+            [arr addObject:groupTitle]; // 首字母
             [arr addObject:item];
         } else {
             if ([groupTitle isEqualToString:firstLetter]) {
@@ -192,7 +195,7 @@ NSString const *convertFormat = @"mov";
                 groupTitle = firstLetter;
                 arr = [NSMutableArray array];
                 [_musicItems addObject:arr];
-                [arr addObject:groupTitle];
+                [arr addObject:groupTitle]; // 首字母
                 [arr addObject:item];
             }
         }
@@ -203,14 +206,15 @@ NSString const *convertFormat = @"mov";
     }
 }
 
+/** 将文件file创建为url，以方便http访问 */
 - (NSString *)createUrlWithFileName:(NSString *)file {
     
-    NSString *domain = [NSString stringWithFormat:@"%@:%@", [SystemToolClass IPAddress], [SystemToolClass httpServerPort]];
-    NSString *urlMusicDir = [domain stringByAppendingPathComponent:(NSString *)songsRelativeDir];
-    NSString *urlMusic = [urlMusicDir stringByAppendingPathComponent:file];
+    NSString *domain = [NSString stringWithFormat:@"%@:%@", [SystemToolClass IPAddress], [SystemToolClass httpServerPort]]; // IP地址：端口号
+    NSString *urlMusicDir = [domain stringByAppendingPathComponent:(NSString *)songsRelativeDir]; // 后跟歌曲所在的绝对路径
+    NSString *urlMusic = [urlMusicDir stringByAppendingPathComponent:file]; // 再跟上歌曲文件名
     NSString *urlHttp = [@"http://" stringByAppendingString:urlMusic];
     
-    return [urlHttp stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    return [urlHttp stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]; // 返回完整的url
 }
 
 - (void)addItemToImportQueue:(YYTXMediaItem *)item {

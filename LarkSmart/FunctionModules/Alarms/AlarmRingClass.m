@@ -19,7 +19,7 @@ NSArray *rings;
 @implementation AlarmRingClass
 
 
-- (instancetype) initWithName:(NSString *)n info:(NSString *)i fileName:(NSString *)fN {
+- (instancetype)initWithName:(NSString *)n info:(NSString *)i fileName:(NSString *)fN {
     
     self = [super init];
     
@@ -30,7 +30,8 @@ NSArray *rings;
     return self;
 }
 
-+ (void) initializeRingArray {
+/** 起床闹铃铃声数组 */
++ (void)initializeRingArray {
     AlarmRingClass *ring1 = [[AlarmRingClass alloc] initWithName:@"自然晨曦" info:@"铃声 10s" fileName:@"ring001.mp3"];
     AlarmRingClass *ring2 = [[AlarmRingClass alloc] initWithName:@"常用滴滴" info:@"铃声 4s" fileName:@"ring002.mp3"];
     AlarmRingClass *ring3 = [[AlarmRingClass alloc] initWithName:@"滴滴铃声" info:@"铃声 4s" fileName:@"ring003.mp3"];

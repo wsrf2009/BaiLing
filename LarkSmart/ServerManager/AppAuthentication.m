@@ -20,7 +20,7 @@
     }
     
     NSError *err;
-    NSDictionary *root = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&err];
+    NSDictionary *root = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&err]; // NSData解析为Json格式的NSDictionary
     if (nil == root) {
         NSLog(@"%s %@", __func__, err);
         return nil;

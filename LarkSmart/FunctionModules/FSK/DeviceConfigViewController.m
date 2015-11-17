@@ -54,6 +54,7 @@
     
     [self.navigationItem setTitle:NSLocalizedStringFromTable(@"WIFINameAndPassword", @"hint", nil)];
     
+    /* 接收来自DevicesManager手机网络连接状态更改的通知 */
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(WifiConnected:) name:YYTXDeviceManagerWIFIConnected object:self.deviceManager];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(wifiDisconnected:) name:YYTXDeviceManagerWIFIDisconnected object:self.deviceManager];
 }
@@ -71,6 +72,7 @@
     [super didReceiveMemoryWarning];
 }
 
+/** 获取手机当前连接到的WIFI信息 */
 - (void)getConnectedWiFi {
 
     [_barButtonItemRefresh setEnabled:NO];
@@ -81,12 +83,13 @@
     
     NSString *ssid = [NetworkMonitor currentWifiSSID];
     if (nil != ssid && ![ssid isEqualToString:@""]) {
-
+        /* 手机当前已连到WIFI网络，则使用手机当前的网络 */
         [_textfieldSSID setText:ssid];
         [_textfieldSSID setUserInteractionEnabled:NO];
         
         [_textfieldPassword setText:[BoxDatabase getPasswordWithSSID:ssid]];
     } else {
+        /* 需要用户手动输入SSID */
         [_textfieldSSID setText:@""];
         [_textfieldSSID setUserInteractionEnabled:YES];
             
@@ -94,11 +97,13 @@
     }
 }
 
+/** 手机网络已连接 */
 - (void)WifiConnected:(NSNotification *)sender {
     
     [self getConnectedWiFi];
 }
 
+/** 手机网络连接已断开 */
 - (void)wifiDisconnected:(NSNotification *)sender {
     [self getConnectedWiFi];
 }
@@ -110,6 +115,7 @@
     }
     
     if ([_textfieldSSID.text isEqualToString:@""]) {
+        /* SSID无效 */
         [QXToast showMessage:NSLocalizedStringFromTable(@"pleaseInputWIFIName", @"hint", nil)];
         [_textfieldSSID becomeFirstResponder];
         
@@ -117,10 +123,11 @@
     }
     
     if (rememberPassword) {
+        /* 将密码保存进数据库 */
         [BoxDatabase addSSID:_textfieldSSID.text withPassword:_textfieldPassword.text];
     }
     
-    dat = [WifiConfigClass generateFSKDataWithSSID:_textfieldSSID.text password:_textfieldPassword.text];
+    dat = [WifiConfigClass generateFSKDataWithSSID:_textfieldSSID.text password:_textfieldPassword.text]; // 将SSID和password加密生成有效的FSK数据
 
     ConfigViewController *configVC = [self.storyboard instantiateViewControllerWithIdentifier:@"ConfigViewController"];
     configVC.deviceManager = self.deviceManager;
@@ -132,7 +139,7 @@
 }
 
 - (IBAction)buttonClick_RememberPassword:(UIButton *)button {
-    
+    /* 更改记住密码按钮的状态 */
     if (rememberPassword) {
         [button setImage:imageUnchecked forState:UIControlStateNormal];
         rememberPassword = NO;
@@ -143,7 +150,7 @@
 }
 
 - (IBAction)buttonClick_DisplayPassword:(UIButton *)button {
-    
+    /* 显示密码 */
     if (displayPassword) {
         [button setImage:imageUnchecked forState:UIControlStateNormal];
         displayPassword = NO;

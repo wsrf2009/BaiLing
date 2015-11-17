@@ -51,6 +51,7 @@
     [_barButtonSave setEnabled:NO];
     [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(enableBarButtonSave) userInfo:nil repeats:NO];
     
+    /* 起床闹铃 */
     _btnGetupAlarm = [[UIButton alloc] init];
     [_btnGetupAlarm setImage:[UIImage imageNamed:@"awakealart_nor.png"] forState:UIControlStateNormal];
     [_btnGetupAlarm setImage:[UIImage imageNamed:@"awakealart_pre.png"] forState:UIControlStateSelected];
@@ -58,18 +59,21 @@
     [_btnGetupAlarm addTarget:self action:@selector(getupAlarmClicked:) forControlEvents:UIControlEventTouchUpInside];
     _btnGetupAlarm.translatesAutoresizingMaskIntoConstraints = NO;
     
+    /* 自定义闹铃 */
     _btnCustomizeAlarm = [[UIButton alloc] init];
     [_btnCustomizeAlarm setImage:[UIImage imageNamed:@"definedalart_nor.png"] forState:UIControlStateNormal];
     [_btnCustomizeAlarm setImage:[UIImage imageNamed:@"definedalart_pre.png"] forState:UIControlStateSelected];
     [_btnCustomizeAlarm addTarget:self action:@selector(customizeAlarmClicked:) forControlEvents:UIControlEventTouchUpInside];
     _btnCustomizeAlarm.translatesAutoresizingMaskIntoConstraints = NO;
     
+    /* 备忘提醒 */
     _btnRemindAlarm = [[UIButton alloc] init];
     [_btnRemindAlarm setImage:[UIImage imageNamed:@"remind_nor.png"] forState:UIControlStateNormal];
     [_btnRemindAlarm setImage:[UIImage imageNamed:@"remind_pre.png"] forState:UIControlStateSelected];
     [_btnRemindAlarm addTarget:self action:@selector(remindAlarmClicked:) forControlEvents:UIControlEventTouchUpInside];
     _btnRemindAlarm.translatesAutoresizingMaskIntoConstraints = NO;
     
+    /* 生日提醒 */
     _btnBirthdayAlarm = [[UIButton alloc] init];
     [_btnBirthdayAlarm setImage:[UIImage imageNamed:@"birthdayalart_nor.png"] forState:UIControlStateNormal];
     [_btnBirthdayAlarm setImage:[UIImage imageNamed:@"birthdayalart_pre.png"] forState:UIControlStateSelected];
@@ -109,7 +113,7 @@
     _birthdayAlarmVC.isAddAlarm = YES;
     _birthdayAlarmVC.birthday = [[BirthdayClass alloc] initWithBirtdayList:_deviceManager.device.userData.birthdayList];
     
-    [self getupAlarmClicked:_btnGetupAlarm];
+    [self getupAlarmClicked:_btnGetupAlarm]; // 默认选中起床闹铃
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -155,6 +159,7 @@
     [super didReceiveMemoryWarning];
 }
 
+/** 起床闹铃被选中 */
 - (void)getupAlarmSelected {
     [_btnGetupAlarm setSelected:YES];
     [_btnCustomizeAlarm  setSelected:NO];
@@ -162,6 +167,7 @@
     [_btnBirthdayAlarm setSelected:NO];
 }
 
+/** 起床闹铃按钮被点击 */
 - (void)getupAlarmClicked:(UIButton *)sender {
 
     [self getupAlarmSelected];
@@ -180,6 +186,7 @@
     [_getupAlarmVC didMoveToParentViewController:self];
 }
 
+/** 自定义闹铃被选中 */
 - (void)customizeAlarmSelected {
     [_btnGetupAlarm setSelected:NO];
     [_btnCustomizeAlarm setSelected:YES];
@@ -187,6 +194,7 @@
     [_btnBirthdayAlarm setSelected:NO];
 }
 
+/** 自定义闹铃按钮被点击 */
 - (void)customizeAlarmClicked:(UIButton *)sender {
 
     [self customizeAlarmSelected];
@@ -205,6 +213,7 @@
     [_customizeAlarmVC didMoveToParentViewController:self];
 }
 
+/** 备忘信息被选中 */
 - (void)remindAlarmSelected {
     [_btnGetupAlarm setSelected:NO];
     [_btnCustomizeAlarm setSelected:NO];
@@ -212,6 +221,7 @@
     [_btnBirthdayAlarm setSelected:NO];
 }
 
+/** 备忘信息按钮被点击 */
 - (void)remindAlarmClicked:(UIButton *)sender {
     
     NSLog(@"%s _currentVC:%@ _remindAlarmVC:%@", __func__, _currentVC, _remindAlarmVC);
@@ -233,6 +243,7 @@
     [_remindAlarmVC didMoveToParentViewController:self];
 }
 
+/** 生日闹铃被选中 */
 - (void)birthdayAlarmSelected {
     [_btnGetupAlarm setSelected:NO];
     [_btnCustomizeAlarm setSelected:NO];
@@ -240,6 +251,7 @@
     [_btnBirthdayAlarm setSelected:YES];
 }
 
+/** 生日闹铃按钮被点击 */
 - (void)birthdayAlarmClicked:(UIButton *)sender {
 
     [self birthdayAlarmSelected];
@@ -285,24 +297,24 @@
     
     NSLog(@"%s", __func__);
 
-    [_barButtonSave setEnabled:NO];
-    [NSTimer scheduledTimerWithTimeInterval:2.0f target:self selector:@selector(enableBarButtonSave) userInfo:nil repeats:NO];
+    [_barButtonSave setEnabled:NO]; // disable保存按钮，防止重复点击
+    [NSTimer scheduledTimerWithTimeInterval:2.0f target:self selector:@selector(enableBarButtonSave) userInfo:nil repeats:NO]; // 2秒后再enable保存按钮
     
     AddingAlarmViewController *addingAlarmVC = self;
     
     if ([_currentVC isKindOfClass:[AlarmDetailViewController class]]) {
         [((AlarmDetailViewController *)_currentVC) addAlarm:^{
-            
+            /* 当前视图为起床闹铃或自定义闹铃 */
             [addingAlarmVC.navigationController popViewControllerAnimated:YES];
         }];
     } else if ([_currentVC isKindOfClass:[RemindViewController class]]) {
         [((RemindViewController *)_currentVC) addRemind:^{
-                
+            /* 当前视图为备忘信息 */
             [addingAlarmVC.navigationController popViewControllerAnimated:YES];
         }];
     } else if ([_currentVC isKindOfClass:[BirthdayViewController class]]) {
         [((BirthdayViewController *)_currentVC) addBirthday:^{
-                
+            /* 当前视图为生日闹铃 */
             [addingAlarmVC.navigationController popViewControllerAnimated:YES];
         }];
     }

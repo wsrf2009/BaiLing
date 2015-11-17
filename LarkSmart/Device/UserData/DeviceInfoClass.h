@@ -22,6 +22,7 @@
 @property (nonatomic, retain) NSString *config;
 @property (nonatomic, assign) BOOL isValid;
 
+/** 解析设备信息 */
 - (BOOL)parseDeviceInfo:(NSDictionary *)deviceInfoItem;
 
 @end

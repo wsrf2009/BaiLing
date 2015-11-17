@@ -18,6 +18,9 @@
 
 @implementation HttpRequest
 
+/**
+ 将NSDictionary专为Http的get请求的参数key＝value
+ */
 - (NSString *)HTTPBodyWithParameters:(NSDictionary *)parameters {
     NSMutableArray *parametersArray = [[NSMutableArray alloc] init];
     

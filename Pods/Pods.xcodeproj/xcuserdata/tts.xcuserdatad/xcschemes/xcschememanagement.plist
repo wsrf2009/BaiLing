@@ -4,6 +4,11 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>CocoaAsyncSocket.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>FMDB.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -44,11 +49,6 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>QXToast.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
 		<key>Reachability.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -67,7 +67,12 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>2AD81830F6DF0E0A78975EF36C8344E1</key>
+		<key>0281C3D499DBB2152D06EB9D8070EF0C</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>256C19B0909AA36324EFCEB39A081276</key>
 		<dict>
 			<key>primary</key>
 			<true/>
@@ -77,17 +82,7 @@
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>51CBC4107C2552CDB13B4BB8181B0F10</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
 		<key>55DBDD8B7D446F1D618F303A9FB53209</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>795F4237327348A9C59BA557BF1F5396</key>
 		<dict>
 			<key>primary</key>
 			<true/>
@@ -97,17 +92,12 @@
 			<key>primary</key>
 			<true/>
 		</dict>
+		<key>920B7E956A1D07E31BCDD699E4F5745C</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>9F12FB4A63E20F601CFB2E64A65B57C1</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>9F8FEB33BC253E42A93074E7543C3D97</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>A8C2046B20922F18B723D34E8E8408FA</key>
 		<dict>
 			<key>primary</key>
 			<true/>
@@ -118,6 +108,16 @@
 			<true/>
 		</dict>
 		<key>E24013C7E4C2A2F376A3B7F9ED43C0FA</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>ECFE0958DDB7FEC79B3AA1C9337BC941</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>ED485FA9EF623E90D245706D91364251</key>
 		<dict>
 			<key>primary</key>
 			<true/>

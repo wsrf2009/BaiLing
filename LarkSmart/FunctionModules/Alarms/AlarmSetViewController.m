@@ -57,7 +57,7 @@
     self.deviceManager.delegate = self;
     
     if (self.deviceManager.device.isAbsent) {
-        
+        /* 设备与手机的连接已端开 */
         [self initEffectViewWithTitle:[NSString stringWithFormat:NSLocalizedStringFromTable(@"iphoneDisconnectedTo %@", @"hint", nil), self.deviceManager.device.userData.generalData.nickName] hint:NSLocalizedStringFromTable(@"hintForDeviceDisconnect", @"hint", nil)];
     } else {
         
@@ -116,13 +116,14 @@
 
     if (0 == indexPath.section) {
         if (0 == indexPath.row) {
+            /* 铃声选择视图 */
             alarmRingVC = [self.storyboard instantiateViewControllerWithIdentifier:@"AlarmRingViewController"];
             alarmRingVC.deviceManager = self.deviceManager;
             alarmRingVC.getupSet = getupSet;
             alarmRingVC.selectRow = [AlarmRingClass getIndexFromPath:getupSet.ringPath];
             [self.navigationController pushViewController:alarmRingVC animated:YES];
         } else if (1 == indexPath.row) {
-            
+            /* 闹铃响铃时间 */
             NSInteger selectedIndex = -1;
             NSMutableArray *arr = [NSMutableArray array];
             for (NSInteger i=0; i<getupSet.ringTime.count; i++) {
@@ -161,23 +162,23 @@
             sheet.insets = UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f);
             
             if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-                
+                /* iPad中的显示位置 */
                 CGPoint p = (CGPoint){-5.0f, CGRectGetMidY(_label_RingDurationContent.bounds)};
-                
                 p = [self.navigationController.view convertPoint:p fromView:_label_RingDurationContent];
-                
                 [sheet showFromPoint:p inView:self.navigationController.view arrowDirection:JGActionSheetArrowDirectionRight animated:YES];
             }
             else {
+                /* iPhone */
                 [sheet showInView:self.navigationController.view animated:YES];
             }
             
+            /* sheet之外区域点击 */
             [sheet setOutsidePressBlock:^(JGActionSheet *sheet) {
                 [sheet dismissAnimated:YES];
             }];
             
             [sheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
-                
+                /* sheet之内的section被点击 */
                 [sheet dismissAnimated:YES];
                 
                 if (1 == indexPath.section) {
@@ -190,6 +191,7 @@
         }
     } else if (1 == indexPath.section) {
         if (4 == indexPath.row) {
+            /* 今日信息播放次数 */
             NSInteger selectedIndex = -1;
             NSMutableArray *arr = [NSMutableArray array];
             for (NSInteger i=0; i<getupSet.playTimes.count; i++) {
@@ -228,21 +230,22 @@
             sheet.insets = UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f);
             
             if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-                
+                /* iPad中的显示位置 */
                 CGPoint p = (CGPoint){-5.0f, CGRectGetMidY(_label_TodayInfoPlayTimes.bounds)};
-                
                 p = [self.navigationController.view convertPoint:p fromView:_label_TodayInfoPlayTimes];
-                
                 [sheet showFromPoint:p inView:self.navigationController.view arrowDirection:JGActionSheetArrowDirectionRight animated:YES];
             }
             else {
+                /* iPhone */
                 [sheet showInView:self.navigationController.view animated:YES];
             }
             
+            /* sheet之外的区域被点击 */
             [sheet setOutsidePressBlock:^(JGActionSheet *sheet) {
                 [sheet dismissAnimated:YES];
             }];
             
+            /* sheet之内的section被点击 */
             [sheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
                 
                 [sheet dismissAnimated:YES];
@@ -263,6 +266,7 @@
     getupSet.delayNum = [[selectedArray objectAtIndex:3] integerValue];
 }
 
+/** 今日信息－－－日期 */
 - (IBAction)switchClick_Date:(UISwitch *)s_date {
     if (s_date.isOn) {
         getupSet.messageOpen |= MESSAGE_OPEN_DATETIME;
@@ -271,6 +275,7 @@
     }
 }
 
+/** 今日信息－－－天气 */
 - (IBAction)switchClick_Weather:(UISwitch *)s_weather {
     if (s_weather.isOn) {
         getupSet.messageOpen |= MESSAGE_OPEN_WEATHER;
@@ -279,6 +284,7 @@
     }
 }
 
+/** 今日信息－－－生日 */
 - (IBAction)switchClick_Birthday:(UISwitch *)s_birthday {
     if (s_birthday.isOn) {
         getupSet.messageOpen |= MESSAGE_OPEN_BIRTHDAY;
@@ -287,6 +293,7 @@
     }
 }
 
+/** 今日信息－－－备忘 */
 - (IBAction)switchClick_Reamind:(UISwitch *)s_remind {
     if (s_remind.isOn) {
         getupSet.messageOpen |= MESSAGE_OPEN_REMIND;
@@ -352,14 +359,16 @@
         [_label_RingContent setText:[AlarmRingClass getNameFromPath:getupSet.ringPath]];
     }
     
-    [_label_RingDurationContent setText:[NSString stringWithFormat:@"%d", getupSet.playTime]];
+    /* 响铃时间 */
+    [_label_RingDurationContent setText:[NSString stringWithFormat:@"%@", @(getupSet.playTime)]];
     for (RingTimeClass *ringTime in getupSet.ringTime) {
         if (getupSet.playTime == ringTime.time) {
             [_label_RingDurationContent setText:ringTime.text];
         }
     }
     
-    [_label_TodayInfoPlayTimes setText:[NSString stringWithFormat:@"%d", getupSet.messageTimes]];
+    /* 今日信息播放次数 */
+    [_label_TodayInfoPlayTimes setText:[NSString stringWithFormat:@"%@", @(getupSet.messageTimes)]];
     for (PlayTimesClass *playTimes in getupSet.playTimes) {
         if (getupSet.messageTimes == playTimes.times) {
             [_label_TodayInfoPlayTimes setText:playTimes.text];
@@ -370,6 +379,7 @@
 
 #pragma 起床闹铃通用设置数据源
 
+/** 获取起床闹铃的通用设置 */
 - (void)getGetupSet {
 
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -402,6 +412,7 @@
     }];
 }
 
+/** 修改起床闹铃通用设置 */
 - (void)saveGetupSet {
     
     NSLog(@"%s", __func__);

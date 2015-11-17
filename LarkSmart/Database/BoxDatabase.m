@@ -44,30 +44,40 @@
 
 @implementation BoxDatabase
 
+/** 获取APP的Document目录 */
 + (NSString *)getDocumentPath {
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     return [paths objectAtIndex:0];
 }
 
+/** 取得数据库所在的目录 */
 + (NSString *)getDatabasePath {
     NSString *documentDictionary = [self getDocumentPath];
 
     return [documentDictionary stringByAppendingPathComponent:DATABASE_PATH];
 }
 
+/** 取得数据库所在的完整路径 */
 + (NSString *)getDatabase {
     NSString *databasePath = [self getDatabasePath];
     
     return [databasePath stringByAppendingPathComponent:DATABASE_NAME];
 }
 
+/**  
+ 打开数据库
+ @return 非nil 打开成功
+ @return nil 打开数据库失败
+ */
 + (FMDatabase *)openDatabase {
-    NSString *dataBasePath = [self getDatabasePath];
-    BOOL databaseIsExist = [[NSFileManager defaultManager] fileExistsAtPath:dataBasePath isDirectory:nil];
+    NSString *dataBasePath = [self getDatabasePath]; // 数据库所在的完整目录
+    BOOL databaseIsExist = [[NSFileManager defaultManager] fileExistsAtPath:dataBasePath isDirectory:nil]; // 判断数据库是否已存在
     if (!databaseIsExist) {
+        /* 数据库还不存在则先创建数据库 */
         [[NSFileManager defaultManager] createDirectoryAtPath:dataBasePath withIntermediateDirectories:YES attributes:nil error:nil];
     }
  
+    /** 打开数据库 */
     FMDatabase *db = [FMDatabase databaseWithPath:[self getDatabase]];
     if ([db open]) {
         return db;
@@ -77,14 +87,15 @@
     }
 }
 
+/** 关闭数据库 db */
 + (void)closeDatabase:(FMDatabase *)db {
     [db close];
 }
 
 #pragma APP第一次打开的时间表
 
+/** 创建打开APP纪录的数据表 */
 + (BOOL)createTheAppOpenedRecordsDatatable:(FMDatabase *)db {
-    // 创建数据表 APP打开记录表
     if (nil != db) {
         NSString *sqlCreateTable = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXISTS %@ (%@)", DATATABLE_OPENAPP_TRACE, DATATABLE_ITEM_DATE];
         return [db executeUpdate:sqlCreateTable];
@@ -93,6 +104,11 @@
     }
 }
 
+/** 
+ 获取打开APP的纪录
+ @return 如果之前已经打开过，则返回 日期、时间、时区：yyyy-MM-dd HH:mm:ss zzz
+ @return 如果没有打开过，则返回nil
+ */
 + (NSString *)getOpenAppRecord {
     NSString *date = nil;
     
@@ -100,10 +116,11 @@
     if (nil != db) {
         BOOL retCode = [self createTheAppOpenedRecordsDatatable:db];
         if (retCode) {
+            /* 查询 */
             NSString *sqlQuery = [NSString stringWithFormat:@"SELECT * FROM %@", DATATABLE_OPENAPP_TRACE];
             FMResultSet *set = [db executeQuery:sqlQuery];
             
-            //遍历表
+            /* 遍历 */
             while ([set next]) {//有下一个的话，就取出它的数据，然后关闭数据库
                 date = [set stringForColumn:DATATABLE_ITEM_DATE];
                 break;
@@ -116,9 +133,12 @@
     return date;
 }
 
+/** 是否是第一次打开APP */
 + (BOOL)isFirstOpenTheApp {
     NSString *openDate = [self getOpenAppRecord];
     if (nil != openDate) {
+        
+        /* 不为空，则表示APP已被打开过 */
         NSLog(@"%s The app is not the first time to be opened, the first open is in %@", __func__, openDate);
         
         return NO;
@@ -127,6 +147,11 @@
     return YES;
 }
 
+
+/**
+ 插入当前打开APP时的时间
+ @param date 打开APP时的时间：yyyy-MM-dd HH:mm:ss zzz
+ */
 + (BOOL)insertOpenAppRecord:(NSString *)date {
     BOOL retCode = NO;
     
@@ -146,8 +171,8 @@
 
 #pragma 网络名和密码保存表
 
+/** 创建保存SSID和密码的数据表 */
 + (BOOL)createSSIDAndPasswordDatatable:(FMDatabase *)db {
-    // 创建数据表 ssid和密码记录表
     if (nil != db) {
         NSString *sqlCreateTable = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXISTS %@ (%@, %@)", DATATABLE_SSIDPASSWORDS, SSIDPASSWORDS_ITEM_SSID, SSIDPASSWORDS_ITEM_PASSWORD];
         return [db executeUpdate:sqlCreateTable];
@@ -156,6 +181,7 @@
     }
 }
 
+/** 向数据表插入SSID和password */
 + (BOOL)insertSSID:(NSString *)ssid withPassword:(NSString *) password {
     BOOL retCode = NO;
     
@@ -173,6 +199,11 @@
     return retCode;
 }
 
+/** 
+ 更改对应SSID的密码
+ @param password 对应SSID的新密码
+ @param ssid 特定的已经保存过的SSID
+ */
 + (BOOL)updatePassword:(NSString *)password withSSID:(NSString *)ssid {
     BOOL retCode = NO;
     
@@ -191,6 +222,10 @@
 
 }
 
+/**
+ 获取保存的SSID的密码
+ @return 如果没有该SSID的记录，则返回nil
+ */
 + (NSString *)getPasswordWithSSID:(NSString *)ssid {
     NSString *password = nil;
     
@@ -201,7 +236,7 @@
             NSString *sqlQuery = [NSString stringWithFormat: @"SELECT * FROM %@ where %@ == '%@'", DATATABLE_SSIDPASSWORDS, SSIDPASSWORDS_ITEM_SSID, ssid];
             FMResultSet *set = [db executeQuery:sqlQuery];
         
-            //遍历Students表
+            /* 遍历 */
             while ([set next]) {//有下一个的话，就取出它的数据，然后关闭数据库
                 password = [set stringForColumn:SSIDPASSWORDS_ITEM_PASSWORD];
                 break;
@@ -214,6 +249,7 @@
     return password;
 }
 
+/** 保存SSID和密码 */
 + (BOOL)addSSID:(NSString *)ssid withPassword:(NSString *) password {
     BOOL retCode;
     
@@ -221,12 +257,12 @@
         return YES; // SSID 为空
     }
     
-    NSString *pw = [self getPasswordWithSSID:ssid];
+    NSString *pw = [self getPasswordWithSSID:ssid]; // 该SSID是否已存在于数据库中
     if (nil == pw) {
-        // 插入ssid和密码
+        // 没有保存过该SSID则插入ssid和密码
         retCode = [self insertSSID:ssid withPassword:password];
     } else {
-        // 修改密码
+        // 已保存过该SSID则修改密码
         retCode = [self updatePassword:password withSSID:ssid];
     }
     
@@ -237,44 +273,51 @@
 
 #pragma 保存从后台获取的url
 
+/** 创建保存各种url的数据表 */
 + (BOOL)createNameUrlDatatable:(FMDatabase *)db {
     // 创建数据表 http请求地址表
     if (nil != db) {
-        NSString *sqlCreateTable = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXISTS %@ (%@, %@)", DATATABLE_HTTPREQUESTURL, HTTPREQUESTURL_ITEM_URLNAME, HTTPREQUESTURL_ITEM_URL];
-        BOOL retCode = [db executeUpdate:sqlCreateTable];
+        NSString *sqlCreateTable = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXISTS %@ (%@, %@)", DATATABLE_HTTPREQUESTURL, HTTPREQUESTURL_ITEM_URLNAME, HTTPREQUESTURL_ITEM_URL]; // 数据表有两列：该url的类别名称，url本身
+        BOOL retCode = [db executeUpdate:sqlCreateTable]; // 创建数据表
         if (retCode) {
             NSString *inserUrl = [NSString stringWithFormat:@"INSERT INTO %@ VALUES (?, ?)", DATATABLE_HTTPREQUESTURL];
+            
             NSString *sqlQuery1 = [NSString stringWithFormat: @"select * from %@ where %@ == '%@'", DATATABLE_HTTPREQUESTURL, HTTPREQUESTURL_ITEM_URLNAME, DT_ITEM_BUYURL];
-            FMResultSet *set1 = [db executeQuery:sqlQuery1];
+            FMResultSet *set1 = [db executeQuery:sqlQuery1]; // 查询是否已有buyurl
             if (![set1 next]) {
+                /* 没有则插入buyurl */
                 NSLog(@"%s set1:%d", __func__, set1.hasAnotherRow);
                 [db executeUpdate:inserUrl, DT_ITEM_BUYURL, @"http://www.larkiv.com/ilarkhelper/product/larkshop.html"];
             }
             
             NSString *sqlQuery2 = [NSString stringWithFormat: @"select * from %@ where %@ == '%@'", DATATABLE_HTTPREQUESTURL, HTTPREQUESTURL_ITEM_URLNAME, DT_ITEM_HELPURL];
-            FMResultSet *set2 = [db executeQuery:sqlQuery2];
+            FMResultSet *set2 = [db executeQuery:sqlQuery2]; // 查询是否已包含helpurl
             if (![set2 next]) {
+                /* 没有则插入和helpurl */
                 NSLog(@"%s set2:%d", __func__, set2.hasAnotherRow);
                 [db executeUpdate:inserUrl, DT_ITEM_HELPURL, @"http://www.larkiv.com/ilarkhelper/help/"];
             }
             
             NSString *sqlQuery3 = [NSString stringWithFormat: @"select * from %@ where %@ == '%@'", DATATABLE_HTTPREQUESTURL, HTTPREQUESTURL_ITEM_URLNAME, DT_ITEM_PRODUCTURL];
-            FMResultSet *set3 = [db executeQuery:sqlQuery3];
+            FMResultSet *set3 = [db executeQuery:sqlQuery3]; // 查询是否已包含producturl
             if (![set3 next]) {
+                /* 没有则插入producturl */
                 NSLog(@"%s set3:%d", __func__, set3.hasAnotherRow);
                 [db executeUpdate:inserUrl, DT_ITEM_PRODUCTURL, @"http://www.larkiv.com/ilarkhelper/product/"];
             }
             
             NSString *sqlQuery4 = [NSString stringWithFormat: @"select * from %@ where %@ == '%@'", DATATABLE_HTTPREQUESTURL, HTTPREQUESTURL_ITEM_URLNAME, DT_ITEM_XMLYHELPURL];
-            FMResultSet *set4 = [db executeQuery:sqlQuery4];
+            FMResultSet *set4 = [db executeQuery:sqlQuery4]; // 查询是否已包含xmlyhelpurl
             if (![set4 next]) {
+                /* 没有则插入xmlyhelpurl */
                 NSLog(@"%s set4:%d", __func__, set4.hasAnotherRow);
                 [db executeUpdate:inserUrl, DT_ITEM_XMLYHELPURL, @"http://www.larkiv.com/ilarkhelper/help/xmly.html"];
             }
             
-            NSString *sqlQuery5 = [NSString stringWithFormat: @"select * from %@ where %@ == '%@'", DATATABLE_HTTPREQUESTURL, HTTPREQUESTURL_ITEM_URLNAME, DT_ITEM_WEIXINURL];
+            NSString *sqlQuery5 = [NSString stringWithFormat: @"select * from %@ where %@ == '%@'", DATATABLE_HTTPREQUESTURL, HTTPREQUESTURL_ITEM_URLNAME, DT_ITEM_WEIXINURL]; // 查询是否已包含weixinurl
             FMResultSet *set5 = [db executeQuery:sqlQuery5];
             if (![set5 next]) {
+                /* 没有则插入weixinurl */
                 NSLog(@"%s set5:%d", __func__, set5.hasAnotherRow);
                 [db executeUpdate:inserUrl, DT_ITEM_WEIXINURL, @"http://www.larkiv.com/alarkhelper/weixin/gongzhonghao.html"];
             }
@@ -286,6 +329,7 @@
     }
 }
 
+/* 向数据表中插入url */
 + (BOOL)insertName:(NSString *)name url:(NSString *)url {
     BOOL retCode = NO;
     
@@ -303,6 +347,11 @@
     return retCode;
 }
 
+/**
+ 更新url，如buy url，喜马拉雅帮助的url等
+ @param url 新的url
+ @name url的名字，buy_url、help_url、product_url、xmly_help_url、weixin_url
+ */
 + (BOOL)updateUrl:(NSString *)url withName:(NSString *)name {
     BOOL retCode = NO;
     
@@ -322,6 +371,11 @@
     return retCode;
 }
 
+/**
+ 获取对应的url
+ @param name url的名字，buy_url、help_url、product_url、xmly_help_url、weixin_url
+ @return 返回对应name的url
+ */
 + (NSString *)getUrlWithName:(NSString *)name {
     NSString *url = nil;
     
@@ -461,6 +515,7 @@ NSString *sqlCreateTable5 = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXI
 
 #pragma 保存从后台服务器获取的产品信息表
 
+/* 创建产品信息数据表 */
 + (BOOL)createProductsInfoDatatable:(FMDatabase *)db {
     // 创建产品信息表
     if (nil != db) {
@@ -472,6 +527,7 @@ NSString *sqlCreateTable5 = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXI
     }
 }
 
+/* 更新产品信息 */
 + (BOOL)updateProductId:(NSString *)pId title:(NSString *)title description:(NSString *)description icon:(NSString *)icon url:(NSString *)url guideImage:(NSString *)guideImage lastUpdateTime:(NSString *)lastUpdateTime guideType:(NSInteger)guideType {
     
     FMDatabase *db = [self openDatabase];
@@ -490,6 +546,7 @@ NSString *sqlCreateTable5 = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXI
     return retCode;
 }
 
+/* 插入产品信息 */
 + (BOOL)insertProductId:(NSString *)pId title:(NSString *)title description:(NSString *)description icon:(NSString *)icon url:(NSString *)url guideImage:(NSString *)guideImage lastUpdateTime:(NSString *)lastUpdateTime guideType:(NSInteger)guideType {
     
     BOOL retCode = NO;
@@ -508,6 +565,7 @@ NSString *sqlCreateTable5 = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXI
     return retCode;
 }
 
+/** 将从服务器获取的设备信息添加到数据库，当前没有用到 */
 + (BOOL)addProductId:(NSString *)pId title:(NSString *)title description:(NSString *)description icon:(NSString *)icon url:(NSString *)url guideImage:(NSString *)guideImage lastUpdateTime:(NSString *)lastUpdateTime guideType:(NSInteger)guideType {
     BOOL isExists = NO;
     BOOL retCode;
@@ -518,7 +576,7 @@ NSString *sqlCreateTable5 = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXI
     if (nil != db) {
         retCode = [self createProductsInfoDatatable:db];
         if (retCode) {
-            NSString *sqlQuery = [NSString stringWithFormat:@"SELECT * FROM %@ where %@ == '%@'", DATATABLE_PRODUCTINFO, PRODUCTINFO_PRODUCTID, pId];
+            NSString *sqlQuery = [NSString stringWithFormat:@"SELECT * FROM %@ where %@ == '%@'", DATATABLE_PRODUCTINFO, PRODUCTINFO_PRODUCTID, pId]; // 查询数据表中是否已包含了该产品
             FMResultSet *set = [db executeQuery:sqlQuery];
             if ([set next]) {
 
@@ -532,14 +590,17 @@ NSString *sqlCreateTable5 = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXI
     [self closeDatabase:db];
     
     if (isExists) {
+        /* 如果已包含则直接更新即可 */
         retCode = [self updateProductId:pId title:title description:description icon:icon url:url guideImage:guideImage lastUpdateTime:lastUpdateTime guideType:guideType];
     } else {
+        /* 若数据库中没有该产品，则直接插入该产品的信息即可 */
         retCode = [self insertProductId:pId title:title description:description icon:icon url:url guideImage:guideImage lastUpdateTime:lastUpdateTime guideType:guideType];
     }
     
     return retCode;
 }
 
+/** 从数据库获取保存的产品信息 */
 + (NSMutableArray *)getItemsFromProducsInfo {
 
     NSMutableArray *arr = [[NSMutableArray alloc] init];
@@ -566,12 +627,14 @@ NSString *sqlCreateTable5 = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXI
 
 #pragma 记录App的openid
 
+/* 创建APP OpenID的数据表 */
 + (BOOL)createOpenIdDatatable:(FMDatabase *)db {
     // 创建openid表
     if (nil != db) {
         NSString *sqlCreateTable = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXISTS %@ (%@)", DATATABLE_OPENID, OPENID_ITEM_OPENID];
         BOOL retCode = [db executeUpdate:sqlCreateTable];
         if (retCode) {
+            /* 创建数据表成功则向其中插入一个默认的openid */
             NSString *inserOpenid = [NSString stringWithFormat: @"INSERT INTO %@ VALUES (?)", DATATABLE_OPENID];
             NSString *sqlQuery = [NSString stringWithFormat: @"select * from %@", DATATABLE_OPENID];
 
@@ -588,6 +651,7 @@ NSString *sqlCreateTable5 = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXI
     }
 }
 
+/** 获取APP的openId */
 + (NSString *)openId {
     NSString *sqlQuery = [NSString stringWithFormat: @"SELECT * FROM %@", DATATABLE_OPENID];
     NSString *openId = nil;
@@ -611,6 +675,7 @@ NSString *sqlCreateTable5 = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXI
     return openId;
 }
 
+/** 更新APP的openId */
 + (BOOL)updateOpenId:(NSString *)openId {
     
     if (nil == openId) {
@@ -636,16 +701,6 @@ NSString *sqlCreateTable5 = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXI
 }
 
 #pragma 记录udp 和tcp扫描结果的表
-
-#if TEST
-NSString *sqlCreateTable8 = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXISTS %@ (%@, '%@', '%@', '%@', '%@')", DATATABLE_UDPSCANRESULT, UDPSCANRESULT_TIME, UDPSCANRESULT_ITEM_1, UDPSCANRESULT_ITEM_2, UDPSCANRESULT_ITEM_3, UDPSCANRESULT_ITEM_4];
-[db executeUpdate:sqlCreateTable8];
-
-NSString *sqlCreateTable9 = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXISTS %@ (%@, '%@', '%@', '%@', '%@')", DATATABLE_TCPSCANRESULT, TCPSCANRESULT_TIME, TCPSCANRESULT_ITEM_1, TCPSCANRESULT_ITEM_2, TCPSCANRESULT_ITEM_3, TCPSCANRESULT_ITEM_4];
-[db executeUpdate:sqlCreateTable9];
-
-NSLog(@"%s 为什么没创建成功－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－", __func__);
-#endif
 
 #if TEST
 + (BOOL)insertUdpScanResultWithScanTime:(NSString *)time scanResult:(NSMutableArray *)result {
@@ -717,6 +772,7 @@ NSLog(@"%s 为什么没创建成功－－－－－－－－－－－－－－－
 
 #pragma 自动弹出喜马拉雅界面纪录表
 
+/* 创建存放是否自动弹出喜马拉雅帮助的数据表 */
 + (BOOL)createAutoPopHimalayaHelper:(FMDatabase *)db {
     
     if (nil != db) {
@@ -736,6 +792,11 @@ NSLog(@"%s 为什么没创建成功－－－－－－－－－－－－－－－
     }
 }
 
+/**
+ 在进入喜马拉雅界面时是否要自动弹出喜马拉雅帮助框
+ @return YES 要弹出
+ @return NO 不弹出
+ */
 + (BOOL)autoPopHimalayaHelper {
     BOOL autoPop;
     
@@ -759,6 +820,10 @@ NSLog(@"%s 为什么没创建成功－－－－－－－－－－－－－－－
     return autoPop;
 }
 
+/**
+ 修改进入喜马拉雅界面时，是否还要自动弹出帮助界面
+ @param autoPop YES，还要自动弹出；NO，不再自动弹出
+ */
 + (BOOL)changeHimalayaPopHelperState:(BOOL)autoPop {
     BOOL retCode = NO;
     

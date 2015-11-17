@@ -43,6 +43,8 @@
 @property (nonatomic, retain) NSArray *playTimes;
 
 - (NSDictionary *)modify;
+
+/** 解析起床闹铃通用设置 */
 - (BOOL)parseGetupSet:(NSDictionary *)getupSetItem;
 
 @end

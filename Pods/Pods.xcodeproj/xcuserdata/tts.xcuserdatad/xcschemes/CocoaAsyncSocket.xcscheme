@@ -14,10 +14,10 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = 'primary'
-               BlueprintIdentifier = 'D5C4CB7B6DB67BE0E2F4A9E9'
-               BlueprintName = 'QXToast'
+               BlueprintIdentifier = '75C3F13D57FED09DF6DE98A3'
+               BlueprintName = 'CocoaAsyncSocket'
                ReferencedContainer = 'container:Pods.xcodeproj'
-               BuildableName = 'libQXToast.a'>
+               BuildableName = 'libCocoaAsyncSocket.a'>
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>

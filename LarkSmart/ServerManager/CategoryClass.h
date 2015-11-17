@@ -18,7 +18,11 @@
 @property (nonatomic, assign) BOOL hassub;
 
 + (NSDictionary *)getCategoryWithCategoryId:(NSString *)cId;
+
+/** 解析音乐类，获取categoryId，title，icon，hassub */
 + (CategoryClass *)parseCategory:(NSDictionary *)categoryItem;
+
+/** 根据Id从给定的rootArray音乐类列表中获取出相应的音乐类 */
 + (CategoryClass *)getSubCategoryFromRootCategoryArray:(NSMutableArray *)rootArray withSubCategoryId:(NSString *)Id;
 
 @end

@@ -28,6 +28,7 @@
     CGRect messageRect;
     messageRect = [message boundingRectWithSize:maxSize options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:messageFont} context:nil];
     messageRect.size.height += 1;
+    messageRect.size.width += 1;
     messageRect.origin = (CGPoint){0, 0};
     
     CGRect contentViewRect = messageRect;
@@ -38,7 +39,7 @@
 
     UIView *contentView = [[UIView alloc] init];
     [contentView setFrame:contentViewRect];
-    [contentView setBackgroundColor:[UIColor colorWithWhite:.0f alpha:0.7]];
+    [contentView setBackgroundColor:[UIColor colorWithWhite:.0f alpha:0.9]];
     [contentView setAlpha:.0f];
     
     UILabel *labelMessage = [[UILabel alloc] init];

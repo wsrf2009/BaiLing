@@ -36,8 +36,13 @@ typedef enum {
 
 @property (nonatomic, assign) DataReceivingState state;
 
+/** 对数据再次封装，添加数据类型和数据长度 */
 - (NSData *)addType:(YYTXFrameDataType)type andlengthFordata:(NSData *)data;
+
+/** 接收数据 */
 - (void)receiveData:(Byte *)data length:(UInt32)length;
+
+/** 解析数据的类型后后面数据区域的长度 */
 - (void)dataDecapsulate:(Byte *)data dataType:(UInt32 *)type dataLength:(UInt32 *)len;
 
 @end
